@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* High-end OLED Ambient Color Palette */
+  --color-void: #07070A;       /* Deeper, pitch-black ink sky */
+  --color-ink: #111116;        /* Premium card surface layer */
+  --color-surface: #1A1A24;    /* Elevated action sheets and fields */
+  
+  /* Vibrant Kinetic Neon Highlights */
+  --color-cyan: #00F5FF;       /* Liquid Diamond Core */
+  --color-lavender: #B794F4;   /* Electric Amethyst */
+  --color-rose: #F43F5E;       /* Kinetic Crimson */
+  --color-amber: #F59E0B;      /* Warm Warning Volt */
+
+  /* Instagram-Style Kinetic Font Weight Curve */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Global Reset Layers */
+:root {
+  font-family: var(--font-sans);
+  background-color: var(--color-void);
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-void);
+  color: #FFFFFF;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.025em; /* Intentional tight typography tracking */
+  overflow-x: hidden;
+}
+
+/* Premium Core Utility Layers */
+@layer utilities {
+  /* Absolute Scrollbar Eraser */
+  .no-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Ultra-Minimal Fluid Drag Scrollbar */
+  .lean-scrollbar::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+  .lean-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .lean-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 99px;
+  }
+  .lean-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-cyan);
+  }
+
+  /* Cybernetic Radial Glow Sheets */
+  .glow-cyan {
+    box-shadow: 0 0 25px -5px rgba(0, 245, 255, 0.15);
+  }
+  .glow-rose {
+    box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.15);
+  }
+  .glow-lavender {
+    box-shadow: 0 0 25px -5px rgba(183, 148, 244, 0.15);
+  }
+}
+
+/* Smooth Interactive Keyframes */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.02); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+/* System Global Override Rules */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+input, textarea {
+  outline: none;
+  border: none;
+}
