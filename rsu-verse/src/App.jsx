@@ -4,7 +4,7 @@ import { HeaderLayout } from './components/navigation/HeaderLayout';
 import './index.css'
 import { Feed } from './components/feed/Feed';
 import { NavBar } from './components/navigation/NavBar';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Zap, MessagesSquare } from 'lucide-react';
 
 const campusFeed = [
   {
@@ -37,12 +37,13 @@ const campusFeed = [
       downvotes: 0,
       comments: 2,
       shares: 0,
-      saves: 1,
+      saves: 0,
       reposts: 0
     },
     userInteraction: {
       voteStatus: null,
-      saved: false
+      saved: false,
+      reposts: false
     },
     marketPlace: {
       price: 18000,
@@ -56,6 +57,98 @@ const campusFeed = [
       glow: "glow-cyan",
       border: "border-cyan/20"
     }
+  },
+  {
+    id: `rsu-verse-${crypto.randomUUID()}`,
+    verse: "gist",
+    time: "15m",
+    icon: <MessagesSquare size={15} />,
+    author: {
+      anonymous: true,
+      name: "Chris L",
+      faculty: "Engineering",
+      department: "Comp Eng",
+      level: "500",
+      rating: 4.7,
+      totalSales: 13,
+      hostel: null
+    },
+    content: {
+      text: "I saw what that Lecturer did.",
+      images: [],
+      tags: ["Gist", "anonymous", "sale"]
+    },
+    meta: {
+      createdAt: "2026-05-18t12:30:00Z",
+      location: "RSU",
+      edited: false
+    },
+    engagement: {
+      upvotes: 15,
+      downvotes: 2,
+      comments: 21,
+      shares: 0,
+      saves: 0,
+      reposts: 0
+    },
+    userInteraction: {
+      voteStatus: null,
+      saved: false,
+      reposts: false
+    },
+    theme: {
+      bg: "bg-lavender",
+      text: "text-lavender",
+      glow: "glow-lavender",
+      border: "border-lavender/20"
+    }
+
+  },
+  {
+    id: `rsu-verse-${crypto.randomUUID()}`,
+    verse: "pulse",
+    time: "15m",
+    icon: <Zap size={15} />,
+    author: {
+      anonymous: true,
+      name: "Chris L",
+      faculty: "Engineering",
+      department: "Comp Eng",
+      level: "500",
+      rating: 4.7,
+      totalSales: 13,
+      hostel: null
+    },
+    content: {
+      text: "The transformer for the faculty of engineering has been fixed",
+      images: [],
+      tags: ["News", "Important", "sale"]
+    },
+    meta: {
+      createdAt: "2026-05-18t12:30:00Z",
+      location: "RSU",
+      edited: false
+    },
+    engagement: {
+      upvotes: 50,
+      downvotes: 10,
+      comments: 11,
+      shares: 0,
+      saves: 0,
+      reposts: 0
+    },
+    userInteraction: {
+      voteStatus: null,
+      saved: false,
+      reposts: false
+    },
+    theme: {
+      bg: "bg-rose",
+      text: "text-rose",
+      glow: "glow-rose",
+      border: "border-rose/20"
+    }
+
   }
 ]
 
@@ -91,7 +184,7 @@ function App() {
   const filteredPosts = posts.filter((post) => activeFilter === "all" || post.verse === activeFilter)
 
 
-const handleUpvote = (postId) => {
+  const handleUpvote = (postId) => {
     setPosts((prevPosts) => prevPosts.map((post) => {
       if (post.id === postId) {
         const currentStatus = post.userInteraction.voteStatus;
@@ -105,7 +198,7 @@ const handleUpvote = (postId) => {
         return {
           ...post,
           engagement: {
-            ...post.engagement, // Keeps downvotes, comments, shares, saves, reposts intact
+            ...post.engagement,
             upvotes: post.engagement.upvotes + upvoteAdjustment,
             downvotes: post.engagement.downvotes + downvoteAdjustment,
           },
@@ -116,10 +209,76 @@ const handleUpvote = (postId) => {
         }
       }
       return post;
-    }))    
+    }))
   }
-console.log(posts)
+  const handleDownvotes = (postId) => {
+    setPosts((prevPosts) => prevPosts.map((post) => {
+      if (post.id !== postId) return post;
 
+      const currentStatus = post.userInteraction.voteStatus
+      const isUpvoted = currentStatus === 'up';
+      const isDownvoted = currentStatus === 'down'
+
+      let downvoteAdjustment = isDownvoted ? -1 : 1
+      let upvoteAdjustment = isUpvoted ? -1 : 0;
+
+      return {
+        ...post,
+        engagement: {
+          ...post.engagement,
+          upvotes: post.engagement.upvotes + upvoteAdjustment,
+          downvotes: post.engagement.downvotes + downvoteAdjustment
+        },
+        userInteraction: {
+          ...post.userInteraction,
+          voteStatus: isDownvoted ? null : 'down'
+        }
+      }
+    }))
+  }
+  const handleRepost = (postId) => {
+    setPosts((prevPosts) => prevPosts.map((post) => {
+      if (post.id !== postId) return post;
+
+      const hasReposted = post.userInteraction?.reposts === true;
+
+      return {
+        ...post,
+        engagement: {
+          ...post.engagement,
+          reposts: hasReposted
+            ? Math.max(0, post.engagement.reposts - 1)
+            : post.engagement.reposts + 1
+        },
+        userInteraction: {
+          ...post.userInteraction,
+          reposts: !hasReposted
+        }
+      }
+    }))
+  }
+  const handleSave = (postId) => {
+    setPosts((prevPosts) => prevPosts.map((post) => {
+      if (post.id !== postId) return post;
+
+      const hasSaved = post.userInteraction.saved === true;
+
+      console.log(post.engagement.saves)
+      return {
+        ...post,
+        engagement: {
+          ...post.engagement,
+          saves: hasSaved
+            ? post.engagement.saves - 1
+            : post.engagement.saves + 1
+        },
+        userInteraction: {
+          ...post.userInteraction,
+          saved: !hasSaved
+        }
+      }
+    }))
+  }
   return (
     <>
       <Routes>
@@ -148,6 +307,9 @@ console.log(posts)
                 activeFilter={activeFilter}
                 setActiveFilter={setActiveFilter}
                 handleUpvote={handleUpvote}
+                handleDownvotes={handleDownvotes}
+                handleRepost={handleRepost}
+                handleSave={handleSave}
               />} />
 
 

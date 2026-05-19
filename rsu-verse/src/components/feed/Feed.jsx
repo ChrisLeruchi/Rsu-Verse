@@ -2,7 +2,7 @@ import { PostCard } from "../../assets/Postcard"
 import { FeedFilter } from "./FeedFilter"
 import { PulseStories } from "./PulseStories"
 
-export function Feed({ posts, stories, activeFilter, setActiveFilter, handleUpvote }) {
+export function Feed({ posts, stories, activeFilter, setActiveFilter, handleUpvote, handleDownvotes, handleRepost, handleSave }) {
   return (
     <>
       <div className="w-full max-w-md mx-auto flex flex-col min-h-full">
@@ -15,7 +15,7 @@ export function Feed({ posts, stories, activeFilter, setActiveFilter, handleUpvo
           setActiveFilter={setActiveFilter}
         />
 
-        <div className="flex flex-col gap-">
+        <div className="flex flex-col">
           {posts.length === 0
             ? (
               <div className="py-16 flex flex-col items-center justify-center text-center space-y-2">
@@ -33,6 +33,9 @@ export function Feed({ posts, stories, activeFilter, setActiveFilter, handleUpvo
                   key={post.id} 
                   post={post} 
                   handleUpvote={handleUpvote}
+                  handleDownvotes={handleDownvotes}
+                  handleRepost={handleRepost}
+                  handleSave={handleSave}
                 />
               ))
             )}
