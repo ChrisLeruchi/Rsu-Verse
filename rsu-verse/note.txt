@@ -1,0 +1,51 @@
+const campusFeed = [
+  {
+    id: `rsu-verse-${crypto.randomUUID()}`,
+    author: {
+      anonymous: true,
+      name: null,
+      faculty: "Management Sciences",
+      department: "Accounting",
+      hostel: null
+    },
+    content: {
+      text: "Clean Oraimo Freepods 4. Used for just 3 weeeks. Battery health 100%. DM if interested.",
+      images: [],
+      tags: ["earbuds", "oraimo", "sale"]
+    },
+    meta: {
+      createdAt: "2026-05-18t12:30:00Z",
+      location: "RSU",
+      edited: false
+    },
+    engagement: {
+      upvotes: 5,
+      downvotes: 0,
+      comments: 2,
+      shares: 0,
+      saves: 1
+    },
+    userInteraction: {
+      voteStatus: null,
+      saved: false
+    },
+    marketPlace: {
+      price: 18000,
+      condition: "Used",
+      category: "Gadgets",
+      negotiable: true
+    }
+  }
+]
+   theme: {
+      bg: "bg-cyan",
+      text: "text-cyan"
+    }
+        theme: {
+      bg: "bg-lavender",
+      text: "text-lavender"
+    }
+        theme: {
+      bg: "bg-rose",
+      text: "text-rose"
+    }

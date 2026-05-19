@@ -1,7 +1,7 @@
 import { Bell, Menu } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
-export function Header({activeTab, setActiveTab}) {
+export function Header({activeFilter, setActiveFilter}) {
   const navigate = useNavigate();
 
   return(
@@ -9,7 +9,7 @@ export function Header({activeTab, setActiveTab}) {
       <header className="fixed top-0 left-0 right-0 h-16 bg-void/80 backdrop-blur border-b border-white/5 flex items-center justify-between px-6 z-50">
         <div
           onClick={() => 
-            {setActiveTab("home"); navigate("/");}}
+            {setActiveFilter("home"); navigate("/");}}
           className="text-sm font-black tracking-widest text-white cursor-pointer select-none"
         >
           RSU<span
@@ -20,8 +20,8 @@ export function Header({activeTab, setActiveTab}) {
         <div className="flex items-center space-x-5 text-white/60">
             <button
               onClick={() => 
-                {setActiveTab("notifications"); navigate("/notifications");}}
-              className={`hover:text-white transition-colors relative p-1 ${activeTab === "notifications" 
+                {setActiveFilter("notifications"); navigate("/notifications");}}
+              className={`hover:text-white transition-colors relative p-1 ${activeFilter === "notifications" 
                 ? "text-cyan"
                 : ""
               }`}
@@ -35,9 +35,9 @@ export function Header({activeTab, setActiveTab}) {
 
             <button 
               onClick={() => {
-                setActiveTab("menu"); navigate("/menu");
+                setActiveFilter("menu"); navigate("/menu");
               }}
-              className={`hover:text-white transition-colors p-1 ${activeTab === "menu"
+              className={`hover:text-white transition-colors p-1 ${activeFilter === "menu"
                 ? "text-cyan"
                 : ""
               }`}
