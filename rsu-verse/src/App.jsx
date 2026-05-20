@@ -1,17 +1,16 @@
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HeaderLayout } from './components/navigation/HeaderLayout';
 import './index.css'
 import { Feed } from './components/feed/Feed';
 import { NavBar } from './components/navigation/NavBar';
-import { ShoppingBag, Zap, MessagesSquare } from 'lucide-react';
+import { CreatePost } from './components/create/CreatePost';
 
 const campusFeed = [
   {
     id: `rsu-verse-${crypto.randomUUID()}`,
     verse: "market",
     time: "15m",
-    icon: <ShoppingBag size={15} />,
     author: {
       anonymous: true,
       name: "Chris L",
@@ -24,7 +23,7 @@ const campusFeed = [
     },
     content: {
       text: "Clean Oraimo Freepods 4. Used for just 3 weeeks. Battery health 100%. DM if interested.",
-      images: [],
+      images: ["https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFxOEeFB5-6G9trSnP1OzFordKWR2_unloBQ&s"],
       tags: ["earbuds", "oraimo", "sale"]
     },
     meta: {
@@ -62,7 +61,6 @@ const campusFeed = [
     id: `rsu-verse-${crypto.randomUUID()}`,
     verse: "gist",
     time: "15m",
-    icon: <MessagesSquare size={15} />,
     author: {
       anonymous: true,
       name: "Chris L",
@@ -108,7 +106,6 @@ const campusFeed = [
     id: `rsu-verse-${crypto.randomUUID()}`,
     verse: "pulse",
     time: "15m",
-    icon: <Zap size={15} />,
     author: {
       anonymous: true,
       name: "Chris L",
@@ -171,10 +168,25 @@ const pulseStories = [
 ]
 
 function App() {
-  const [posts, setPosts] = useState(campusFeed);
+ const [posts, setPosts] = useState(() => {
+    const savedTransmissions = localStorage.getItem('rsu_verse_feed');
+    if (savedTransmissions) {
+      try {
+        return JSON.parse(savedTransmissions);
+      } catch (error) {
+        console.error("Error parsing stored transmission data:", error);
+        return campusFeed;
+      }
+    }
+    return campusFeed;
+  });
   const [stories, setStories] = useState(pulseStories)
   const [activeFilter, setActiveFilter] = useState("all");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem('rsu_verse_feed', JSON.stringify(posts));
+  }, [posts]);
 
   const handlePlusClick = () => {
     setActiveFilter("plus")
@@ -321,10 +333,7 @@ function App() {
         <Route
           path="/plus"
           element={
-            <div className="min-h-screen bg-ink p-8 flex flex-col justify-between">
-              <div className="text-sm font-mono text-rose">Transmission Engine Initialization Block.</div>
-              <button onClick={() => { setActiveFilter("home"); navigate("/"); }} className="text-xs text-white/40 text-left underline">Abort Stream</button>
-            </div>
+            <CreatePost setPosts={setPosts} />
           }
         />
       </Routes>

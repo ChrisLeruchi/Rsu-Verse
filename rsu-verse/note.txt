@@ -199,3 +199,6 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
     </div>
   )
 } 
+  <form onSubmit={handleBroadcast}>
+
+    </form>
