@@ -39,7 +39,7 @@ export function SearchPage({ setActiveFilter, recents, setRecents, search, setSe
           </div>
         </div>
         {recents.length > 0 && (
-          <div className="flex text-[12px] font-semibold tracking-wide text-white/30 uppercase items-center justify-between mt-2 px-1">
+          <div className="flex text-[14px] font-semibold tracking-wide text-white/30 uppercase items-center justify-between mt-2 px-1">
             <div className="flex items-center gap-2">
               <ClockFadingIcon size={14} className="text-white/40" />
               <p className="tracking-wide">Recents</p>
@@ -47,14 +47,14 @@ export function SearchPage({ setActiveFilter, recents, setRecents, search, setSe
             <button
               type="button"
               onClick={handleClearAll}
-              className="font-medium text-[12px] text-white/40 hover:text-white/80 normal-case transition-colors cursor-pointer"
+              className="font-medium text-[14px] text-white/40 hover:text-white/80 normal-case transition-colors cursor-pointer"
             >
               Clear all
             </button>
           </div>
         )}
       
-        <div className="font-medium text-[15px] flex flex-col overflow-hidden">
+        <div className="font-medium text-[14px] flex flex-col overflow-hidden">
           {filteredRecents.length > 0 ? (
             filteredRecents.map((item, index) => (
               <div
@@ -73,7 +73,7 @@ export function SearchPage({ setActiveFilter, recents, setRecents, search, setSe
             ))
           ) : (
             <div className="flex flex-col gap-3">
-              <div className="text-[11px] font-semibold tracking-wider text-white/30 uppercase px-1">
+              <div className="text-[12px] font-semibold tracking-wider text-white/30 uppercase px-1">
                 Search Results ({matchingPosts.length})
               </div>
 
@@ -112,7 +112,7 @@ export function SearchPage({ setActiveFilter, recents, setRecents, search, setSe
 
 
                           {post.verse === "market" && post.marketPlace && (
-                            <span className="text-[13px] font-semibold text-white/90">
+                            <span className="text-[14px] font-semibold text-white/90">
                               ₦{post.marketPlace.price.toLocaleString()}
                             </span>
                           )}
@@ -130,7 +130,7 @@ export function SearchPage({ setActiveFilter, recents, setRecents, search, setSe
                             {post.content.tags.map((tag, tIdx) => (
                               <span
                                 key={tIdx}
-                                className="text-[11px] font-light bg-white/5 border border-white/5 text-white/50 px-2 py-0.5 rounded-md"
+                                className="text-[12px] font-light bg-white/5 border border-white/5 text-white/50 px-2 py-0.5 rounded-md"
                               >
                                 #{tag}
                               </span>

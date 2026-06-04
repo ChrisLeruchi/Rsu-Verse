@@ -22,7 +22,7 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
             <div className="flex font-semibold text-white items-start gap-2 min-w-0 w-full justify-between">
               {post.verse === "market"
                 ? (
-                  <div className="flex flex-col text-[20px] min-w-0 flex-1">
+                  <div className="flex flex-col text-[18px] min-w-0 flex-1">
                     <div className="flex items-center gap-1 min-w-0 w-full">
                       <h4 className="truncate flex-1 min-w-0 whitespace-nowrap">
                         {post.author?.name}
@@ -38,7 +38,7 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
                 )
 
                 : (
-                  <div className="flex flex-col text-[20px] min-w-0 flex-1">
+                  <div className="flex flex-col text-[18px] min-w-0 flex-1">
                     <div className="flex items-center gap-1 min-w-0 w-full">
                       <h4 className="truncate flex-1 min-w-0 whitespace-nowrap">{post.author?.faculty}</h4>
                     </div>
@@ -67,13 +67,13 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
       </div>
       {post.verse === 'confession' ? (
         <div className="px-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-rose bg-rose/5 w-fit py-1 px-2 flex shrink-0">
+          <span className="text-sm font-bold uppercase tracking-wider text-rose bg-rose/5 w-fit py-1 px-2 flex shrink-0">
             Confession
           </span>
         </div>
       ) : (
         <div className="px-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan bg-cyan/5 w-fit py-1 px-2 flex shrink-0">
+          <span className="text-sm font-bold uppercase tracking-wider text-cyan bg-cyan/5 w-fit py-1 px-2 flex shrink-0">
             {post.verse}
           </span>
         </div>
@@ -111,17 +111,17 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
         {post.verse === 'market' && (
           <div className="flex items-center justify-between">
             <div className="flex min-w-0 gap-1">
-              <h4 className="text-[18px] text-white font-semibold truncate">
+              <h4 className="text-[16px] text-white font-semibold truncate">
                 ₦{post.marketPlace?.price}
               </h4>
               <p>-</p>
-              <h4 className="text-[18px] text-white font-medium truncate">
+              <h4 className="text-[16px] text-white font-medium truncate">
                 {post.marketPlace?.condition}
               </h4>
             </div>
             <div className="shrink-0 min-w-0">
-              <button className="font-semibold bg-cyan text-white/90 text-[18px] px-3 py-2 rounded-md active:scale-95 transition-transform flex items-center  whitespace-nowrap">
-                Buy Now <ArrowUpRight size={18} />
+              <button className="font-semibold bg-cyan text-white/90 text-[16px] px-3 py-2 rounded-md active:scale-95 transition-transform flex items-center  whitespace-nowrap">
+                Buy Now <ArrowUpRight size={16} />
               </button>
             </div>
           </div>

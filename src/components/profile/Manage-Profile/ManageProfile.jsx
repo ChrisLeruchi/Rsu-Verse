@@ -14,11 +14,11 @@ export function ManageProfile({isSellerActive, setIsSellerActive}) {
           <ArrowLeft size={20} strokeWidth={2.5} />
         </NavLink>
 
-        <h1 className="text-[20px] font-bold  flex justify-center">
+        <h1 className="text-[20px] font-semibold  flex justify-center">
           Edit Profile
         </h1>
 
-        <button className="text-[18px] font-semibold text-white hover:text-white/80 transition-colors duration-200">
+        <button className="text-[18px] font-normal text-white hover:text-white/80 transition-colors duration-200">
           Save
         </button>
       </header>

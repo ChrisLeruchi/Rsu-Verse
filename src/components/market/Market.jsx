@@ -26,7 +26,7 @@ export function Market({ posts = [] }) {
     <div
       className="w-full max-w-md mx-auto flex flex-col min-h-screen bg-void px-4 pb-12 pt-5">
       <header className="flex sticky">
-        <h4 className="text-[32px] font-bold  text-cyan">Shop</h4>
+        <h4 className="text-[28px] font-bold  text-cyan">Shop</h4>
       </header>
       <div className="sticky top-1 bg-void/90 backdrop-blur-md pt-4 pb-3 z-30 flex flex flex-col gap-3 border-b border-white/5">
         <div className="flex be-ink border border-white/5 focus-within:border-cyan/30 rounded-xl items-center px-3.5 gap-2.5 transition-all">
@@ -36,7 +36,7 @@ export function Market({ posts = [] }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search gadgets, books, bedspaces..."
-            className="bg-transparent py-2.5 text-[14px] text-white/90 placeholder-white/30 w-full outline-none font-sans"
+            className="bg-transparent py-2.5 text-[18px] text-white/90 placeholder-white/30 w-full outline-none font-sans"
           />
         </div>
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
@@ -50,7 +50,7 @@ export function Market({ posts = [] }) {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`text-[14px] font-sans uppercase  px-3.5 py-1.5 rounded-lg border transition-all duration-200 whitespace-nowrap ${selectedCategory === cat.id
+              className={`text-[16px] font-sans uppercase  px-3.5 py-1.5 rounded-lg border transition-all duration-200 whitespace-nowrap ${selectedCategory === cat.id
                 ? 'by-cyan/10 text-cyan border-cyan/20 glow-cyan'
                 : 'bg-ink/40 text-white border-transparent hover:text-white/60'
                 }`}
@@ -95,23 +95,21 @@ export function Market({ posts = [] }) {
                   <h4 className="text-[18px] font-semibold text-white/90 line-clamp-2 min-h-[32px] leading-tight ">
                     {item.content?.text}
                   </h4>
-                  <div className="text-[14px] text-white/30 font-sans flex justify-between items-center">
-                  </div>
                 </div>
               </div>
               <div className=" pt-2 border-t border-white/5 flex flex-col gap-2">
                 <div className="flex justify-between">
-                  <span className="text-[18px] font-black  text-white px-1 ">
+                  <span className="text-[16px] font-black  text-white px-1 ">
                     ₦{item.marketPlace?.price?.toLocaleString()}
                   </span>
                 </div>
 
                 <button
                   onClick={() => handleMakeOffer(item)}
-                  className="w-full bg-cyan font-bold text-[18px] py-2  flex items-center justify-center gap-1 active:scale-95 transition-transform duration-150 shadow-md shadow-cyan/5 hover:bg-cyan/90"
+                  className="w-full bg-cyan font-bold text-[16px] py-2  flex items-center justify-center gap-1 active:scale-95 transition-transform duration-150 shadow-md shadow-cyan/5 hover:bg-cyan/90"
                 >
                   <span>Buy Now</span>
-                  <ArrowUpRight size={18} strokeWidth={2.5} />
+                  <ArrowUpRight size={16} strokeWidth={2.5} />
                 </button>
               </div>
             </div>
