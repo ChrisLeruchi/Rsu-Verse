@@ -366,3 +366,90 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
             </div>
           </div>
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+             <div className="flex flex-col gap-3">
+              <div className="text-[12px] font-semibold tracking-wider text-white/30 uppercase px-1">
+                Search Results ({matchingPosts.length})
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {matchingPosts.length > 0 ? (
+                  matchingPosts.map((post) => (
+                    <NavLink
+                      to='/search_feed'
+                      state={{
+                        query: search, clickedPostId: post.id
+                      }}
+                      className="block decoration-none group"
+                      key={crypto.randomUUID()}
+                    >
+                      <div
+                        key={post.id}
+                        className="bg-ink border border-white/5 p-4 rounded-2xl flex flex-col gap-2.5 transition-all hover:border-white/10"
+                      >
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-[12px] font-medium text-white/40">
+                            {post.verse === "market" ? (
+                              <>
+                                <Store size={13} className="text-white/40" />
+                                <span>Marketplace</span>
+                              </>
+                            ) : (
+                              <>
+                                <MessageSquare size={13} className="text-white/40" />
+                                <span className="capitalize">{post.verse} feed</span>
+                              </>
+                            )}
+                            <span>•</span>
+                            <span>{post.time} ago</span>
+                          </div>
+
+
+                          {post.verse === "market" && post.marketPlace && (
+                            <span className="text-[14px] font-semibold text-white/90">
+                              ₦{post.marketPlace.price.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+
+                        <p
+                          className="text-[14px] text-white/80 font-normal leading-relaxed line-clamp-2">
+                          {post.content.text}
+                        </p>
+
+
+              
+                        {post.content.tags && post.content.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-0.5">
+                            {post.content.tags.map((tag, tIdx) => (
+                              <span
+                                key={tIdx}
+                                className="text-[12px] font-light bg-white/5 border border-white/5 text-white/50 px-2 py-0.5 rounded-md"
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </NavLink>
+                  ))
+                ) : (
+                  <div className="p-12 text-center bg-ink border border-white/5 rounded-2xl text-[14px] text-white/30 font-light">
+                    No matching campus posts found for "{search}"
+                  </div>
+                )}
+              </div>
+            </div>

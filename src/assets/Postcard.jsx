@@ -65,24 +65,26 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
           </div>
         </div>
       </div>
-      {post.verse === 'confession' ? (
-        <div className="px-3">
-          <span className="text-sm font-bold uppercase tracking-wider text-rose bg-rose/5 w-fit py-1 px-2 flex shrink-0">
-            Confession
-          </span>
+      <NavLink to={`/comments/${post.id}`} className= "flex flex-col gap-4">
+        {post.verse === 'confession' ? (
+          <div className="px-3">
+            <span className="text-sm font-bold uppercase tracking-wider text-rose bg-rose/5 w-fit py-1 px-2 flex shrink-0">
+              Confession
+            </span>
+          </div>
+        ) : (
+          <div className="px-3">
+            <span className="text-sm font-bold uppercase tracking-wider text-cyan bg-cyan/5 w-fit py-1 px-2 flex shrink-0">
+              {post.verse}
+            </span>
+          </div>
+        )}
+        <div className="flex flex-col gap-4 px-3 leading-snug text-[18px] tracking-tight font-normal text-white/90">
+          <div >
+            {post.content?.text}
+          </div>
         </div>
-      ) : (
-        <div className="px-3">
-          <span className="text-sm font-bold uppercase tracking-wider text-cyan bg-cyan/5 w-fit py-1 px-2 flex shrink-0">
-            {post.verse}
-          </span>
-        </div>
-      )}
-      <div className="flex flex-col gap-4 px-3 leading-snug text-[18px] tracking-tight font-normal text-white/90">
-        <div >
-          {post.content?.text}
-        </div>
-      </div>
+      </NavLink>
       <div>
         {post.content?.images && post.content.images.length > 0 && (
           <div className={`mt-3 grid gap-1.5 overflow-hidden border border-white/5 ${post.content.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
@@ -99,7 +101,7 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
                 onLoad={() => {
                   if (imgUrl.startsWith('blob:')) {
                     // Optional: URL.revokeObjectURL(imgUrl); 
-                   
+
                   }
                 }}
               />
@@ -165,50 +167,50 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
               />
               <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{post.engagement?.downvotes}</span>
             </button>
-            <NavLink to={`/comments/${post.id}`}>
-              <button className="flex gap-1 flex-1 items-center">
-                <MessageCircle size={24} />
-                <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{
-                  post.engagement?.comments.length === 0
-                    ? ''
-                    : post.engagement?.comments.length
-                }</span>
-              </button>
-            </NavLink>
-            <button
-              onClick={() => handleRepost(post.id)}
-              className={`relative flex flex-1  items-center gap-1 h-8 transition-colors select-none group outline-none justify-self-start ${post.userInteraction?.reposts ? 'text-white' : 'hover:text-white text-white/70'
-                }`}>
-              {post.userInteraction?.reposts ? <Repeat1
-                size={24}
-                className={`shrink-0 transform-gpu ${post.userInteraction?.reposts ? 'animate-cyber-spin' : 'group-active:scale-90 transition-transform'
-                  }`}
-              /> : <Repeat
-                size={24}
-                className={`shrink-0 transform-gpu ${post.userInteraction?.reposts ? 'animate-cyber-spin' : 'group-active:scale-90 transition-transform'
-                  }`}
-              />}
-              <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{post.engagement?.reposts === 0 ? '' : post.engagement?.reposts}</span>
-            </button>
-          </div>
-          <div className="flex gap-3 items-center text-white/70">
-            <button
-              onClick={() => handleSave(post.id)}
-              className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-self-start ${post.userInteraction?.saved ? 'text-amber' : 'hover:text-amber/80 text-white/70'
-                }`}>
-              <Bookmark size={24}
-                className={`shrink-0 transform-gpu ${post.userInteraction?.saved ? 'animate-cyber-pop' : 'group-active:scale-90 transition-transform'
-                  }`}
-                fill={post.userInteraction?.saved ? "currentColor" : "transparent"}
-                strokeWidth={post.userInteraction?.saved ? 2 : 1.5}
-              />
-            </button>
+
             <button className="flex gap-1 flex-1 items-center">
-              <Send size={24} />
+              <MessageCircle size={24} />
+              <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{
+                post.engagement?.comments.length === 0
+                  ? ''
+                  : post.engagement?.comments.length
+              }</span>
             </button>
-          </div>
+ 
+          <button
+            onClick={() => handleRepost(post.id)}
+            className={`relative flex flex-1  items-center gap-1 h-8 transition-colors select-none group outline-none justify-self-start ${post.userInteraction?.reposts ? 'text-white' : 'hover:text-white text-white/70'
+              }`}>
+            {post.userInteraction?.reposts ? <Repeat1
+              size={24}
+              className={`shrink-0 transform-gpu ${post.userInteraction?.reposts ? 'animate-cyber-spin' : 'group-active:scale-90 transition-transform'
+                }`}
+            /> : <Repeat
+              size={24}
+              className={`shrink-0 transform-gpu ${post.userInteraction?.reposts ? 'animate-cyber-spin' : 'group-active:scale-90 transition-transform'
+                }`}
+            />}
+            <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{post.engagement?.reposts === 0 ? '' : post.engagement?.reposts}</span>
+          </button>
+        </div>
+        <div className="flex gap-3 items-center text-white/70">
+          <button
+            onClick={() => handleSave(post.id)}
+            className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-self-start ${post.userInteraction?.saved ? 'text-amber' : 'hover:text-amber/80 text-white/70'
+              }`}>
+            <Bookmark size={24}
+              className={`shrink-0 transform-gpu ${post.userInteraction?.saved ? 'animate-cyber-pop' : 'group-active:scale-90 transition-transform'
+                }`}
+              fill={post.userInteraction?.saved ? "currentColor" : "transparent"}
+              strokeWidth={post.userInteraction?.saved ? 2 : 1.5}
+            />
+          </button>
+          <button className="flex gap-1 flex-1 items-center">
+            <Send size={24} />
+          </button>
         </div>
       </div>
     </div>
+    </div >
   )
 }

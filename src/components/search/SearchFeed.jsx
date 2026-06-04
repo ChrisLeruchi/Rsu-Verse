@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, NavLink } from "react-router-dom";
 import { ChevronLeft, ArrowBigUp, ArrowBigDown, Repeat, Repeat1, Bookmark, Share, MoreHorizontal, ArrowUpRight, MessageCircle } from "lucide-react";
 import { formatRelativeTime } from "../../assets/formatRelativeTime";
 
@@ -37,7 +37,7 @@ export function SearchFeed({ posts, handleSave, handleRepost, handleUpvote, hand
       <div className="flex items-center gap-3 border-b border-white/5 pb-3">
         <button
           type="button"
-          onClick={() => navigate(-1)} 
+          onClick={() => navigate(-1)}
           className="text-white/60 hover:text-white transition-colors p-1 cursor-pointer"
         >
           <ChevronLeft size={22} />
@@ -48,7 +48,7 @@ export function SearchFeed({ posts, handleSave, handleRepost, handleUpvote, hand
         </div>
       </div>
 
-     
+
       <div className="flex flex-col gap-3">
         {prioritizedPosts.length > 0 ? (
           prioritizedPosts.map((post) => {
@@ -112,24 +112,26 @@ export function SearchFeed({ posts, handleSave, handleRepost, handleUpvote, hand
                     </div>
                   </div>
                 </div>
-                {post.verse === 'confession' ? (
-                  <div className="px-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-rose bg-rose/5 w-fit py-1 px-2 flex shrink-0">
-                      Confession
-                    </span>
+                <NavLink to={`/comments/${post.id}`} className="flex flex-col gap-4">
+                  {post.verse === 'confession' ? (
+                    <div className="px-3">
+                      <span className="text-xs font-bold uppercase tracking-wider text-rose bg-rose/5 w-fit py-1 px-2 flex shrink-0">
+                        Confession
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="px-3">
+                      <span className="text-xs font-bold uppercase tracking-wider text-cyan bg-cyan/5 w-fit py-1 px-2 flex shrink-0">
+                        {post.verse}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-4 px-3 leading-snug text-[18px] tracking-tight font-normal text-white/90">
+                    <div >
+                      {post.content?.text}
+                    </div>
                   </div>
-                ) : (
-                  <div className="px-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-cyan bg-cyan/5 w-fit py-1 px-2 flex shrink-0">
-                      {post.verse}
-                    </span>
-                  </div>
-                )}
-                <div className="flex flex-col gap-4 px-3 leading-snug text-[18px] tracking-tight font-normal text-white/90">
-                  <div >
-                    {post.content?.text}
-                  </div>
-                </div>
+                </NavLink>
                 <div>
                   {post.content?.images && post.content.images.length > 0 && (
                     <div className={`mt-3 grid gap-1.5 overflow-hidden border border-white/5 ${post.content.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
@@ -146,7 +148,7 @@ export function SearchFeed({ posts, handleSave, handleRepost, handleUpvote, hand
                           onLoad={() => {
                             if (imgUrl.startsWith('blob:')) {
                               // Optional: URL.revokeObjectURL(imgUrl); 
-                              
+
                             }
                           }}
                         />
@@ -214,7 +216,9 @@ export function SearchFeed({ posts, handleSave, handleRepost, handleUpvote, hand
                       </button>
                       <button className="flex gap-1 flex-1 items-center">
                         <MessageCircle size={24} />
-                        <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{post.engagement?.comments === 0 ? '' : post.engagement?.comments}</span>
+                        <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{Array.isArray(post.engagement?.comments)
+                          ? post.engagement.comments.length
+                          : post.engagement?.comments || 0}</span>
                       </button>
                       <button
                         onClick={() => handleRepost(post.id)}

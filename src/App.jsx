@@ -442,10 +442,7 @@ function App() {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const [recents, setRecents] = useState([
-    "Gist",
-    "Verse launch",
-    "Confessions",
-    "Verse CEO"
+    
   ]);
 
   const [search, setSearch] = useState("")
@@ -455,7 +452,7 @@ function App() {
     const matchesText = post.content?.text?.toLowerCase().includes(query);
     const matchesAuthor = post.content?.faculty?.toLowerCase().includes(query);
 
-    const matchesVerse = post.verse?.toLowerCase().includes(query)
+    const matchesVerse = post.verse.toLowerCase().includes(query)
 
     const matchesTags = Array.isArray(post.content?.tags) && post.content.tags.some(tag =>
       typeof tag === 'string' && tag.toLowerCase().includes(query)
@@ -581,6 +578,7 @@ function App() {
                 search={search}
                 setSearch={setSearch}
                 matchingPosts={matchingPosts}
+                getVerseIcon={getVerseIcon}
               />
               <NavBar
                 activeTab={activeTab}
@@ -602,6 +600,8 @@ function App() {
                 handleRepost={handleRepost}
                 handleUpvote={handleUpvote}
                 handleDownvotes={handleDownvotes}
+                search={search}
+                setSearch={setSearch}
               />
               <NavBar
                 activeTab={activeTab}
