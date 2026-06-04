@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Send, Bookmark, Repeat, Repeat1, MessageCircle, ArrowBigDown, ArrowBigUp, ArrowUpRight, MoreHorizontal, ArrowLeft } from "lucide-react";
+import { Send, Bookmark, Repeat, Repeat1, ArrowBigDown, ArrowBigUp, ArrowUpRight, MoreHorizontal, ArrowLeft } from "lucide-react";
 import { formatRelativeTime } from "./formatRelativeTime";
 
 export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDownvotes, handleUpvote, getVerseIcon }) {
@@ -8,8 +8,10 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
   const navigate = useNavigate();
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState("");
+  const [viewReply, setViewReply] = useState("");
 
 
+  console.log(viewReply)
   const post = posts.find(
     post => post.id === postId
   );
@@ -322,93 +324,116 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
       <div className="flex flex-col gap-4 pt-5">
         {!post.engagement?.comments || post.engagement.comments.length === 0 ? (
           <div className="flex justify-center items-center text-white/40 px-3 py-10">
-            No comments yet
+            Be the first to comment
           </div>
         ) : (
-          post.engagement.comments.map((comment) => (
-            <div
-              key={comment.id}
-              className="flex flex-col border-b  border-white/5 pb-6 px-3 gap-2"
-            >
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 shrink-0" />
-                <div className="flex flex-1 flex-col gap-2">
-                  <div className="flex justify-between w-full items-center">
-                    <div className="flex justify-center items-center gap-2">
-                      <div className="flex items-center flex-1 gap-1">
-                        <span className="text-[18px] font-medium">
-                          {comment.author?.department}
-                        </span>
-                        <span className="text-white/30">
-                          &bull; {formatRelativeTime(comment.createdAt)}
-                        </span>
+          post.engagement.comments.map((comment) => {
+
+            return (
+              <div
+                key={comment.id}
+                className="flex flex-col border-b  border-white/5 pb-6 px-3 gap-2"
+              >
+                <div className="flex gap-3">
+                  <div className="w-14 h-14 rounded-full bg-white/10 shrink-0" />
+                  <div className="flex flex-1 flex-col gap-2">
+                    <div className="flex justify-between w-full items-center">
+                      <div className="flex justify-center items-center gap-2">
+                        <div className="flex items-center flex-1 gap-1">
+                          <span className="text-[18px] font-medium">
+                            {comment.author?.department}
+                          </span>
+                          <span className="text-white/30">
+                            &bull; {formatRelativeTime(comment.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-white/30">
+                        <MoreHorizontal size={20} />
                       </div>
                     </div>
-                    <div className="text-white/30">
-                      <MoreHorizontal size={20} />
+
+                    <div className="text-white/90 text-[18px]">
+                      {comment.text}
                     </div>
-                  </div>
-
-                  <div className="text-white/90 text-[18px]">
-                    {comment.text}
-                  </div>
 
 
-                  <div className="flex items-center gap-4 mt-1">
-                    <button
-                      onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                      className={`text-[16px] font-semibold transition-colors ${replyingTo === comment.id ? "text-cyan" : "text-white/30 hover:text-white/60"
+                    <div className="flex items-center justify-between mt-1">
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                          className={`text-[16px] font-semibold transition-colors ${replyingTo === comment.id ? "text-cyan" : "text-white/30 hover:text-white/60"
+                            }`}
+                        >
+                          {replyingTo === comment.id ? "Cancel Reply" : "Reply"}
+                        </button>
+
+                        <button
+                          onClick={() => setViewReply(viewReply === comment.id ? null : comment.id)}
+                          className={`text-[16px] font-semibold transition-colors text-white/30 hover:text-white/60
                         }`}
-                    >
-                      {replyingTo === comment.id ? "Cancel Reply" : "Reply"}
-                    </button>
+                        >
+                          {viewReply === comment.id ? "Hide Replies" : `View ${comment.engagement?.replies.length
+                            === 0
+                            ? ''
+                            : comment.engagement?.replies.length
+                            } repl${comment.engagement?.replies.length > 1 || comment.engagement?.replies.length === 0 ? 'ies' : 'y'}`}
+                        </button>
+                      </div>
+                      <div className="flex justify-between items-center text-white/70 mt-2 gap-4">
+                        <button className="flex items-center gap-1 hover:text-white transition-colors">
+                          <ArrowBigUp size={24} strokeWidth={2} />
+                          <span className="text-xs font-sans">
+                            {comment.engagement?.upvotes || ""}
+                          </span>
+                        </button>
+                        <button className="flex items-center gap-1 hover:text-white transition-colors">
+                          <ArrowBigDown size={24} strokeWidth={2} />
+                          <span className="text-xs font-sans">
+                            {comment.engagement?.downvotes || ""}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                    {viewReply === comment.id && (
+                      <div className="mt-3 pl-4 border-l-2 border-white/5 flex flex-col gap-3 transition-all duration-100">
+                        {comment.engagement?.replies && comment.engagement.replies.length > 0 ? (
+                          comment.engagement.replies.map((replyText, rIdx) => (
+                            <div
+                              key={rIdx}
+                              className="flex flex-col gap-1  p-3 rounded-xl"
+                            >
 
-                    <button
-                      onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                      className={`text-[16px] font-semibold transition-colors ${replyingTo === comment.id ? "text-cyan" : "text-white/30 hover:text-white/60"
-                        }`}
-                    >
-                      View reply
-                    </button>
-                  </div>
+                              <div className="flex items-center gap-1.5 font-medium text-white/30">
+                                <div className="w-12 h-12 rounded-full bg-white/10 shrink-0" />
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex gap-1 items-center">
+                                    <span className="font-semibold text-white text-[18px]">Comp Eng</span>
+                                    <span>•</span>
+                                    <span >{formatRelativeTime(new Date().toISOString())}</span>
+                                  </div>
+                                  <div>
+                                    <p className="text-[16px] text-white/80 font-normal ">
+                                      {replyText}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-[16px] font-light text-white/20 pl-2 italic">
+                            No Replies.
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-
-                  <div className="flex justify-between items-center text-white/70 mt-2">
-                    <button className="flex items-center gap-1 hover:text-white transition-colors">
-                      <MessageCircle size={20} strokeWidth={2} />
-                      <span className="text-xs font-sans">
-                        {comment.engagement?.replies?.length || ""}
-                      </span>
-                    </button>
-                    <button className="flex items-center gap-1 hover:text-white transition-colors">
-                      <Repeat size={20} strokeWidth={2} />
-                      <span className="text-xs font-sans">
-                        {comment.engagement?.reposts || ""}
-                      </span>
-                    </button>
-                    <button className="flex items-center gap-1 hover:text-white transition-colors">
-                      <ArrowBigUp size={20} strokeWidth={2} />
-                      <span className="text-xs font-sans">
-                        {comment.engagement?.upvotes || ""}
-                      </span>
-                    </button>
-                    <button className="flex items-center gap-1 hover:text-white transition-colors">
-                      <ArrowBigDown size={20} strokeWidth={2} />
-                      <span className="text-xs font-sans">
-                        {comment.engagement?.downvotes || ""}
-                      </span>
-                    </button>
-                    <button className="hover:text-white transition-colors">
-                      <Bookmark size={20} strokeWidth={2} />
-                    </button>
-                    <button className="hover:text-white transition-colors">
-                      <Send size={20} strokeWidth={2} />
-                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
 
