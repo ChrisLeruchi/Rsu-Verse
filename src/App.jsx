@@ -107,12 +107,12 @@ const campusFeed = [
         engagement: {
           upvotes: 0,
           downvotes: 0,
-          replies: ['my days'],
+          replies: 0,
           shares: 0,
           saves: 0,
           reposts: 0
         }
-      },
+      }
       ],
       shares: 0,
       saves: 0,
@@ -494,26 +494,37 @@ function App() {
           <Route
             index
             element={
-              <Feed
-                posts={filteredPosts}
-                setPosts={setPosts}
-                stories={stories}
-                setStories={setStories}
-                activeFilter={activeFilter}
-                setActiveFilter={setActiveFilter}
-                handleUpvote={handleUpvote}
-                handleDownvotes={handleDownvotes}
-                handleRepost={handleRepost}
-                handleSave={handleSave}
-                onPlusClick={handlePlusClick}
-                isVisible={isVisible}
-                setIsScrolled={setIsScrolled}
-                setIsVisible={setIsVisible}
-                setLastScrollY={setLastScrollY}
-                lastScrollY={lastScrollY}
-                getVerseIcon={getVerseIcon}
-                handleAddComment={handleAddComment}
-              />} />
+              <>
+                <Feed
+                  posts={filteredPosts}
+                  setPosts={setPosts}
+                  stories={stories}
+                  setStories={setStories}
+                  activeFilter={activeFilter}
+                  setActiveFilter={setActiveFilter}
+                  handleUpvote={handleUpvote}
+                  handleDownvotes={handleDownvotes}
+                  handleRepost={handleRepost}
+                  handleSave={handleSave}
+                  onPlusClick={handlePlusClick}
+                  isVisible={isVisible}
+                  setIsScrolled={setIsScrolled}
+                  setIsVisible={setIsVisible}
+                  setLastScrollY={setLastScrollY}
+                  lastScrollY={lastScrollY}
+                  getVerseIcon={getVerseIcon}
+                  handleAddComment={handleAddComment}
+                />
+
+                <NavBar
+                  activeTab={activeTab}
+                  setActiveFilter={setActiveFilter}
+                  handlePlusClick={handlePlusClick}
+                />
+              </>
+
+            }
+          />
 
         </Route>
 
@@ -522,6 +533,7 @@ function App() {
           element={
             <PostDetail
               posts={posts}
+              setPosts={setPosts}
               handleSave={handleSave}
               handleRepost={handleRepost}
               handleDownvotes={handleDownvotes}
@@ -534,7 +546,16 @@ function App() {
 
         <Route
           path="/market"
-          element={<Market posts={posts} />}
+          element={
+            <>
+              <Market posts={posts} />
+              <NavBar
+                activeTab={activeTab}
+                setActiveFilter={setActiveFilter}
+                handlePlusClick={handlePlusClick}
+              />
+            </>
+          }
         />
 
 
@@ -550,34 +571,62 @@ function App() {
 
         <Route
           path='/search'
-          element={<SearchPage
-            setActiveFilter={setActiveFilter}
-            recents={recents}
-            setRecents={setRecents}
-            posts={posts}
-            search={search}
-            setSearch={setSearch}
-            matchingPosts={matchingPosts}
-          />}
+          element={
+            <>
+              <SearchPage
+                setActiveFilter={setActiveFilter}
+                recents={recents}
+                setRecents={setRecents}
+                posts={posts}
+                search={search}
+                setSearch={setSearch}
+                matchingPosts={matchingPosts}
+              />
+              <NavBar
+                activeTab={activeTab}
+                setActiveFilter={setActiveFilter}
+                handlePlusClick={handlePlusClick}
+              />
+            </>
+          }
         />
 
         <Route
           path='/search_feed'
-          element={<SearchFeed
-            posts={posts}
-            getVerseIcon={getVerseIcon}
-            handleSave={handleSave}
-            handleRepost={handleRepost}
-            handleUpvote={handleUpvote}
-            handleDownvotes={handleDownvotes}
-          />}
+          element={
+            <>
+              <SearchFeed
+                posts={posts}
+                getVerseIcon={getVerseIcon}
+                handleSave={handleSave}
+                handleRepost={handleRepost}
+                handleUpvote={handleUpvote}
+                handleDownvotes={handleDownvotes}
+              />
+              <NavBar
+                activeTab={activeTab}
+                setActiveFilter={setActiveFilter}
+                handlePlusClick={handlePlusClick}
+              />
+            </>
+
+          }
         />
 
         <Route
           path='/profile'
-          element={<ProfilePage
-            selectedTheme={selectedTheme}
-          />}
+          element={
+            <>
+              <ProfilePage selectedTheme={selectedTheme} />
+
+              <NavBar
+                activeTab={activeTab}
+                setActiveFilter={setActiveFilter}
+                handlePlusClick={handlePlusClick}
+              />
+            </>
+
+          }
         />
 
         <Route
@@ -675,11 +724,7 @@ function App() {
         />
       </Routes>
 
-      <NavBar
-        activeTab={activeTab}
-        setActiveFilter={setActiveFilter}
-        handlePlusClick={handlePlusClick}
-      />
+
     </>
   )
 }

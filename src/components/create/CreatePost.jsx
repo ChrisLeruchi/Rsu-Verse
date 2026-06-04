@@ -116,7 +116,21 @@ const handleImageChange = async (e) => {
       engagement: {
         upvotes: 0,
         downvotes: 0,
-        comments: 0,
+        comments: [{
+        id: crypto.randomUUID(),
+        author: { name: "Amina", department: "Law" },
+        text: "Me too.",
+        createdAt: "2026-05-30T10:00:00Z",
+        engagement: {
+          upvotes: 0,
+          downvotes: 0,
+          replies: [],
+          shares: 0,
+          saves: 0,
+          reposts: 0
+        }
+      }
+      ],
         shares: 0,
         saves: 0,
         reposts: 0
