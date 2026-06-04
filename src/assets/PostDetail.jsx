@@ -40,19 +40,26 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
       prevPosts.map((p) => {
         if (p.id !== postId) return p;
 
+        const rawComments = Array.isArray(p.engagement?.comments) ? p.engagement.comments : [];
+
         if (replyingTo) {
 
           return {
             ...p,
             engagement: {
               ...p.engagement,
-              comments: p.engagement.comments.map((c) => {
+              comments: rawComments.map((c) => {
                 if (c.id !== replyingTo) return c;
+
+                const rawReplies = Array.isArray(c.engagement?.replies)
+                  ? c.engagement.replies
+                  : [];
+
                 return {
                   ...c,
                   engagement: {
                     ...c.engagement,
-                    replies: [...c.engagement.replies, commentText.trim()]
+                    replies: [...rawReplies, commentText.trim()]
                   }
                 };
               })
@@ -63,19 +70,26 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
           const newComment = {
             id: newCommentId,
             author: {
-              name: post.verse === "market" ? "Anonymous Buyer" : "Anonymous Explorer",
-              department: "Anonymous"
+              "name": "Law",
+              "department": "Law",
             },
             text: commentText.trim(),
             createdAt: new Date().toISOString(),
-            engagement: { upvotes: 0, downvotes: 0, replies: [], shares: 0, saves: 0, reposts: 0 }
+            engagement: {
+              upvotes: 0,
+              downvotes: 0,
+              replies: [],
+              shares: 0,
+              saves: 0,
+              reposts: 0
+            },
           };
 
           return {
             ...p,
             engagement: {
               ...p.engagement,
-              comments: [newComment, ...p.engagement.comments]
+              comments: [newComment, ...rawComments]
             }
           };
         }
@@ -86,12 +100,12 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
     setReplyingTo(null);
   };
 
- return (
+  return (
     <div className="w-full max-w-md mx-auto min-h-screen bg-void text-white flex flex-col pb-32">
-      
+
       <div className="sticky top-0 z-50 bg-void/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between p-4 py-3">
-        <button 
-          onClick={() => navigate(-1)} 
+        <button
+          onClick={() => navigate(-1)}
           className="p-1.5 rounded-full hover:bg-white/5 text-white/70 hover:text-white transition-colors"
         >
           <ArrowLeft size={20} />
@@ -100,11 +114,10 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
 
 
       <div
-        className={`${
-          post.verse === "confession"
-            ? "bg-rose/[0.04] border-rose/20"
-            : "bg-ink"
-        } border-b border-white/10 flex flex-col py-5 gap-4`}
+        className={`${post.verse === "confession"
+          ? "bg-rose/[0.04] border-rose/20"
+          : "bg-ink"
+          } border-b border-white/10 flex flex-col py-5 gap-4`}
       >
         <div className="flex flex-col px-3 justify-between w-full min-w-0">
           <div className="flex gap-3 min-w-0 w-full">
@@ -123,7 +136,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                       <p className="text-[16px] font-light text-white/30 truncate">
                         @{post.author?.department}
                       </p>
-                      <p className="text-[16px] font-light text-white/30 shrink-0"> 
+                      <p className="text-[16px] font-light text-white/30 shrink-0">
                         &bull; {formatRelativeTime(post.meta?.createdAt || post.createdAt)}
                       </p>
                     </div>
@@ -139,17 +152,16 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                       <p className="text-[16px] font-light text-white/30">
                         @{post.author?.department}
                       </p>
-                      <p className="text-[16px] font-light text-white/30 truncate"> 
+                      <p className="text-[16px] font-light text-white/30 truncate">
                         &bull; {formatRelativeTime(post.meta?.createdAt || post.createdAt)}
                       </p>
                     </div>
                   </div>
                 )}
-                
+
                 <div className="text-white/30 flex gap-1 shrink-0">
-                  <button className={`${
-                    post.verse === "confession" ? "text-rose" : post.theme?.text || "text-cyan"
-                  } p-1 rounded-full`}>
+                  <button className={`${post.verse === "confession" ? "text-rose" : post.theme?.text || "text-cyan"
+                    } p-1 rounded-full`}>
                     {getVerseIcon(post.verse)}
                   </button>
                   <button className="hover:text-white transition-colors">
@@ -162,9 +174,8 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
         </div>
 
         <div className="px-3">
-          <span className={`text-xs font-bold uppercase tracking-wider w-fit py-1 px-2 flex shrink-0 ${
-            post.verse === "confession" ? "text-rose bg-rose/5" : "text-cyan bg-cyan/5"
-          }`}>
+          <span className={`text-xs font-bold uppercase tracking-wider w-fit py-1 px-2 flex shrink-0 ${post.verse === "confession" ? "text-rose bg-rose/5" : "text-cyan bg-cyan/5"
+            }`}>
             {post.verse}
           </span>
         </div>
@@ -173,22 +184,20 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
           <div>{post.content?.text}</div>
         </div>
 
-  
+
         <div>
           {post.content?.images && post.content.images.length > 0 && (
-            <div className={`mt-3 grid gap-1.5 overflow-hidden border border-white/5 ${
-              post.content.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
-            }`}>
+            <div className={`mt-3 grid gap-1.5 overflow-hidden border border-white/5 ${post.content.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
+              }`}>
               {post.content.images.map((imgUrl, index) => (
                 <img
                   key={index}
                   src={imgUrl}
                   alt="Broadcast attachment"
-                  className={`w-full object-cover bg-ink/50 ${
-                    post.content.images.length === 1
-                      ? "max-h-[440px] aspect-auto bg-ink/30"
-                      : "aspect-square bg-ink/50"
-                  }`}
+                  className={`w-full object-cover bg-ink/50 ${post.content.images.length === 1
+                    ? "max-h-[440px] aspect-auto bg-ink/30"
+                    : "aspect-square bg-ink/50"
+                    }`}
                 />
               ))}
             </div>
@@ -216,25 +225,23 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
           )}
         </div>
 
-    
+
         <div className="px-3">
           <div className="flex items-center justify-between">
             <div className="flex gap-3 items-center text-white/70">
               {/* Upvote Control */}
               <button
                 onClick={() => handleUpvote(post.id)}
-                className={`flex gap-1 flex-1 items-center relative h-8 transition-colors select-none group outline-none justify-center ${
-                  post.userInteraction?.voteStatus === "up" ? "text-[#17CB49]" : "hover:text-[#17CB49]/80 text-white/70"
-                }`}
+                className={`flex gap-1 flex-1 items-center relative h-8 transition-colors select-none group outline-none justify-center ${post.userInteraction?.voteStatus === "up" ? "text-[#17CB49]" : "hover:text-[#17CB49]/80 text-white/70"
+                  }`}
               >
                 {post.userInteraction?.voteStatus === "up" && (
                   <span className="absolute left-[9px] top-[7px] w-[18px] h-[18px] rounded-full border-emerald-400 pointer-events-none animate-neon-blast"></span>
                 )}
                 <ArrowBigUp
                   size={24}
-                  className={`shrink-0 transform-gpu ${
-                    post.userInteraction?.voteStatus === "up" ? "animate-cyber-pop" : "group-active:scale-90 transition-transform"
-                  }`}
+                  className={`shrink-0 transform-gpu ${post.userInteraction?.voteStatus === "up" ? "animate-cyber-pop" : "group-active:scale-90 transition-transform"
+                    }`}
                   fill={post.userInteraction?.voteStatus === "up" ? "currentColor" : "transparent"}
                   color={post.userInteraction?.voteStatus === "up" ? "transparent" : "currentColor"}
                   strokeWidth={post.userInteraction?.voteStatus === "up" ? 2 : 1.5}
@@ -246,18 +253,16 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
 
               <button
                 onClick={() => handleDownvotes(post.id)}
-                className={`flex gap-1 flex-1 items-center relative h-8 transition-colors select-none group outline-none justify-center ${
-                  post.userInteraction?.voteStatus === "down" ? "text-rose" : "hover:text-rose/80 text-white/70"
-                }`}
+                className={`flex gap-1 flex-1 items-center relative h-8 transition-colors select-none group outline-none justify-center ${post.userInteraction?.voteStatus === "down" ? "text-rose" : "hover:text-rose/80 text-white/70"
+                  }`}
               >
                 {post.userInteraction?.voteStatus === "down" && (
                   <span className="absolute left-[9px] top-[7px] w-[18px] h-[18px] rounded-full border-rose pointer-events-none animate-neon-blast"></span>
                 )}
                 <ArrowBigDown
                   size={24}
-                  className={`shrink-0 transform-gpu ${
-                    post.userInteraction?.voteStatus === "down" ? "animate-cyber-drop" : "group-active:scale-90 transition transform"
-                  }`}
+                  className={`shrink-0 transform-gpu ${post.userInteraction?.voteStatus === "down" ? "animate-cyber-drop" : "group-active:scale-90 transition transform"
+                    }`}
                   fill={post.userInteraction?.voteStatus === "down" ? "currentColor" : "transparent"}
                   strokeWidth={post.userInteraction?.voteStatus === "down" ? 2 : 1.5}
                 />
@@ -266,12 +271,11 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                 </span>
               </button>
 
-            
+
               <button
                 onClick={() => handleRepost(post.id)}
-                className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-center ${
-                  post.userInteraction?.reposts ? "text-white" : "hover:text-white text-white/70"
-                }`}
+                className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-center ${post.userInteraction?.reposts ? "text-white" : "hover:text-white text-white/70"
+                  }`}
               >
                 {post.userInteraction?.reposts ? (
                   <Repeat1
@@ -291,23 +295,21 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
             </div>
 
             <div className="flex gap-3 items-center text-white/70">
-            
+
               <button
                 onClick={() => handleSave(post.id)}
-                className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-center ${
-                  post.userInteraction?.saved ? "text-amber" : "hover:text-amber/80 text-white/70"
-                }`}
-              >
-                <Bookmark 
-                  size={24}
-                  className={`shrink-0 transform-gpu ${
-                    post.userInteraction?.saved ? "animate-cyber-pop" : "group-active:scale-90 transition-transform"
+                className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-center ${post.userInteraction?.saved ? "text-amber" : "hover:text-amber/80 text-white/70"
                   }`}
+              >
+                <Bookmark
+                  size={24}
+                  className={`shrink-0 transform-gpu ${post.userInteraction?.saved ? "animate-cyber-pop" : "group-active:scale-90 transition-transform"
+                    }`}
                   fill={post.userInteraction?.saved ? "currentColor" : "transparent"}
                   strokeWidth={post.userInteraction?.saved ? 2 : 1.5}
                 />
               </button>
-   
+
               <button className="flex gap-1 flex-1 items-center hover:text-white transition-colors">
                 <Send size={24} />
               </button>
@@ -316,7 +318,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
         </div>
       </div>
 
-     
+
       <div className="flex flex-col gap-4 pt-5">
         {!post.engagement?.comments || post.engagement.comments.length === 0 ? (
           <div className="flex justify-center items-center text-white/40 px-3 py-10">
@@ -351,19 +353,26 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                     {comment.text}
                   </div>
 
-       
+
                   <div className="flex items-center gap-4 mt-1">
-                    <button 
+                    <button
                       onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                      className={`text-[16px] font-semibold transition-colors ${
-                        replyingTo === comment.id ? "text-cyan" : "text-white/30 hover:text-white/60"
-                      }`}
+                      className={`text-[16px] font-semibold transition-colors ${replyingTo === comment.id ? "text-cyan" : "text-white/30 hover:text-white/60"
+                        }`}
                     >
                       {replyingTo === comment.id ? "Cancel Reply" : "Reply"}
                     </button>
+
+                    <button
+                      onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                      className={`text-[16px] font-semibold transition-colors ${replyingTo === comment.id ? "text-cyan" : "text-white/30 hover:text-white/60"
+                        }`}
+                    >
+                      View reply
+                    </button>
                   </div>
 
-                 
+
                   <div className="flex justify-between items-center text-white/70 mt-2">
                     <button className="flex items-center gap-1 hover:text-white transition-colors">
                       <MessageCircle size={20} strokeWidth={2} />
@@ -403,14 +412,14 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
         )}
       </div>
 
-      
+
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-void/90 backdrop-blur-lg border-t border-white/10 p-3 px-4 z-50">
         <form onSubmit={handleSendComment} className="flex items-center gap-2 w-full relative">
           <input
             type="text"
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder= 'Post your reply'
+            placeholder={replyingTo ? 'Send reply' : 'Post a comment'}
             className="flex-1 bg-white/[0.03] border border-white/5 text-white placeholder-white/20 text-[18px] p-2.5 px-4 rounded-full outline-none focus:border-cyan/30 focus:bg-white/[0.04] transition-all"
           />
           <button

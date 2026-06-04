@@ -25,7 +25,7 @@ export function Feed({ posts, activeFilter, setActiveFilter, handleUpvote, handl
 
   return (
     <>
-      <div className="w-full max-w-md mx-auto flex flex-col min-h-full relative py-6 pb-14">
+      <div className="w-full max-w-md mx-auto flex flex-col min-h-full relative pb-14">
         <FeedFilter
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
