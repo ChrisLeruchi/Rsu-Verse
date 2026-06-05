@@ -44,81 +44,82 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
 
   const newCommentId = crypto.randomUUID();
 
-  setPosts((prevPosts) =>
-    prevPosts.map((p) => {
-      if (p.id !== postId) return p;
+if (replyingTo) {
+  setViewReply(replyingTo);
+}
 
-      const rawComments = Array.isArray(p.engagement?.comments) ? p.engagement.comments : [];
+setPosts((prevPosts) =>
+  prevPosts.map((p) => {
+    if (p.id !== postId) return p;
 
-      if (replyingTo) {
-   
-        return {
-          ...p,
-          engagement: {
-            ...p.engagement,
-            comments: rawComments.map((c) => {
-              if (c.id !== replyingTo) return c;
+    const rawComments = Array.isArray(p.engagement?.comments) ? p.engagement.comments : [];
 
-              const rawReplies = Array.isArray(c.engagement?.replies)
-                ? c.engagement.replies
-                : [];
+    if (replyingTo) {
+      return {
+        ...p,
+        engagement: {
+          ...p.engagement,
+          comments: rawComments.map((c) => {
+            if (c.id !== replyingTo) return c;
 
-              const newReply = {
-                id: crypto.randomUUID(),
-                author: {
-                  name: "Comp Eng",
-                  department: "Comp Eng"
-                },
-                text: commentText.trim(),
-                createdAt: new Date().toISOString(),
-                replyingToText: cleanSnippet, 
-                engagement: {
-                  upvotes: 0,
-                  downvotes: 0
-                }
-              };
+            const rawReplies = Array.isArray(c.engagement?.replies)
+              ? c.engagement.replies
+              : [];
 
-              return {
-                ...c,
-                engagement: {
-                  ...c.engagement,
-                  replies: [...rawReplies, newReply]
-                }
-              };
-            })
-          }
-        };
-      } else {
+            const newReply = {
+              id: crypto.randomUUID(),
+              author: {
+                name: "Comp Eng",
+                department: "Comp Eng"
+              },
+              text: commentText.trim(),
+              createdAt: new Date().toISOString(),
+              replyingToText: cleanSnippet, 
+              engagement: {
+                upvotes: 0,
+                downvotes: 0
+              }
+            };
 
-        const newComment = {
-          id: newCommentId,
-          author: {
-            name: "Law",
-            department: "Law",
-          },
-          text: commentText.trim(),
-          createdAt: new Date().toISOString(),
-          engagement: {
-            upvotes: 0,
-            downvotes: 0,
-            replies: [],
-            shares: 0,
-            saves: 0,
-            reposts: 0
-          },
-        };
+            return {
+              ...c,
+              engagement: {
+                ...c.engagement,
+                replies: [...rawReplies, newReply]
+              }
+            };
+          })
+        }
+      };
+    } else {
+      const newComment = {
+        id: newCommentId,
+        author: {
+          name: "Law",
+          department: "Law",
+        },
+        text: commentText.trim(),
+        createdAt: new Date().toISOString(),
+        engagement: {
+          upvotes: 0,
+          downvotes: 0,
+          replies: [],
+          shares: 0,
+          saves: 0,
+          reposts: 0
+        },
+      };
 
-        return {
-          ...p,
-          engagement: {
-            ...p.engagement,
-            comments: [newComment, ...rawComments] 
-          }
-        };
-      }
-    })
-  );
-
+      return {
+        ...p,
+        engagement: {
+          ...p.engagement,
+          comments: [newComment, ...rawComments] 
+        }
+      };
+    }
+  })
+);
  
   setCommentText("");
   setReplyingTo(null);
