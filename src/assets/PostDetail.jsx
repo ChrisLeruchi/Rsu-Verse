@@ -32,90 +32,98 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
     );
   }
 
-  const handleSendComment = (e) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
+ const handleSendComment = (e) => {
+  e.preventDefault();
+  if (!commentText.trim()) return;
 
-    const newCommentId = crypto.randomUUID();
+  
+  const rawSnippet = secReplyingTo ? secReplyingTo.text : null;
+  const cleanSnippet = rawSnippet && rawSnippet.length > 25
+    ? `${rawSnippet.substring(0, 25)}...`
+    : rawSnippet;
 
-    setPosts((prevPosts) =>
-      prevPosts.map((p) => {
-        if (p.id !== postId) return p;
+  const newCommentId = crypto.randomUUID();
 
-        const rawComments = Array.isArray(p.engagement?.comments) ? p.engagement.comments : [];
+  setPosts((prevPosts) =>
+    prevPosts.map((p) => {
+      if (p.id !== postId) return p;
 
-        if (replyingTo) {
-          return {
-            ...p,
-            engagement: {
-              ...p.engagement,
-              comments: rawComments.map((c) => {
-                if (c.id !== replyingTo) return c;
+      const rawComments = Array.isArray(p.engagement?.comments) ? p.engagement.comments : [];
 
-                const rawReplies = Array.isArray(c.engagement?.replies)
-                  ? c.engagement.replies
-                  : [];
+      if (replyingTo) {
+   
+        return {
+          ...p,
+          engagement: {
+            ...p.engagement,
+            comments: rawComments.map((c) => {
+              if (c.id !== replyingTo) return c;
 
-                const newReply = {
-                  id: crypto.randomUUID(),
-                  author: {
-                    name: "Comp Eng",
-                    department: "Comp Eng"
-                  },
-                  text: commentText.trim(),
-                  createdAt: new Date().toISOString(),
-                  // Track target handle if responding to another reply
-                  replyingToText: secReplyingTo ? (secReplyingTo.text || "User") : null,
-                  engagement: {
-                    upvotes: 0,
-                    downvotes: 0
-                  }
-                };
+              const rawReplies = Array.isArray(c.engagement?.replies)
+                ? c.engagement.replies
+                : [];
 
-                return {
-                  ...c,
-                  engagement: {
-                    ...c.engagement,
-                    replies: [...rawReplies, newReply]
-                  }
-                };
-              })
-            }
-          };
-        } else {
-          const newComment = {
-            id: newCommentId,
-            author: {
-              "name": "Law",
-              "department": "Law",
-            },
-            text: commentText.trim(),
-            createdAt: new Date().toISOString(),
-            engagement: {
-              upvotes: 0,
-              downvotes: 0,
-              replies: [],
-              shares: 0,
-              saves: 0,
-              reposts: 0
-            },
-          };
+              const newReply = {
+                id: crypto.randomUUID(),
+                author: {
+                  name: "Comp Eng",
+                  department: "Comp Eng"
+                },
+                text: commentText.trim(),
+                createdAt: new Date().toISOString(),
+                replyingToText: cleanSnippet, // Lightweight snippet injected here
+                engagement: {
+                  upvotes: 0,
+                  downvotes: 0
+                }
+              };
 
-          return {
-            ...p,
-            engagement: {
-              ...p.engagement,
-              comments: [newComment, ...rawComments]
-            }
-          };
-        }
-      })
-    );
+              return {
+                ...c,
+                engagement: {
+                  ...c.engagement,
+                  replies: [...rawReplies, newReply]
+                }
+              };
+            })
+          }
+        };
+      } else {
 
-    setCommentText("");
-    setReplyingTo(null);
-    setSecReplyingTo(null);
-  };
+        const newComment = {
+          id: newCommentId,
+          author: {
+            name: "Law",
+            department: "Law",
+          },
+          text: commentText.trim(),
+          createdAt: new Date().toISOString(),
+          engagement: {
+            upvotes: 0,
+            downvotes: 0,
+            replies: [],
+            shares: 0,
+            saves: 0,
+            reposts: 0
+          },
+        };
+
+        return {
+          ...p,
+          engagement: {
+            ...p.engagement,
+            comments: [newComment, ...rawComments] // Adds new comment to the top
+          }
+        };
+      }
+    })
+  );
+
+ 
+  setCommentText("");
+  setReplyingTo(null);
+  setSecReplyingTo(null);
+};
 
   return (
     <div className="w-full max-w-md mx-auto min-h-screen bg-void text-white flex flex-col pb-32">
@@ -405,7 +413,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                         </button>
                       </div>
                     </div>
-                    
+
                     {viewReply === comment.id && (
                       <div className="mt-3 pl-3 border-l-2 border-white/5 flex flex-col gap-3 transition-all duration-100 ">
                         {comment.engagement?.replies && comment.engagement.replies.length > 0 ? (
@@ -417,7 +425,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                               <div className="flex gap-1.5 text-white/30">
                                 <div className="w-12 h-12 rounded-full bg-white/10 shrink-0" />
                                 <div className="flex flex-col flex-1 gap-1">
-                                  <div className="flex gap-1 items-center flex-wrap">
+                                  <div className="flex flex-col gap-1 flex-wrap">
                                     <span className="font-semibold text-white text-[18px]">
                                       {reply.author?.department || "Comp Eng"}
                                     </span>
@@ -491,7 +499,29 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-void/90 backdrop-blur-lg border-t border-white/10 p-3 px-4 z-50">
+      <div className="fixed flex flex-col gap-3 bottom-0 left-0 right-0 max-w-md mx-auto bg-void/90 backdrop-blur-lg border-t border-white/10 p-3 px-4 z-50">
+        {replyingTo && (
+          <div className="flex items-center justify-between  border-l-2 border-cyan px-3 py-1.5  transition-all duration-200 animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-[12px] font-bold uppercase text-cyan shrink-0">
+                Replying to:
+              </span>
+              <p className="text-[12px] text-white/50 truncate italic">
+                "{secReplyingTo ? secReplyingTo.text : post.engagement.comments.find(c => c.id === replyingTo)?.text}"
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setReplyingTo(null);
+                setSecReplyingTo(null);
+              }}
+              className="text-white/30 hover:text-rose p-1 transition-colors text-sm font-bold"
+            >
+              &times;
+            </button>
+          </div>
+        )}
         <form onSubmit={handleSendComment} className="flex items-center gap-2 w-full relative">
           <input
             type="text"
