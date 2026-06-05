@@ -71,7 +71,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                 },
                 text: commentText.trim(),
                 createdAt: new Date().toISOString(),
-                replyingToText: cleanSnippet, // Lightweight snippet injected here
+                replyingToText: cleanSnippet, 
                 engagement: {
                   upvotes: 0,
                   downvotes: 0
@@ -112,7 +112,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
           ...p,
           engagement: {
             ...p.engagement,
-            comments: [newComment, ...rawComments] // Adds new comment to the top
+            comments: [newComment, ...rawComments] 
           }
         };
       }
