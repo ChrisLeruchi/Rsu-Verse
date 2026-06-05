@@ -7,9 +7,9 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
   const { postId } = useParams();
   const navigate = useNavigate();
   const [commentText, setCommentText] = useState("");
-  const [replyingTo, setReplyingTo] = useState("");
-  const [viewReply, setViewReply] = useState("");
-
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [secReplyingTo, setSecReplyingTo] = useState(null);
+  const [viewReply, setViewReply] = useState(null);
 
   console.log(viewReply)
   const post = posts.find(
@@ -19,7 +19,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
   if (!post) {
     return (
       <div className="min-h-screen bg-void flex flex-col items-center justify-center text-center p-6">
-        <p className="tex t-white/40 text-sm font-medium">
+        <p className="text-white/40 text-sm font-medium">
           Post not found or has been removed.
         </p>
         <button
@@ -45,7 +45,6 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
         const rawComments = Array.isArray(p.engagement?.comments) ? p.engagement.comments : [];
 
         if (replyingTo) {
-
           return {
             ...p,
             engagement: {
@@ -57,18 +56,33 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                   ? c.engagement.replies
                   : [];
 
+                const newReply = {
+                  id: crypto.randomUUID(),
+                  author: {
+                    name: "Comp Eng",
+                    department: "Comp Eng"
+                  },
+                  text: commentText.trim(),
+                  createdAt: new Date().toISOString(),
+                  // Track target handle if responding to another reply
+                  replyingToText: secReplyingTo ? (secReplyingTo.text || "User") : null,
+                  engagement: {
+                    upvotes: 0,
+                    downvotes: 0
+                  }
+                };
+
                 return {
                   ...c,
                   engagement: {
                     ...c.engagement,
-                    replies: [...rawReplies, commentText.trim()]
+                    replies: [...rawReplies, newReply]
                   }
                 };
               })
             }
           };
         } else {
-
           const newComment = {
             id: newCommentId,
             author: {
@@ -100,6 +114,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
 
     setCommentText("");
     setReplyingTo(null);
+    setSecReplyingTo(null);
   };
 
   return (
@@ -113,7 +128,6 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
           <ArrowLeft size={20} />
         </button>
       </div>
-
 
       <div
         className={`${post.verse === "confession"
@@ -186,7 +200,6 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
           <div>{post.content?.text}</div>
         </div>
 
-
         <div>
           {post.content?.images && post.content.images.length > 0 && (
             <div className={`mt-3 grid gap-1.5 overflow-hidden border border-white/5 ${post.content.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
@@ -227,11 +240,9 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
           )}
         </div>
 
-
         <div className="px-3">
           <div className="flex items-center justify-between">
             <div className="flex gap-3 items-center text-white/70">
-              {/* Upvote Control */}
               <button
                 onClick={() => handleUpvote(post.id)}
                 className={`flex gap-1 flex-1 items-center relative h-8 transition-colors select-none group outline-none justify-center ${post.userInteraction?.voteStatus === "up" ? "text-[#17CB49]" : "hover:text-[#17CB49]/80 text-white/70"
@@ -273,7 +284,6 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                 </span>
               </button>
 
-
               <button
                 onClick={() => handleRepost(post.id)}
                 className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-center ${post.userInteraction?.reposts ? "text-white" : "hover:text-white text-white/70"
@@ -297,7 +307,6 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
             </div>
 
             <div className="flex gap-3 items-center text-white/70">
-
               <button
                 onClick={() => handleSave(post.id)}
                 className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-center ${post.userInteraction?.saved ? "text-amber" : "hover:text-amber/80 text-white/70"
@@ -320,7 +329,6 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
         </div>
       </div>
 
-
       <div className="flex flex-col gap-4 pt-5">
         {!post.engagement?.comments || post.engagement.comments.length === 0 ? (
           <div className="flex justify-center items-center text-white/40 px-3 py-10">
@@ -328,7 +336,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
           </div>
         ) : (
           post.engagement.comments.map((comment) => {
-
+            const replyCount = comment.engagement?.replies?.length || 0;
             return (
               <div
                 key={comment.id}
@@ -357,15 +365,21 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                       {comment.text}
                     </div>
 
-
                     <div className="flex items-center justify-between mt-1">
                       <div className="flex gap-4">
                         <button
-                          onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                          className={`text-[16px] font-semibold transition-colors ${replyingTo === comment.id ? "text-cyan" : "text-white/30 hover:text-white/60"
+                          onClick={() => {
+                            if (replyingTo === comment.id && !secReplyingTo) {
+                              setReplyingTo(null);
+                            } else {
+                              setReplyingTo(comment.id);
+                              setSecReplyingTo(null);
+                            }
+                          }}
+                          className={`text-[16px] font-semibold transition-colors ${replyingTo === comment.id && !secReplyingTo ? "text-cyan" : "text-white/30 hover:text-white/60"
                             }`}
                         >
-                          {replyingTo === comment.id ? "Cancel Reply" : "Reply"}
+                          {replyingTo === comment.id && !secReplyingTo ? "Cancel Reply" : "Reply"}
                         </button>
 
                         <button
@@ -373,11 +387,7 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                           className={`text-[16px] font-semibold transition-colors text-white/30 hover:text-white/60
                         }`}
                         >
-                          {viewReply === comment.id ? "Hide Replies" : `View ${comment.engagement?.replies.length
-                            === 0
-                            ? ''
-                            : comment.engagement?.replies.length
-                            } repl${comment.engagement?.replies.length > 1 || comment.engagement?.replies.length === 0 ? 'ies' : 'y'}`}
+                          {viewReply === comment.id ? "Hide Replies" : `View ${replyCount === 0 ? '' : replyCount} repl${replyCount > 1 || replyCount === 0 ? 'ies' : 'y'}`}
                         </button>
                       </div>
                       <div className="flex justify-between items-center text-white/70 mt-2 gap-4">
@@ -395,28 +405,72 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
                         </button>
                       </div>
                     </div>
+                    
                     {viewReply === comment.id && (
-                      <div className="mt-3 pl-4 border-l-2 border-white/5 flex flex-col gap-3 transition-all duration-100">
+                      <div className="mt-3 pl-3 border-l-2 border-white/5 flex flex-col gap-3 transition-all duration-100 ">
                         {comment.engagement?.replies && comment.engagement.replies.length > 0 ? (
-                          comment.engagement.replies.map((replyText, rIdx) => (
+                          comment.engagement.replies.map((reply, rIdx) => (
                             <div
-                              key={rIdx}
-                              className="flex flex-col gap-1  p-3 rounded-xl"
+                              key={reply.id || rIdx}
+                              className="flex flex-col gap-1 rounded-xl"
                             >
-
-                              <div className="flex items-center gap-1.5 font-medium text-white/30">
+                              <div className="flex gap-1.5 text-white/30">
                                 <div className="w-12 h-12 rounded-full bg-white/10 shrink-0" />
-                                <div className="flex flex-col gap-1">
-                                  <div className="flex gap-1 items-center">
-                                    <span className="font-semibold text-white text-[18px]">Comp Eng</span>
-                                    <span>•</span>
-                                    <span >{formatRelativeTime(new Date().toISOString())}</span>
+                                <div className="flex flex-col flex-1 gap-1">
+                                  <div className="flex gap-1 items-center flex-wrap">
+                                    <span className="font-semibold text-white text-[18px]">
+                                      {reply.author?.department || "Comp Eng"}
+                                    </span>
+                                    {reply.replyingToText && (
+                                      <span className="flex items-center gap-1 mx-1 text-white/30 text-[14px] font-medium">
+                                        <span>→</span>
+                                        <span className="text-white/30 max-w-40 truncate">"{reply.replyingToText}..."</span>
+                                      </span>
+                                    )}
                                   </div>
                                   <div>
                                     <p className="text-[16px] text-white/80 font-normal ">
-                                      {replyText}
+                                      {reply.text || reply}
                                     </p>
                                   </div>
+
+                                  <div className="flex items-center justify-between mt-2">
+                                    <div className="flex gap-4">
+                                      <span>
+                                        {formatRelativeTime(reply.createdAt || new Date().toISOString())}
+                                      </span>
+                                      <button
+                                        onClick={() => {
+                                          if (secReplyingTo?.id === reply.id) {
+                                            setReplyingTo(null);
+                                            setSecReplyingTo(null);
+                                          } else {
+                                            setReplyingTo(comment.id);
+                                            setSecReplyingTo(reply);
+                                          }
+                                        }}
+                                        className={`text-[16px] font-semibold transition-colors ${secReplyingTo?.id === reply.id ? "text-cyan" : "text-white/30 hover:text-white/60"
+                                          }`}
+                                      >
+                                        {secReplyingTo?.id === reply.id ? "Cancel Reply" : "Reply"}
+                                      </button>
+                                    </div>
+                                    <div className="flex items-center text-white/70 gap-4">
+                                      <button className="flex items-center gap-0.5 hover:text-white transition-colors">
+                                        <ArrowBigUp size={24} strokeWidth={2} />
+                                        <span className="text-xs font-sans select-none">
+                                          {reply.engagement?.upvotes || ""}
+                                        </span>
+                                      </button>
+                                      <button className="flex items-center gap-0.5 hover:text-white transition-colors">
+                                        <ArrowBigDown size={24} strokeWidth={2} />
+                                        <span className="text-xs font-sans select-none">
+                                          {reply.engagement?.downvotes || ""}
+                                        </span>
+                                      </button>
+                                    </div>
+                                  </div>
+
                                 </div>
                               </div>
                             </div>
@@ -437,15 +491,20 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
         )}
       </div>
 
-
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-void/90 backdrop-blur-lg border-t border-white/10 p-3 px-4 z-50">
         <form onSubmit={handleSendComment} className="flex items-center gap-2 w-full relative">
           <input
             type="text"
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder={replyingTo ? 'Send reply' : 'Post a comment'}
-            className="flex-1 bg-white/[0.03] border border-white/5 text-white placeholder-white/20 text-[18px] p-2.5 px-4 rounded-full outline-none focus:border-cyan/30 focus:bg-white/[0.04] transition-all"
+            placeholder={
+              secReplyingTo
+                ? `Replying to "${secReplyingTo.text}..."`
+                : replyingTo
+                  ? 'Send reply...'
+                  : 'Post a comment...'
+            }
+            className="flex-1 bg-white/[0.03] border border-white/5 text-white placeholder-white/20 text-[18px] p-2.5 px-4 rounded-full outline-none focus:border-cyan/30 focus:bg-white/[0.04] transition-all truncate"
           />
           <button
             type="submit"
@@ -460,4 +519,3 @@ export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDo
     </div>
   );
 }
-

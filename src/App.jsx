@@ -107,7 +107,7 @@ const campusFeed = [
         engagement: {
           upvotes: 0,
           downvotes: 0,
-          replies: 0,
+          replies: [],
           shares: 0,
           saves: 0,
           reposts: 0

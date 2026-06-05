@@ -6,6 +6,11 @@ import { NavLink } from "react-router-dom"
 
 
 export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, handleSave, getVerseIcon }) {
+  const totalCommentsAndReplies = post.engagement?.comments?.reduce((total, comment) => {
+    const replyCount = comment.engagement?.replies?.length || 0;
+    return total + 1 + replyCount;
+  }, 0) || 0;
+
   return (
     <div
       key={post.id}
@@ -65,7 +70,7 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
           </div>
         </div>
       </div>
-      <NavLink to={`/comments/${post.id}`} className= "flex flex-col gap-4">
+      <NavLink to={`/comments/${post.id}`} className="flex flex-col gap-4">
         {post.verse === 'confession' ? (
           <div className="px-3">
             <span className="text-sm font-bold uppercase tracking-wider text-rose bg-rose/5 w-fit py-1 px-2 flex shrink-0">
@@ -170,47 +175,45 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
 
             <button className="flex gap-1 flex-1 items-center">
               <MessageCircle size={24} />
-              <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{
-                post.engagement?.comments.length === 0
-                  ? ''
-                  : post.engagement?.comments.length
-              }</span>
+              <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">
+                {totalCommentsAndReplies === 0 ? '' : totalCommentsAndReplies}
+              </span>
             </button>
- 
-          <button
-            onClick={() => handleRepost(post.id)}
-            className={`relative flex flex-1  items-center gap-1 h-8 transition-colors select-none group outline-none justify-self-start ${post.userInteraction?.reposts ? 'text-white' : 'hover:text-white text-white/70'
-              }`}>
-            {post.userInteraction?.reposts ? <Repeat1
-              size={24}
-              className={`shrink-0 transform-gpu ${post.userInteraction?.reposts ? 'animate-cyber-spin' : 'group-active:scale-90 transition-transform'
-                }`}
-            /> : <Repeat
-              size={24}
-              className={`shrink-0 transform-gpu ${post.userInteraction?.reposts ? 'animate-cyber-spin' : 'group-active:scale-90 transition-transform'
-                }`}
-            />}
-            <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{post.engagement?.reposts === 0 ? '' : post.engagement?.reposts}</span>
-          </button>
-        </div>
-        <div className="flex gap-3 items-center text-white/70">
-          <button
-            onClick={() => handleSave(post.id)}
-            className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-self-start ${post.userInteraction?.saved ? 'text-amber' : 'hover:text-amber/80 text-white/70'
-              }`}>
-            <Bookmark size={24}
-              className={`shrink-0 transform-gpu ${post.userInteraction?.saved ? 'animate-cyber-pop' : 'group-active:scale-90 transition-transform'
-                }`}
-              fill={post.userInteraction?.saved ? "currentColor" : "transparent"}
-              strokeWidth={post.userInteraction?.saved ? 2 : 1.5}
-            />
-          </button>
-          <button className="flex gap-1 flex-1 items-center">
-            <Send size={24} />
-          </button>
+
+            <button
+              onClick={() => handleRepost(post.id)}
+              className={`relative flex flex-1  items-center gap-1 h-8 transition-colors select-none group outline-none justify-self-start ${post.userInteraction?.reposts ? 'text-white' : 'hover:text-white text-white/70'
+                }`}>
+              {post.userInteraction?.reposts ? <Repeat1
+                size={24}
+                className={`shrink-0 transform-gpu ${post.userInteraction?.reposts ? 'animate-cyber-spin' : 'group-active:scale-90 transition-transform'
+                  }`}
+              /> : <Repeat
+                size={24}
+                className={`shrink-0 transform-gpu ${post.userInteraction?.reposts ? 'animate-cyber-spin' : 'group-active:scale-90 transition-transform'
+                  }`}
+              />}
+              <span className="text-[14px] font-sans tabular-nums min-w-[16px] text-left">{post.engagement?.reposts === 0 ? '' : post.engagement?.reposts}</span>
+            </button>
+          </div>
+          <div className="flex gap-3 items-center text-white/70">
+            <button
+              onClick={() => handleSave(post.id)}
+              className={`relative flex flex-1 items-center gap-1 h-8 transition-colors select-none group outline-none justify-self-start ${post.userInteraction?.saved ? 'text-amber' : 'hover:text-amber/80 text-white/70'
+                }`}>
+              <Bookmark size={24}
+                className={`shrink-0 transform-gpu ${post.userInteraction?.saved ? 'animate-cyber-pop' : 'group-active:scale-90 transition-transform'
+                  }`}
+                fill={post.userInteraction?.saved ? "currentColor" : "transparent"}
+                strokeWidth={post.userInteraction?.saved ? 2 : 1.5}
+              />
+            </button>
+            <button className="flex gap-1 flex-1 items-center">
+              <Send size={24} />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </div >
   )
 }
