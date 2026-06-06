@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Send, Bookmark, Repeat, Repeat1, ArrowBigDown, ArrowBigUp, ArrowUpRight, MoreHorizontal, ArrowLeft } from "lucide-react";
 import { formatRelativeTime } from "./formatRelativeTime";
 
-export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDownvotes, handleUpvote, getVerseIcon }) {
+export function PostDetail({ posts, setPosts, handleSave, handleRepost, handleDownvotes, handleUpvote, handleCommentUpvote, getVerseIcon }) {
   const { postId } = useParams();
   const navigate = useNavigate();
   const [commentText, setCommentText] = useState("");
@@ -401,7 +401,9 @@ setPosts((prevPosts) =>
                       </div>
                       <div className="flex justify-between items-center text-white/70 mt-2 gap-4">
                         <button className="flex items-center gap-1 hover:text-white transition-colors">
-                          <ArrowBigUp size={24} strokeWidth={2} />
+                          <ArrowBigUp 
+                          onClick={() => handleCommentUpvote(post.id, comment.id)}
+                          size={24} strokeWidth={2} />
                           <span className="text-xs font-sans">
                             {comment.engagement?.upvotes || ""}
                           </span>

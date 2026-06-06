@@ -383,6 +383,52 @@ function App() {
       }
     }))
   }
+  const handleShare = (postId) => {
+  const postUrl = `${window.location.origin}/post/${postId}`;
+  navigator.clipboard.writeText(postUrl)
+    .then(() => {
+      // You can trigger a local toast message here later
+      alert("Link copied to clipboard!"); 
+    })
+    .catch((err) => console.error("Could not copy link: ", err));
+};
+const handleCommentUpvote = (postId, commentId) => {
+  setPosts((prevPosts) =>
+    prevPosts.map((post) => {
+      if (post.id !== postId) return post;
+
+      return {
+        ...post,
+        engagement: {
+          ...post.engagement,
+          comments: post.engagement.comments.map((comment) => {
+            if (comment.id !== commentId) return comment;
+
+            const currentStatus = comment.userInteraction?.voteStatus;
+            const isUpvoted = currentStatus === 'up';
+            const isDownvoted = currentStatus === 'down';
+
+            let upvoteAdjustment = isUpvoted ? -1 : 1;
+            let downvoteAdjustment = isDownvoted ? -1 : 0;
+
+            return {
+              ...comment,
+              engagement: {
+                ...comment.engagement,
+                upvotes: (comment.engagement.upvotes || 0) + upvoteAdjustment,
+                downvotes: (comment.engagement.downvotes || 0) + downvoteAdjustment,
+              },
+              userInteraction: {
+                ...comment.userInteraction,
+                voteStatus: isUpvoted ? null : 'up',
+              },
+            };
+          }),
+        },
+      };
+    })
+  );
+};
 
   const [isSellerActive, setIsSellerActive] = useState(false);
 
@@ -502,6 +548,7 @@ function App() {
                   handleUpvote={handleUpvote}
                   handleDownvotes={handleDownvotes}
                   handleRepost={handleRepost}
+                  handleShare={handleShare}
                   handleSave={handleSave}
                   onPlusClick={handlePlusClick}
                   isVisible={isVisible}
@@ -535,6 +582,7 @@ function App() {
               handleRepost={handleRepost}
               handleDownvotes={handleDownvotes}
               handleUpvote={handleUpvote}
+              handleCommentUpvote={handleCommentUpvote}
               getVerseIcon={getVerseIcon}
             />
           }

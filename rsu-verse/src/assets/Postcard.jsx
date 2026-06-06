@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom"
 
 
 
-export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, handleSave, getVerseIcon }) {
+export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, handleSave, getVerseIcon, handleShare }) {
   const totalCommentsAndReplies = post.engagement?.comments?.reduce((total, comment) => {
     const replyCount = comment.engagement?.replies?.length || 0;
     return total + 1 + replyCount;
@@ -208,7 +208,9 @@ export function PostCard({ post, handleUpvote, handleDownvotes, handleRepost, ha
                 strokeWidth={post.userInteraction?.saved ? 2 : 1.5}
               />
             </button>
-            <button className="flex gap-1 flex-1 items-center">
+            <button 
+            onClick={() => handleShare(post.id)}
+            className="flex gap-1 flex-1 items-center">
               <Send size={24} />
             </button>
           </div>

@@ -6,7 +6,7 @@ import { Plus } from "lucide-react"
 
 
 
-export function Feed({ posts, activeFilter, setActiveFilter, handleUpvote, handleDownvotes, handleRepost, handleSave, onPlusClick, getVerseIcon}) {
+export function Feed({ posts, activeFilter, setActiveFilter, handleUpvote, handleDownvotes, handleRepost, handleSave, onPlusClick, getVerseIcon, handleShare}) {
 
 
   const getIconStyles = (isActive, hasFill = false) => {
@@ -51,6 +51,7 @@ export function Feed({ posts, activeFilter, setActiveFilter, handleUpvote, handl
                   handleUpvote={handleUpvote}
                   handleDownvotes={handleDownvotes}
                   handleRepost={handleRepost}
+                  handleShare={handleShare}
                   handleSave={handleSave}
                   getVerseIcon={getVerseIcon}
                 />

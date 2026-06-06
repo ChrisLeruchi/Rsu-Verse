@@ -8,8 +8,8 @@ const commentSchema = new mongoose.Schema({
     },
     text: { type: String, required: true },
     engagement: {
-        upvotes: { type: Number, default: 0 },
-        downvotes: { type: Number, default: 0 },
+        upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         replies: { type: Array, default: [] }
     }
 }, { timestamps: true });
