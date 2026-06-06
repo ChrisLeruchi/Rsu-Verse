@@ -1,22 +1,73 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, ShoppingBag, MessagesSquare, ArrowLeft, Sparkles, Image, Shield, ShieldAlert } from "lucide-react";
+import { ShoppingBag, MessagesSquare, ArrowLeft, Image, ShieldAlert, X, Flame, Landmark, Music, HeartHandshake } from "lucide-react";
 
-export function CreatePost({ setPosts }) {
+export function CreatePost({ setPosts, setActiveFilter }) {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null)
   const [verse, setVerse] = useState("gist");
   const [text, setText] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [price, setPrice] = useState("");
   const [condition, setCondition] = useState("Used");
-  const [imageUrl, setImageUrl] = useState("");
+  const [images, setImages] = useState([]);
 
   const [category, setCategory] = useState("general");
 
+const handleImageChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    if (images.length + files.length > 4) {
+      alert("Maximum of 4 images allowed per post.")
+      return;
+    }
+
+    const conversionPromises = files.map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    try {
+      const base64Strings = await Promise.all(conversionPromises);
+      setImages((prevImages) => [...prevImages, ...base64Strings]);
+    } catch (error) {
+      console.error("Failed to read image files: ", error);
+    }
+  };
+
+
+  const handleRemoveImage = (indexToRemove) => {
+    setImages((prevImages) => prevImages.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handlePriceKeyDown = (e) => {
+
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+
+    if (allowedKeys.includes(e.key)) {
+      return;
+    }
+
+
+    if (!/^[0-890-9]$/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   const handleBroadcast = (e) => {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (verse === "gist" && !text.trim() && images.length === 0) return;
+
+    if (verse === "market" && (!text.trim() || !price)) return;
+
+    setIsSubmitting(true)
 
     let themeConfig = {
       bg: "bg-lavender/10",
@@ -24,14 +75,7 @@ export function CreatePost({ setPosts }) {
       glow: "glow-lavender",
       border: "border-lavender/20"
     };
-    if (verse === "pulse") {
-      themeConfig = {
-        bg: "bg-rose/10",
-        text: "text-rose",
-        glow: "glow-rose",
-        border: "border-rose/20"
-      };
-    }
+
     if (verse === "market") {
       themeConfig = {
         bg: "bg-cyan/10",
@@ -41,13 +85,19 @@ export function CreatePost({ setPosts }) {
       };
     }
 
+    const displayName = isAnonymous && verse !== "market" ? "Engineering" : "Christopher Igwe Leruchi";
+
+    const displayHandle = "Comp Eng"
 
     const newTransmission = {
       id: `rsu-verse-${crypto.randomUUID()}`,
       verse,
+      time: "Just Now",
       author: {
-        name: isAnonymous ? "Anonymous Rabbit" : "Chris L",
-        Faculty: "Engineering",
+        anonymous: verse === "market" ? false : isAnonymous,
+        name: displayName,
+        department: displayHandle,
+        faculty: displayName,
         Department: "Comp Eng",
         Level: "500",
         rating: 4.7,
@@ -55,7 +105,7 @@ export function CreatePost({ setPosts }) {
       },
       content: {
         text: text,
-        images: imageUrl.trim() ? [imageUrl.trim()] : [],
+        images: images,
         tags: verse === "market" ? [category.toLowerCase()] : [verse.toUpperCase()]
       },
       meta: {
@@ -66,169 +116,270 @@ export function CreatePost({ setPosts }) {
       engagement: {
         upvotes: 0,
         downvotes: 0,
-        comments: 0,
+        comments: [],
         shares: 0,
         saves: 0,
-        repost: 0
+        reposts: 0
+      },
+      userInteraction: {
+        voteStatus: null,
+        reposts: false,
+        saved: false
       },
       theme: themeConfig,
       ...(verse === "market" && {
         marketPlace: {
           price: Number(price) || 0,
-          condition: condition
+          condition: condition,
+          description: text,
+          category: category
         }
       })
     };
 
-
     setPosts((prevPosts) => [newTransmission, ...prevPosts]);
-    navigate("/");
+    setIsSubmitting(false);
+
+    if (verse === "market") {
+      navigate("/market");
+    } else {
+      setActiveFilter("all");
+      navigate("/");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-void text-white font-sans selection:bg-cyan/30 max-w-md mx-auto border-x border-white/5">
+    <div className="h-screen flex flex-col bg-void text-white font-sans selection:bg-cyan/30 max-w-md mx-auto border-x border-white/5 overflow-hidden pb-25">
       <header className="flex justify-between items-center h-24 px-4">
         <div className="flex-1 flex justify-start">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => {
+              setActiveFilter("all")
+              navigate('/')
+            }}
+            disabled={isSubmitting}
+            className="disabled:opacity-30"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={20} />
           </button>
         </div>
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 text-[24px] font-bold  flex justify-start">
           <p>New Post</p>
         </div>
         <div className="flex-1 flex justify-end">
           <button
             onClick={handleBroadcast}
-            disabled={!text.trim() || (verse === "market" && !price)}
-            className="bg-white text-void font-bold text-xs px-4 py-2 rounded-lg disabled:opacity-20 disabled:pointer-events-none transition-all active:scale-95 duration-200"
+            disabled={verse === "market"
+              ? (isSubmitting || !text.trim() || !price || images.length === 0)
+              : (!text.trim() && images.length === 0)}
+            className={`${verse === 'confession' ? 'bg-rose' : 'bg-lavender'} font-bold text-[18px] px-4 py-2 rounded-lg disabled:opacity-20 disabled:pointer-events-none transition-all active:scale-95 duration-200`}
           >
-            Share
+            {isSubmitting ? "Sharing..." : "Share"}
           </button>
         </div>
       </header>
-      <div className="p-3 flex items-center gap-3 font-bold text-white/100 tracking-tight">
-        <div className=" w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500" />
-        <div>
-          <h4>Chiamaka Morah</h4>
-        </div>
-      </div>
-      <div className="p-3 flex-1 flex flex-col gap-6 overflow-y-auto no-scrollbar">
-        <label className="text-[10px] font-sans tracking-wider text-white/30 uppercase">
-          Select Verse
-        </label>
-        <div className="grid grid-cols-3 gap-2 bg-ink p-1 rounded-xl border border-white/5">
-          {[
-            { id: 'gist', label: 'Gist', icon: <MessagesSquare size={14} />, activeClass: 'bg-lavender/10 text-lavemder border-lavender/20' },
-            { id: 'pulse', label: 'Pulse', icon: <Zap size={14} />, activeClass: 'bg-rose/10 text-rose border-rose/20' },
-            { id: 'market', label: 'Market', icon: <ShoppingBag size={14} />, activeClass: 'bg-cyan/10 text-cyan border-cyan/20' }
-          ].map((channel) => (
-            <button
-              key={channel.id}
-              type="button"
-              onClick={() => setVerse(channel.id)}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg  text-xs font-semibold border transition-all duration-300 ${verse === channel.id
-                ? channel.activeClass
-                : 'bg-transparent text-white/40 border-transparent hover:text-white/70'
-                }`}
-            >
-              {channel.icon}
-              <span>{channel.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div
-        className="p-3 flex flex-col gap-2 flex-1 min-h-[250px]">
-        <div className="bg-ink rounded-xl borderborder-white/5 p-4 flex flex-col gap-3 focus-within:border-white/10 transition-colors flex-1">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={
-              verse === "market" ? "What do you want to sell?..." : verse === "pulse" ? "What's happening in Campus?..." : "What's on your mind?..."
-            }
-            className="bg-transparent text-white/90 placeholder-white/20 text-[15px] leading-relaxed resize-none w-full flex-1 outline-none min-h-[140px] maxLength = {600}"
-          />
-
-        </div>
-      </div>
-      {verse === "market" && (
-        <div className="flex flex-col gap-4 b-ink border- border-white/5 p-3 rounded-xl">
-          <div className="text-xs font-mono tracking-wid text-cyan flex items-center gap-1.5 mb-1">
-            ITEM SPEC
+      <main className="overflow-y-auto flex-1 flex flex-col gap-2 no-scrollbar min-h-0">
+        <div className="p-3 flex items-center gap-3 font-semibold text-white/100 shrink-0">
+          <div className=" w-12 h-12 rounded-full shrink-0 bg-gradient-to-tr from-black to-gray-500 flex-shrink-0" />
+          <div className="text-[20px]">
+            <h4>{isAnonymous && verse !== "market" ? "Comp Eng" : "Christopher Igwe"}</h4>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-mono tracking-wider text-white/40">
-                PRICE (₦)
-              </label>
-              <input
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="e.g 10000"
-                className="bg-surface border-white/5 rounded-lg px-3 py-2 text-sm font-mono text-white focus:border-cyan/40 transition-colors"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-mono tracking-wider text-white/40">
-                CONDITION
-              </label>
-              <select
-                value={condition}
-                onChange={(e) => setCondition(e.target.value)}
-                className="bg-surface border border-white/5 rounded-lg px-3 py-2 text-white text-sm focus: border-cyan/40 appearance-none outline-none"
+        </div>
+        <div className="p-3 flex flex-col gap-6 shrink-0">
+          <label className="text-[18px] font-sans  text-white/30 uppercase">
+            Select Verse
+          </label>
+          <div className="flex items-center overflow-x-scroll gap-2 bg-ink border border-white/5 scrollbar-none">
+            {[
+              { id: 'gist', label: 'Gist', icon: <MessagesSquare size={16} />, activeClass: 'bg-lavender/10 text-lavender border-lavender/20' },
+              { id: 'market', label: 'Market', icon: <ShoppingBag size={16} />, activeClass: 'bg-cyan/10 text-cyan border-cyan/20' },
+              { id: 'confession', label: 'Confession', icon: <Flame size={16} />, activeClass: 'bg-rose/10 text-rose border-rose/20' },
+              { id: 'music', label: 'Music', icon: <Music size={16} />, activeClass: 'bg-cyan/10 text-cyan border-cyan/20' },
+              { id: 'politics', label: 'Politics', icon: <Landmark size={16} />, activeClass: 'bg-cyan/10 text-cyan border-cyan/20' },
+              { id: 'relationship', label: 'Relationship', icon: <HeartHandshake size={16} />, activeClass: 'bg-cyan/10 text-cyan border-cyan/20' },
+            ].map((channel) => (
+              <button
+                key={channel.id}
+                type="button"
+                onClick={() => setVerse(channel.id)}
+                className={`flex items-center justify-center gap-1.5 py-2.5  text-[18px] font-semibold border transition-all duration-300 min-w-35 shrink-0 ${verse === channel.id
+                  ? channel.activeClass
+                  : 'bg-transparent text-white/40 border-transparent hover:text-white/70'
+                  }`}
               >
-                <option value="Brand New">Brand New</option>
-                <option value="Used">Used</option>
-                <option value="Fixable">Needs Repair</option>
-              </select>
-            </div>
+                {channel.icon}
+                <span>{channel.label}</span>
+              </button>
+            ))}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-mono tracking-wider text-white/40">IMAGE URL (TEMPORARY DEV INJECTION)</label>
-            <div className="flex bg-surface border border-white/5 rounded-lg items-center px-3 gap-2">
-              <Image size={14} className="text-white/30" />
+        </div>
+        <div className="p-3 shrink-0 flex flex-col gap-2 min-h-[280px]">
+          <div className="bg-ink rounded-xl border border-white/5 p-4 flex flex-col gap-3 focus-within:border-white/10 transition-colors flex-1">
+            <textarea
+              value={text}
+              maxLength={500}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={
+                verse === "market" ? "Describe what you want to sell..." : "What's on your mind?..."
+              }
+              className="bg-transparent text-white/90 placeholder-white/20 text-[18px] leading-relaxed resize-none w-full outline-none min-h-[120px]"
+            />
+            {images.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 mt-2 max-h-[180px] overflow-y-auto no-scrollbar pb-1">
+                {images.map((url, index) => (
+                  <div key={index} className="relative aspect-video rounded-lg overflow-hidden border border-white/10 bg-void">
+                    <img src={url} alt="Upload preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1.5 right-1.5 bg-black/80 hover:bg-black p-1 rounded-full text-white/80 hover:text-white transition-colors border border-white/5"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-auto shrink-0">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={`flex items-center gap-2 text-white/40 hover:text-white/80 transition-colors group text-[16px] font-medium p-1 rounded-md`}
+              >
+                <Image size={20}
+                  className={` ${verse === 'confession' ? 'text-rose' : 'text-cyan' } 
+                  group-hover:scale-105 transition-transform
+                  `}
+                />
+                <span>Media</span>
+              </button>
+
               <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Paste direct Url to picture of product"
-                className="bg-transparent py-2 text-xs font-mono text-white w-full outline-none"
+                type="file"
+                ref={fileInputRef}
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
               />
+
+              <div className="flex items-center gap-2.5 text-[14px] text-white/30 font-sans tabular-nums">
+                <span className={text.length >= 480 ? "text-rose/70 font-semibold" : ""}>
+                  {text.length}/500
+                </span>
+                {images.length > 0 && (
+                  <>
+                    <span className="text-white/10 text-[10px]">•</span>
+                    <span>{images.length} attached</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      )}
-      <div className="p-3">
-        <div className="bg-ink border border-white/5 rounded-xl px-3 py-4 flex items-center justify-between gap-4">
-          <div className="flex gap-3 items-start min-w-0">
-            <div className="p-2 bg-void rounded-lg border border-white/5 shrink-0 text-white/40">
-              <ShieldAlert size={16} />
+        {verse === "market" && (
+          <div className="flex flex-col shrink-0 gap-4 bg-ink border border-white/5 p-3 rounded-xl">
+            <div className="text-[18px] font-sans text-cyan flex items-center gap-1.5 mb-1">
+              ITEM SPEC
             </div>
-            <div className="flex flex-col min-w-0" >
-              <h5 className="text-xs font-semibold text-white/90">
-                Post Anonymously
-              </h5>
-              <p className="text-[10px] text-white/40 leading-normal mt-0.5 truncate">
-                Your name and profile will be hidden from other students.
-              </p>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[18px] font-sans  text-white/30">
+                  PRICE (₦)
+                </label>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || Number(val) >= 0) {
+                      setPrice(val)
+                    }
+                  }}
+                  onKeyDown={handlePriceKeyDown}
+                  placeholder="e.g 10000"
+                  className="border-2 border-solid border-white/30 w-full bg-void rounded-lg px-3 py-2 text-white text-[18px] focus:border-lavender/40 outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none scrollbar-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[18px] font-sans text-white/30">
+                  CONDITION
+                </label>
+                <div className="grid grid-cols-3 gap-2 bg-void p-1 rounded-lg border border-white/5">
+                  {["Brand New", "Used", "Fixable"].map((cond) => (
+                    <button
+                      key={cond}
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => setCondition(cond)}
+                      className={`py-2 text-[16px] font-medium rounded-md border transition-all duration-200 ${condition === cond
+                        ? "bg-cyan/10 border-cyan/20 font-semibold "
+                        : "bg-transparent text-white/40 border-transparent hover:text-white/60"
+                        }`}
+                    >
+                      {cond === "Fixable"
+                        ? "Needs Repair"
+                        : cond
+                      }
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5 col-span-2">
+                <label className="text-[18px] font-sans text-white/30">
+                  CATEGORY
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {["Gadgets", "Books", "Fashion", "Hostels"].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => setCategory(cat)}
+                      className={`py-2 px-3 text-[16px] font-medium rounded-md border transition-all text-left flex justify-between items-center ${category === cat
+                        ? "bg-cyan/10 text-cyan border-cyan/20 font-semibold"
+                        : "bg-void text-white/40 border-white/5 hover:text-white/60"
+                        }`}
+                    >
+                      <span>{cat}</span>
+                      {category === cat && <div className="w-1.5 h-1.5 rounded-full bg-cyan shadow-[0_0_6px_rgba(6,182,212,0.5)]" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsAnonymous(!isAnonymous)}
-            disabled={verse === "pulse"} // Pulse alerts are strictly official/public broadcast actions
-            className={`w-10 h-6 rounded-full transition-colors relative outline-none shrink-0 disabled:opacity-20 ${isAnonymous ? "bg-cyan" : "bg-white/10"
-              }`}
-          >
-            <span className={`absolute top-1 left-1 bg-void w-4 h-4 rounded-full transition-transform ${isAnonymous ? "translate-x-4" : "translate-x-0"
-              }`} />
-          </button>
-        </div>
-      </div>
+        )}
+        {verse !== 'market' ? (
+          <div className="p-3 shrink-0">
+            <div className="bg-ink border border-white/5 rounded-xl px-3 py-4 flex items-center justify-between gap-4">
+              <div className="flex gap-3 items-start min-w-0">
+                <div className="p-2 bg-void rounded-lg border border-white/5 shrink-0 text-white/40">
+                  <ShieldAlert size={18} />
+                </div>
+                <div className="flex flex-col min-w-0" >
+                  <h5 className="text-[18px] font-semibold text-white/100">
+                    Post Anonymously
+                  </h5>
+                  <p className="text-[16px] text-white/30 leading-normal mt-0.5 truncate">
+                    Your department will be displayed
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAnonymous(!isAnonymous)}
+                className={`w-10 h-6 rounded-full transition-colors relative outline-none shrink-0 disabled:opacity-20 ${verse === 'confession' ? isAnonymous ? "bg-rose" : "bg-white/10"
+                  :  isAnonymous ? "bg-lavender" : "bg-white/10"}`}
+              >
+                <span className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${isAnonymous ? "translate-x-4" : "translate-x-0"
+                  }`} />
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </main>
     </div>
   );
 

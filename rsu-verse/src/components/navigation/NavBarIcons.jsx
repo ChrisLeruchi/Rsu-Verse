@@ -1,79 +1,75 @@
-import { Home, Zap, Plus, ShoppingBag, MessageCircle } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Home, Search, ShoppingBag, UserCircle2 } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
 
-export function NavBarIcons({ activeFilter, setActiveFilter, onPlusClick }) {
-  const navigate = useNavigate();
-
-  const handleNav = (filter, path = '/') => {
-    setActiveFilter(filter)
-    navigate(path)
+export function NavBarIcons({ setActiveFilter }) {
+  
+  const handleFilter = () => {
+    setActiveFilter("all")
   }
+
+  const getIconStyles = (isActive, hasFill = false) => {
+    if (hasFill) {
+      return {
+        fill: isActive ? 'white' : 'transparent',
+        color: isActive ? 'transparent' : 'currentColor'
+      }
+    }
+    return {
+      color: isActive ? 'white' : 'currentColor'
+    }
+  }
+
   return (
-    <>
-      <div className='flex justify-between bg-void fixed bottom-0 left-0 right-0 bg-void border-t border-white/10 p-5 text-white/70'>
-        <button onClick={() => handleNav('all')}>
-          <Home
+    <div className='flex justify-between bg-void fixed bottom-0 left-0 right-0 border-t border-white/10 p-7 text-white/70'>
+
+      {/* 1. Home / All Feed */}
+      <NavLink to="/" end onClick={handleFilter}>
+        {({ isActive }) => (
+            <Home
+              size={24}
+              strokeWidth={2.5}
+              className="transition-all duration-200 ease-in-out"
+              {...getIconStyles(isActive, true)}
+            />
+        )}
+      </NavLink>
+
+
+      <NavLink to="/search">
+        {({ isActive }) => (
+          <Search
             size={24}
             strokeWidth={2.5}
-            style={{ transition: '200ms ease-in-out' }}
-            fill={`${activeFilter === 'all'
-              ? 'white'
-              : 'transparent'}`}
-            color={`${activeFilter === 'all' ? 'transparent' : 'currentColor'}`}
+            className="transition-all duration-300 ease-in-out"
+            {...getIconStyles(isActive)}
           />
-        </button>
+        )}
+      </NavLink>
 
-        <button onClick={() => handleNav('pulse')}>
-          <Zap
-            size={24}
-            strokeWidth={2.5}
-            style={{ transition: '300ms ease-in-out' }}
-            fill={`${activeFilter === 'pulse'
-              ? 'white'
-              : 'transparent'}`}
-            color={`${activeFilter === 'pulse'
-              ? 'transparent'
-              : 'currentColor'}`}
-          />
-        </button>
 
-        <button onClick={onPlusClick}>
-          <Plus
-            size={24}
-            strokeWidth={2.5}
-            style={{ transition: '300ms ease-in-out' }}
-            color={`${activeFilter === 'plus'
-              ? 'white'
-              : 'currentColor'}`}
-          />
-        </button>
 
-        <button onClick={() => handleNav("market")}>
+      <NavLink to="/market">
+        {({ isActive }) => (
           <ShoppingBag
             size={24}
             strokeWidth={2.5}
-            style={{ transition: '300ms ease-in-out' }}
-            color={`${activeFilter === 'market'
-              ? 'white'
-              : 'currentColor'}`}
+            className="transition-all duration-300 ease-in-out"
+            {...getIconStyles(isActive)}
           />
-        </button>
+        )}
+      </NavLink>
 
-        <button onClick={() => {handleNav('chat')}}>
-          <MessageCircle
+      <NavLink to="/profile">
+        {({ isActive }) => (
+          <UserCircle2
             size={24}
             strokeWidth={2.5}
-            style={{ transition: '300ms ease-in-out' }}
-            fill={`${activeFilter === 'chat'
-              ? 'white'
-              : 'transparent'}`}
-            color={`${activeFilter === 'chat'
-              ? 'white'
-              : 'currentColor'}`}
+            className="transition-all duration-300 ease-in-out"
+            {...getIconStyles(isActive)}
           />
-        </button>
+        )}
+      </NavLink>
 
-      </div>
-    </>
+    </div>
   )
 }

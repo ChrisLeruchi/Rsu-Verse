@@ -1,10 +1,24 @@
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HeaderLayout } from './components/navigation/HeaderLayout';
 import './index.css'
 import { Feed } from './components/feed/Feed';
 import { NavBar } from './components/navigation/NavBar';
 import { CreatePost } from './components/create/CreatePost';
+import { Market } from './components/market/Market';
+import { ProfilePage } from './components/profile/ProfilePage';
+import { SearchPage } from './components/search/SearchPage';
+import { ManageProfile } from './components/profile/Manage-Profile/ManageProfile';
+import { PasswordSecurity } from './components/profile/Password_Security/Security/PasswordSecurity';
+import { Notification } from './components/profile/Notification/Notification';
+import { Theme } from './components/profile/Theme/Theme';
+import { PrivacySafety } from './components/profile/Password_Security/Security/Privacy/PrivacySafety';
+import { AboutVerse } from './components/profile/AboutVerse/AboutVerse';
+import { HelpCenter } from './components/profile/HelpCenter/HelpCenter';
+import { ContactUs } from './components/profile/ContactUs/ContactUs';
+import { Sun, Moon, MessagesSquare, HeartHandshake, Landmark, Music, Flame, ShoppingBag } from 'lucide-react';
+import { SearchFeed } from './components/search/SearchFeed';
+import { PostDetail } from './assets/PostDetail';
 
 const campusFeed = [
   {
@@ -22,7 +36,7 @@ const campusFeed = [
       hostel: null
     },
     content: {
-      text: "Clean Oraimo Freepods 4. Used for just 3 weeeks. Battery health 100%. DM if interested.",
+      text: "Oraimo Freepods 4.",
       images: ["https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFxOEeFB5-6G9trSnP1OzFordKWR2_unloBQ&s"],
       tags: ["earbuds", "oraimo", "sale"]
     },
@@ -34,7 +48,7 @@ const campusFeed = [
     engagement: {
       upvotes: 5,
       downvotes: 0,
-      comments: 2,
+      comments: [],
       shares: 0,
       saves: 0,
       reposts: 0
@@ -45,6 +59,7 @@ const campusFeed = [
       reposts: false
     },
     marketPlace: {
+      description: "Oraimo Freepods 4",
       price: 18000,
       condition: "Used",
       category: "Gadgets",
@@ -84,7 +99,21 @@ const campusFeed = [
     engagement: {
       upvotes: 15,
       downvotes: 2,
-      comments: 21,
+      comments: [{
+        id: crypto.randomUUID(),
+        author: { name: "Amina", department: "Law" },
+        text: "Me too.",
+        createdAt: "2026-05-30T10:00:00Z",
+        engagement: {
+          upvotes: 0,
+          downvotes: 0,
+          replies: [],
+          shares: 0,
+          saves: 0,
+          reposts: 0
+        }
+      }
+      ],
       shares: 0,
       saves: 0,
       reposts: 0
@@ -104,7 +133,7 @@ const campusFeed = [
   },
   {
     id: `rsu-verse-${crypto.randomUUID()}`,
-    verse: "pulse",
+    verse: "gist",
     time: "15m",
     author: {
       anonymous: true,
@@ -129,7 +158,35 @@ const campusFeed = [
     engagement: {
       upvotes: 50,
       downvotes: 10,
-      comments: 11,
+      comments: [{
+        id: crypto.randomUUID(),
+        author: { name: "Amina", department: "Law" },
+        text: "I agree with this Information.",
+        createdAt: "2026-05-30T10:00:00Z",
+        engagement: {
+          upvotes: 0,
+          downvotes: 0,
+          replies: [],
+          shares: 0,
+          saves: 0,
+          reposts: 0
+        }
+      },
+      {
+        id: crypto.randomUUID(),
+        author: { "name": "Tobi", "department": "Computer Science" },
+        text: "Ah, yes! Bless you. I thought they've abandoned it completely.",
+        createdAt: "2026-05-30T10:15:00Z",
+        engagement: {
+          upvotes: 0,
+          downvotes: 0,
+          replies: [],
+          shares: 0,
+          saves: 0,
+          reposts: 0
+        }
+      }
+      ],
       shares: 0,
       saves: 0,
       reposts: 0
@@ -140,10 +197,10 @@ const campusFeed = [
       reposts: false
     },
     theme: {
-      bg: "bg-rose",
-      text: "text-rose",
-      glow: "glow-rose",
-      border: "border-rose/20"
+      bg: "bg-cyan/10",
+      text: "text-cyan",
+      glow: "glow-cyan",
+      border: "border-cyan/20"
     }
 
   }
@@ -167,33 +224,69 @@ const pulseStories = [
   },
 ]
 
+const getVerseIcon = (verse) => {
+  switch (verse) {
+    case "market": return <ShoppingBag size={20} />
+    case "gist": return <MessagesSquare size={20} />
+    case "confession": return <Flame size={20} />
+    case "music": return <Music size={20} />
+    case "politics": return <Landmark size={20} />
+    case "relationship": return <HeartHandshake size={20} />
+    default: return <MessagesSquare size={20} />
+  }
+}
+
 function App() {
- const [posts, setPosts] = useState(() => {
-    const savedTransmissions = localStorage.getItem('rsu_verse_feed');
-    if (savedTransmissions) {
-      try {
-        return JSON.parse(savedTransmissions);
-      } catch (error) {
-        console.error("Error parsing stored transmission data:", error);
-        return campusFeed;
-      }
-    }
-    return campusFeed;
+  const [posts, setPosts] = useState(() => {
+    const savedNetworkData = localStorage.getItem("campus_posts");
+    return savedNetworkData ? JSON.parse(savedNetworkData) : campusFeed;
   });
+
+  useEffect(() => {
+    localStorage.setItem("campus_posts", JSON.stringify(posts));
+  }, [posts]);
+
   const [stories, setStories] = useState(pulseStories)
   const [activeFilter, setActiveFilter] = useState("all");
   const navigate = useNavigate();
-
-  useEffect(() => {
-    localStorage.setItem('rsu_verse_feed', JSON.stringify(posts));
-  }, [posts]);
+  const [activeTab, setActiveTab] = useState("/")
 
   const handlePlusClick = () => {
     setActiveFilter("plus")
     navigate("/plus")
   }
 
-  const filteredPosts = posts.filter((post) => activeFilter === "all" || post.verse === activeFilter)
+  let filteredPosts = posts.filter((post) => {
+    if (activeFilter === "all" || activeFilter === "new") {
+      return post.verse !== "market";
+    }
+    return post.verse === activeFilter;
+  });
+
+  if (activeFilter === "new") {
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+
+    filteredPosts = filteredPosts
+
+      .filter((post) => {
+        const postTime = new Date(post.meta.createdAt).getTime();
+        return (Date().now() - postTime) < ONE_DAY;
+      })
+
+      .sort((a, b) => {
+        const timeA = new Date(a.meta.createdAt).getTime();
+        const timeB = new Date(b.meta.createdAt).getTime();
+
+        const scoreA = a.engagement.upvotes + a.engagement.comments;
+        const scoreB = b.engagement.upvotes + b.engagement.comments;
+
+        if (scoreA !== scoreB) {
+          return scoreB - scoreA;
+        }
+
+        return timeB - timeA;
+      });
+  }
 
 
   const handleUpvote = (postId) => {
@@ -203,7 +296,6 @@ function App() {
         const isUpvoted = currentStatus === 'up';
         const isDownvoted = currentStatus === 'down';
 
-        // Clean calculations supporting switches between upvote and downvote
         let upvoteAdjustment = isUpvoted ? -1 : 1;
         let downvoteAdjustment = isDownvoted ? -1 : 0;
 
@@ -291,12 +383,100 @@ function App() {
       }
     }))
   }
+
+  const [isSellerActive, setIsSellerActive] = useState(false);
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [twoFactorActive, setTwoFactorActive] = useState(false);
+  const [biometricsActive, setBiometricsActive] = useState(true);
+  const [pushMaster, setPushMaster] = useState(true);
+  const [emailDigest, setEmailDigest] = useState(false);
+
+  const [socialAlerts, setSocialAlerts] = useState(true);
+  const [confessionAlerts, setConfessionAlerts] = useState(false);
+  const [marketAlerts, setMarketAlerts] = useState(true);
+  const [verseAlerts, setVerseAlerts] = useState(true);
+  const [selectedTheme, setSelectedTheme] = useState("Dark");
+
+  const Themes = [
+    {
+      id: crypto.randomUUID(),
+      theme: "Light",
+      icon: <Sun size={16} />
+    },
+    {
+      id: crypto.randomUUID(),
+      theme: "Dark",
+      icon: <Moon size={16} />
+    }
+  ]
+
+  const [anonymousDefault, setAnonymousDefault] = useState(true);
+  const [hideDetails, setHideDetails] = useState(false);
+  const [allowDirectMessages, setAllowDirectMessages] = useState(true);
+  const currentYear = new Date().getFullYear();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [message, setMessage] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [attachment, setAttachment] = useState(null);
+
+  const topics = [
+    { id: "marketplace", label: "Marketplace & Orders" },
+    { id: "account", label: "Account & Verification" },
+    { id: "privacy", label: "Privacy & Reporting" },
+    { id: "technical", label: "App Bugs & Feedback" }
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (selectedTopic && message) {
+      setIsSubmitted(true);
+    }
+  };
+
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  const [recents, setRecents] = useState([
+    
+  ]);
+
+  const [search, setSearch] = useState("")
+
+  const matchingPosts = posts.filter((post) => {
+    const query = search.toLowerCase();
+    const matchesText = post.content?.text?.toLowerCase().includes(query);
+    const matchesAuthor = post.content?.faculty?.toLowerCase().includes(query);
+
+    const matchesVerse = post.verse.toLowerCase().includes(query)
+
+    const matchesTags = Array.isArray(post.content?.tags) && post.content.tags.some(tag =>
+      typeof tag === 'string' && tag.toLowerCase().includes(query)
+    );
+
+    return matchesText || matchesAuthor || matchesTags || matchesVerse;
+  })
+
+  const handleAddComment = () => {
+    return
+  }
+
   return (
     <>
       <Routes>
         <Route
           element={
             <HeaderLayout
+              isScrolled={isScrolled}
+              isVisible={isVisible}
+              lastScrollY={lastScrollY}
+              setIsScrolled={setIsScrolled}
+              setIsVisible={setIsVisible}
+              setLastScrollY={setLastScrollY}
               activeFilter={activeFilter === "all"
                 ? "home"
                 : activeFilter}
@@ -311,38 +491,240 @@ function App() {
           <Route
             index
             element={
-              <Feed
-                posts={filteredPosts}
-                setPosts={setPosts}
-                stories={stories}
-                setStories={setStories}
-                activeFilter={activeFilter}
-                setActiveFilter={setActiveFilter}
-                handleUpvote={handleUpvote}
-                handleDownvotes={handleDownvotes}
-                handleRepost={handleRepost}
-                handleSave={handleSave}
-              />} />
+              <>
+                <Feed
+                  posts={filteredPosts}
+                  setPosts={setPosts}
+                  stories={stories}
+                  setStories={setStories}
+                  activeFilter={activeFilter}
+                  setActiveFilter={setActiveFilter}
+                  handleUpvote={handleUpvote}
+                  handleDownvotes={handleDownvotes}
+                  handleRepost={handleRepost}
+                  handleSave={handleSave}
+                  onPlusClick={handlePlusClick}
+                  isVisible={isVisible}
+                  setIsScrolled={setIsScrolled}
+                  setIsVisible={setIsVisible}
+                  setLastScrollY={setLastScrollY}
+                  lastScrollY={lastScrollY}
+                  getVerseIcon={getVerseIcon}
+                  handleAddComment={handleAddComment}
+                />
 
+                <NavBar
+                  activeTab={activeTab}
+                  setActiveFilter={setActiveFilter}
+                  handlePlusClick={handlePlusClick}
+                />
+              </>
 
-          <Route path="/market" element={<div className="p-6 text-xs font-mono text-white/40">Marketplace Frame Ready.</div>} />
-          <Route path="/user" element={<div className="p-6 text-xs font-mono text-white/40">User Profile Frame Ready.</div>} />
-          <Route path="/notifications" element={<div className="p-6 text-xs font-mono text-white/40">Notifications Frame Ready.</div>} />
-          <Route path="/menu" element={<div className="p-6 text-xs font-mono text-white/40">Menu Settings Frame Ready.</div>} />
+            }
+          />
+
         </Route>
+
+        <Route
+          path='/comments/:postId'
+          element={
+            <PostDetail
+              posts={posts}
+              setPosts={setPosts}
+              handleSave={handleSave}
+              handleRepost={handleRepost}
+              handleDownvotes={handleDownvotes}
+              handleUpvote={handleUpvote}
+              getVerseIcon={getVerseIcon}
+            />
+          }
+        />
+
+
+        <Route
+          path="/market"
+          element={
+            <>
+              <Market posts={posts} />
+              <NavBar
+                activeTab={activeTab}
+                setActiveFilter={setActiveFilter}
+                handlePlusClick={handlePlusClick}
+              />
+            </>
+          }
+        />
+
+
         <Route
           path="/plus"
           element={
-            <CreatePost setPosts={setPosts} />
+            <CreatePost
+              setPosts={setPosts}
+              setActiveFilter={setActiveFilter}
+            />
           }
+        />
+
+        <Route
+          path='/search'
+          element={
+            <>
+              <SearchPage
+                setActiveFilter={setActiveFilter}
+                recents={recents}
+                setRecents={setRecents}
+                posts={posts}
+                search={search}
+                setSearch={setSearch}
+                matchingPosts={matchingPosts}
+                getVerseIcon={getVerseIcon}
+              />
+              <NavBar
+                activeTab={activeTab}
+                setActiveFilter={setActiveFilter}
+                handlePlusClick={handlePlusClick}
+              />
+            </>
+          }
+        />
+
+        <Route
+          path='/search_feed'
+          element={
+            <>
+              <SearchFeed
+                posts={posts}
+                getVerseIcon={getVerseIcon}
+                handleSave={handleSave}
+                handleRepost={handleRepost}
+                handleUpvote={handleUpvote}
+                handleDownvotes={handleDownvotes}
+                search={search}
+                setSearch={setSearch}
+              />
+              <NavBar
+                activeTab={activeTab}
+                setActiveFilter={setActiveFilter}
+                handlePlusClick={handlePlusClick}
+              />
+            </>
+
+          }
+        />
+
+        <Route
+          path='/profile'
+          element={
+            <>
+              <ProfilePage selectedTheme={selectedTheme} />
+
+              <NavBar
+                activeTab={activeTab}
+                setActiveFilter={setActiveFilter}
+                handlePlusClick={handlePlusClick}
+              />
+            </>
+
+          }
+        />
+
+        <Route
+          path='/manage_profile'
+          element={<ManageProfile
+            isSellerActive={isSellerActive}
+            setIsSellerActive={setIsSellerActive}
+          />}
+        />
+
+        <Route
+          path='/password_security'
+          element={<PasswordSecurity
+            showCurrentPassword={showCurrentPassword}
+            showNewPassword={showNewPassword}
+            twoFactorActive={twoFactorActive}
+            biometricsActive={biometricsActive}
+            setShowCurrentPassword={setShowCurrentPassword}
+            setShowNewPassword={setShowNewPassword}
+            setTwoFactorActive={setTwoFactorActive}
+            setBiometricsActive={setBiometricsActive}
+          />}
+        />
+
+        <Route
+          path='/notification_settings'
+          element={<Notification
+            pushMaster={pushMaster}
+            emailDigest={emailDigest}
+            socialAlerts={socialAlerts}
+            confessionAlerts={confessionAlerts}
+            marketAlerts={marketAlerts}
+            verseAlerts={verseAlerts}
+            setPushMaster={setPushMaster}
+            setEmailDigest={setEmailDigest}
+            setSocialAlerts={setSocialAlerts}
+            setConfessionAlerts={setConfessionAlerts}
+            setMarketAlerts={setMarketAlerts}
+            setVerseAlerts={setVerseAlerts}
+          />}
+        />
+
+        <Route
+          path='/theme_settings'
+          element={<Theme
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
+            Themes={Themes}
+          />}
+        />
+
+        <Route
+          path='/privacy-safety'
+          element={<PrivacySafety
+            anonymousDefault={anonymousDefault}
+            hideDetails={hideDetails}
+            allowDirectMessages={allowDirectMessages}
+            setAnonymousDefault={setAnonymousDefault}
+            setHideDetails={setHideDetails}
+            setAllowDirectMessages={setAllowDirectMessages}
+          />}
+        />
+
+        <Route
+          path='/about_verse'
+          element={<AboutVerse
+            currentYear={currentYear}
+          />}
+        />
+
+        <Route
+          path='/help_center'
+          element={<HelpCenter
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />}
+        />
+
+        <Route
+          path='/contact_us'
+          element={<ContactUs
+            isOpen={isOpen}
+            selectedTopic={selectedTopic}
+            message={message}
+            isSubmitted={isSubmitted}
+            attachment={attachment}
+            topics={topics}
+            handleSubmit={handleSubmit}
+            setIsOpen={setIsOpen}
+            setSelectedTopic={setSelectedTopic}
+            setMessage={setMessage}
+            setIsSubmitted={setIsSubmitted}
+            setAttachment={setAttachment}
+          />}
         />
       </Routes>
 
-      <NavBar
-        activeFilter={activeFilter}
-        setActiveFilter={setActiveFilter}
-        handlePlusClick={handlePlusClick}
-      />
+
     </>
   )
 }

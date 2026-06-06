@@ -1,10 +1,11 @@
 import { NavBarIcons } from "./NavBarIcons";
 
-export function NavBar({activeFilter, setActiveFilter, handlePlusClick}) {
+export function NavBar({activeTab, setActiveTab, handlePlusClick, setActiveFilter}) {
   return (
     <>
       <NavBarIcons
-        activeFilter={activeFilter}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         setActiveFilter={setActiveFilter}
         onPlusClick={handlePlusClick}
       />
