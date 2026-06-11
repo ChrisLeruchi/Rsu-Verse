@@ -1,154 +1,390 @@
-import { NavLink } from "react-router-dom";
-import { ChevronLeft, Search, ClockFadingIcon, ArrowUpRight, Store } from "lucide-react";
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
+} from "react-native";
+import { ChevronLeft, Search, Clock, ArrowUpRight, Store } from "lucide-react-native";
 
-export function SearchPage({ setActiveFilter, recents, setRecents, search, setSearch, matchingPosts, getVerseIcon }) {
+export function SearchPage({
+  setActiveFilter,
+  recents,
+  setRecents,
+  search,
+  setSearch,
+  matchingPosts,
+  getVerseIcon,
+  navigation
+}) {
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleClearAll = () => {
     setRecents([]);
+  };
+
+  const handleBackPress = () => {
+    const state = navigation.getState();
+    const currentRouteName = state?.routes[state.index]?.name;
+
+    if (currentRouteName !== "Search" && currentRouteName !== "SearchFeed") {
+    setActiveFilter("all");
+    setSearch(''); 
+  }
+    setActiveFilter("all");
+    
+    
+    if (navigation) navigation.goBack();
   };
 
   const filteredRecents = recents.filter((item) =>
     item.toLowerCase().includes(search.toLowerCase())
   );
 
-  
   const isSearching = search.trim().length > 0;
 
   return (
-    <>
-      <div className="w-full max-w-md mx-auto flex flex-col min-h-screen bg-void px-4 pb-12 pt-5 gap-4">
-        {/* Search Header Container */}
-        <div className="flex items-center gap-4">
-          <NavLink to="/" end onClick={() => setActiveFilter("all")}>
-            <ChevronLeft size={20} />
-          </NavLink>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#09090B" />
 
-          <div className="flex bg-ink flex-1 border border-white/5 focus-within:border-cyan/30 rounded-full items-center px-3.5 gap-2.5 transition-all">
-            <Search size={18} className="text-white/30 shrink-0" />
-            <input
-              type="text"
+      <View style={styles.container}>
+
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={handleBackPress}
+            activeOpacity={0.7}
+            style={styles.backButton}
+          >
+            <ChevronLeft size={22} color="rgba(255, 255, 255, 0.8)" />
+          </TouchableOpacity>
+
+          <View
+            style={[
+              styles.searchBarContainer,
+              isFocused && styles.searchBarFocused
+            ]}
+          >
+            <Search size={18} color="rgba(255, 255, 255, 0.3)" style={styles.searchIcon} />
+            <TextInput
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChangeText={(text) => setSearch(text)}
               placeholder="Search"
-              className="bg-transparent py-2.5 text-[18px] text-white/90 placeholder-white/30 w-full outline-none font-sans"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              style={styles.input}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              autoCorrect={false}
+              keyboardAppearance="dark"
             />
-          </div>
-        </div>
+          </View>
+        </View>
 
-        <div className="font-medium text-[14px] flex flex-col overflow-hidden">
-          
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollContent}
+        >
           {!isSearching ? (
             <>
               {recents.length > 0 && (
-                <div className="flex text-[14px] font-semibold tracking-wide text-white/30 uppercase items-center justify-between mt-2 px-1 mb-2">
-                  <div className="flex items-center gap-2">
-                    <ClockFadingIcon size={14} className="text-white/40" />
-                    <p className="tracking-wide">Recents</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleClearAll}
-                    className="font-medium text-[14px] text-white/40 hover:text-white/80 normal-case transition-colors cursor-pointer"
-                  >
-                    Clear all
-                  </button>
-                </div>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionTitleRow}>
+                    <Clock size={14} color="rgba(255, 255, 255, 0.4)" />
+                    <Text style={styles.sectionTitleText}>Recents</Text>
+                  </View>
+                  <TouchableOpacity onPress={handleClearAll} activeOpacity={0.6}>
+                    <Text style={styles.clearAllText}>Clear all</Text>
+                  </TouchableOpacity>
+                </View>
               )}
 
               {filteredRecents.length > 0 ? (
                 filteredRecents.map((item, index) => (
-                  <div
+                  <TouchableOpacity
                     key={index}
-                    onClick={() => setSearch(item)}
-                    className="flex justify-between items-center p-4 hover:bg-white/[0.01] last:border-none text-white/80 hover:text-white cursor-pointer transition-colors group"
+                    onPress={() => setSearch(item)}
+                    activeOpacity={0.6}
+                    style={styles.recentItem}
                   >
-                    {item}
-                    <span>
-                      <ArrowUpRight
-                        size={16}
-                        className="text-white/30 group-hover:text-white/60 transition-colors"
-                      />
-                    </span>
-                  </div>
+                    <Text style={styles.recentItemText}>{item}</Text>
+                    <ArrowUpRight size={16} color="rgba(255, 255, 255, 0.3)" />
+                  </TouchableOpacity>
                 ))
               ) : (
-                <div className="text-white/30 text-[14px] flex justify-center pt-2 text-center">
-                  Try searching for names, departments, topics or keywords
-                </div>
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyStateText}>
+                    Try searching for names, departments, topics or keywords
+                  </Text>
+                </View>
               )}
             </>
           ) : (
-            <div className="flex flex-col gap-3 mt-2">
-              <div className="text-[12px] font-semibold tracking-wider text-white/30 uppercase px-1">
-                Search Results ({matchingPosts.length})
-              </div>
+            <View style={styles.resultsWrapper}>
+              <Text style={styles.resultsCountText}>
+                {matchingPosts.length > 0 &&
+                  `SEARCH RESULTS (${matchingPosts.length})`
+                }
+              </Text>
 
-              <div className="flex flex-col gap-2">
+
+              <View style={styles.postsList}>
                 {matchingPosts.length > 0 ? (
                   matchingPosts.map((post) => (
-                    <NavLink
-                      to='/search_feed'
-                      state={{
-                        query: search, 
-                        clickedPostId: post.id
+                    <TouchableOpacity
+                      key={post.id}
+                      activeOpacity={0.85}
+                      onPress={() => {
+                        if (navigation) {
+                          navigation.navigate('Search_feed', {
+                            query: search,
+                            clickedPostId: post.id
+                          });
+                        }
                       }}
-                      className="block decoration-none group"
-                      key={post.id} 
+                      style={styles.postCard}
                     >
-                      <div className="bg-ink border border-white/5 p-4 rounded-2xl flex flex-col gap-2.5 transition-all hover:border-white/10">
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 text-[12px] font-medium text-white/40">
-                            {post.verse === "market" ? (
-                              <>
-                                <Store size={13} className="text-white/40" />
-                                <span>Marketplace</span>
-                              </>
-                            ) : (
-                              <>
-                                {getVerseIcon(post.verse)}
-                                <span className="capitalize text-[16px]">{post.verse}</span>
-                              </>
-                            )}
-                          </div>
 
-                          {post.verse === "market" && post.marketPlace && (
-                            <span className="text-[14px] font-semibold text-white/90">
-                              ₦{post.marketPlace.price.toLocaleString()}
-                            </span>
+                      <View style={styles.postCardHeader}>
+                        <View style={styles.verseMetaContainer}>
+                          {post.verse === "market" ? (
+                            <>
+                              <Store size={14} color="rgba(255, 255, 255, 0.4)" />
+                              <Text style={styles.verseText}>Marketplace</Text>
+                            </>
+                          ) : (
+                            <>
+                              {getVerseIcon && getVerseIcon(post.verse)}
+                              <Text style={[styles.verseText, styles.capitalizeText]}>
+                                {post.verse}
+                              </Text>
+                            </>
                           )}
-                        </div>
+                        </View>
 
-                        <p className="text-[14px] text-white/80 font-normal leading-relaxed line-clamp-2">
-                          {post.content?.text}
-                        </p>
-
-                        {post.content?.tags && post.content.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pt-0.5">
-                            {post.content.tags.map((tag, tIdx) => (
-                              <span
-                                key={tIdx}
-                                className="text-[12px] font-light bg-white/5 border border-white/5 text-white/50 px-2 py-0.5 rounded-md"
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
+                        {post.verse === "market" && post.marketPlace && (
+                          <Text style={styles.priceText}>
+                            ₦{post.marketPlace.price.toLocaleString()}
+                          </Text>
                         )}
-                      </div>
-                    </NavLink>
+                      </View>
+
+
+                      <Text
+                        style={styles.postBodyText}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                      >
+                        {post.content?.text}
+                      </Text>
+
+
+                      {post.content?.tags && post.content.tags.length > 0 && (
+                        <View style={styles.tagsContainer}>
+                          {post.content.tags.map((tag, tIdx) => (
+                            <View key={tIdx} style={styles.tagBadge}>
+                              <Text style={styles.tagText}>#{tag}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </TouchableOpacity>
                   ))
                 ) : (
-                  <div className="p-12 text-center bg-ink border border-white/5 rounded-2xl text-[14px] text-white/30 font-light italic">
-                    No matching campus posts found for "{search}"
-                  </div>
+                  <View style={styles.noResultsCard}>
+                    <Text style={styles.noResultsText}>
+                      {`No matching posts found for "${search}"`}
+                    </Text>
+                  </View>
                 )}
-              </div>
-            </div>
+              </View>
+            </View>
           )}
-
-        </div>
-      </div>
-    </>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#09090B",
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 12,
+    paddingBottom: 16,
+    gap: 12,
+  },
+  backButton: {
+    padding: 4,
+    marginLeft: -4,
+  },
+  searchBarContainer: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: "#16161A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 100,
+    alignItems: "center",
+    paddingHorizontal: 14,
+  },
+  searchBarFocused: {
+    borderColor: "rgba(34, 211, 238, 0.3)",
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: 16,
+    paddingVertical: 10,
+    letterSpacing: 0.2,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 12,
+    marginBottom: 10,
+    paddingHorizontal: 4,
+  },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  sectionTitleText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.3)",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  clearAllText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "rgba(255, 255, 255, 0.4)",
+  },
+  recentItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.03)",
+  },
+  recentItemText: {
+    fontSize: 15,
+    color: "rgba(255, 255, 255, 0.8)",
+    fontWeight: "500",
+  },
+  emptyContainer: {
+    paddingTop: 32,
+    alignItems: "center",
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.3)",
+    textAlign: "center",
+    lineHeight: 20,
+    paddingHorizontal: 20,
+  },
+  resultsWrapper: {
+    marginTop: 8,
+  },
+  resultsCountText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "rgba(255, 255, 255, 0.3)",
+    letterSpacing: 1.2,
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+  postsList: {
+    gap: 12,
+  },
+  postCard: {
+    backgroundColor: "#16161A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 16,
+    padding: 16,
+  },
+  postCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  verseMetaContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  verseText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.5)",
+  },
+  capitalizeText: {
+    textTransform: "capitalize",
+  },
+  priceText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.95)",
+  },
+  postBodyText: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.75)",
+    lineHeight: 21,
+    fontWeight: "400",
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 12,
+  },
+  tagBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.02)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  tagText: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: "rgba(255, 255, 255, 0.4)",
+  },
+  noResultsCard: {
+    paddingVertical: 40,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noResultsText: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.3)",
+    textAlign: "center",
+  },
+});

@@ -36,7 +36,7 @@ export function PostCard({
   const isSaved = post.userInteraction?.saved;
   const isReposted = post.userInteraction?.reposts;
   const handleNavigateToDetail = () => {
-    navigation.navigate("PostDetail", { postId: post.id });
+    navigation.navigate("Comments", { postId: post.id });
   };
 
   return (

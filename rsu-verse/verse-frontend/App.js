@@ -5,36 +5,21 @@ import { Feed } from './src/components/feed/Feed';
 import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, ShoppingBag } from 'lucide-react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as Crypto from 'expo-crypto';
 import { NavBar } from './src/components/navigation/NavBar';
 import { Market } from './src/components/market/Market';
 import { PostDetail } from './src/assets/PostDetail';
+import { CreatePost } from './src/components/create/CreatePost';
+import { SearchPage } from './src/components/search/SearchPage';
+import { SearchFeed } from './src/components/search/SearchFeed';
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function MarketScreenPlaceHolder() {
-  return (
-    <View style={placeholderStyles.centerContainer}>
-      {campusFeed.map((post) => {
-        return (
-          <Text key={post.id} style={placeholderStyles.text}>
-            {post.verse === 'market' ? post.author.name : 'Market Screen (Empty for now)'}
-          </Text>
-        )
-      })}
-    </View>
-  )
-}
-function SearchScreenPlaceholder() {
-  return (
-    <View style={placeholderStyles.centerContainer}>
-      <Text style={placeholderStyles.text}>Search Screen (Empty for now)</Text>
-    </View>
-  );
-}
+
 
 function ProfileScreenPlaceholder() {
   return (
@@ -885,6 +870,27 @@ function HomeStackNavigator({ filteredPosts, activeFilter, setActiveFilter, hand
   );
 }
 
+function Search({ setActiveFilter, recents, setRecents, search, setSearch, matchingPosts, navigation, getVerseIcon }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='SearchPage'>
+        {(props) => (
+          <SearchPage
+            {...props}
+            setActiveFilter={setActiveFilter}
+            recents={recents}
+            setRecents={setRecents}
+            search={search}
+            setSearch={setSearch}
+            matchingPosts={matchingPosts}
+            getVerseIcon={getVerseIcon}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
+
 function MarketPlace({ posts }) {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -923,14 +929,73 @@ function CommentSection({ posts, setPosts, handleSave, handleRepost, handleDownv
     </Stack.Navigator>
   )
 }
+function SFeed({ posts, handleSave, handleRepost,
+  handleUpvote, handleDownvotes, getVerseIcon,
+}) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Search_feed'>
+        {(props) => (
+          <SearchFeed
+            {...props}
+            posts={posts}
+            handleSave={handleSave}
+            handleRepost={handleRepost}
+            handleDownvotes={handleDownvotes}
+            handleUpvote={handleUpvote}
+            getVerseIcon={getVerseIcon}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
+
+function PostCreation({ setPosts, setActiveFilter }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='CreatePage'>
+        {(props) => (
+          <CreatePost
+            {...props}
+            setPosts={setPosts}
+            setActiveFilter={setActiveFilter}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
 export default function App() {
   const [posts, setPosts] = useState(campusFeed);
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("/");
+  const [recents, setRecents] = useState([]);
+  const [search, setSearch] = useState("");
+
+
+  const matchingPosts = posts.filter((post) => {
+    if (post.verse === 'market') return false;
+
+    const query = search.toLowerCase().trim();
+
+    if (!query) return true;
+
+    const matchesText = post.content?.text?.toLowerCase().includes(query);
+    const matchesAuthor = post.content?.faculty?.toLowerCase().includes(query);
+
+    const matchesVerse = post.verse.toLowerCase().includes(query)
+
+    const matchesTags = Array.isArray(post.content?.tags) && post.content.tags.some(tag =>
+      typeof tag === 'string' && tag.toLowerCase().includes(query)
+    );
+
+    return matchesText || matchesAuthor || matchesTags || matchesVerse;
+  })
 
   const handlePlusClick = (navigation) => {
     setActiveFilter("plus");
-    if (navigation) navigation.navigate("PlusScreen");
+    if (navigation) navigation.navigate("CreatePost");
   };
 
   const handleUpvote = (postId) => {
@@ -1058,16 +1123,19 @@ export default function App() {
           <StatusBar barStyle="light-content" backgroundColor="#121212" />
           <Tab.Navigator
             tabBar={(props) => {
-             
+
               const { routes, index } = props.state;
               const currentRouteName = routes[index].name;
 
-             
-              if (currentRouteName === 'PostDetail') {
+
+              if (currentRouteName === 'Comments' ||
+                currentRouteName === 'CreatePost' ||
+                currentRouteName === 'Search'
+              ) {
                 return null;
               }
 
-             
+
               return (
                 <NavBar
                   {...props}
@@ -1095,7 +1163,7 @@ export default function App() {
                 />
               )}
             </Tab.Screen>
-            <Tab.Screen name='PostDetail'>
+            <Tab.Screen name='Comments'>
               {(props) => (
                 <CommentSection
                   {...props}
@@ -1110,8 +1178,47 @@ export default function App() {
               )}
             </Tab.Screen>
 
-            
-            <Tab.Screen name="Search" component={SearchScreenPlaceholder} />
+            <Tab.Screen name='CreatePost'>
+              {(props) => (
+                <PostCreation
+                  {...props}
+                  setPosts={setPosts}
+                  setActiveFilter={setActiveFilter}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen name='Search'>
+              {(props) => (
+                <Search
+                  {...props}
+                  setActiveFilter={setActiveFilter}
+                  recents={recents}
+                  setRecents={setRecents}
+                  search={search}
+                  setSearch={setSearch}
+                  matchingPosts={matchingPosts}
+
+                  getVerseIcon={getVerseIcon}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen name='Search_feed'>
+              {(props) => (
+                <SearchFeed
+                  {...props}
+                  posts={posts}
+                  handleSave={handleSave}
+                  handleRepost={handleRepost}
+                  handleDownvotes={handleDownvotes}
+                  handleUpvote={handleUpvote}
+                  getVerseIcon={getVerseIcon}
+                />
+              )}
+            </Tab.Screen>
+
+
             <Tab.Screen name="Profile" component={ProfileScreenPlaceholder} />
             <Tab.Screen name="Market">
               {(props) => (

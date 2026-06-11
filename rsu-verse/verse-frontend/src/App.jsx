@@ -498,7 +498,7 @@ const handleCommentUpvote = (postId, commentId) => {
     const matchesText = post.content?.text?.toLowerCase().includes(query);
     const matchesAuthor = post.content?.faculty?.toLowerCase().includes(query);
 
-    const matchesVerse = post.verse.toLowerCase().includes(query)
+    const matchesVerse = post.verse !== "market" ? post.verse.toLowerCase().includes(query) : ''
 
     const matchesTags = Array.isArray(post.content?.tags) && post.content.tags.some(tag =>
       typeof tag === 'string' && tag.toLowerCase().includes(query)

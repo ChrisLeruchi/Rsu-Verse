@@ -10,11 +10,11 @@ export function Market({ posts = [] }) {
   const marketItems = posts.filter(post => {
     if (post.verse !== "market") return false;
 
-    const matchesSearch = post.content?.text?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          post.marketPlace?.category?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = post.content?.text?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.marketPlace?.category?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesCategory = selectedCategory === "all" || 
-                            post.marketPlace?.category?.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesCategory = selectedCategory === "all" ||
+      post.marketPlace?.category?.toLowerCase() === selectedCategory.toLowerCase();
 
     return matchesSearch && matchesCategory;
   });
@@ -38,8 +38,8 @@ export function Market({ posts = [] }) {
 
   return (
     <View style={styles.screenWrapper}>
-      
-   
+
+
       <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeAreaHeader}>
         <View style={styles.headerContainer}>
           <Text style={styles.headerText}>Shop</Text>
@@ -89,7 +89,7 @@ export function Market({ posts = [] }) {
                   ]}
                 >
                   <Text style={[
-                    styles.categoryText, 
+                    styles.categoryText,
                     isSelected ? styles.categoryTextActive : styles.categoryTextInactive
                   ]}>
                     {cat.label}
@@ -172,10 +172,10 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(255, 255, 255, 0.03)",
   },
   headerContainer: {
-    height: 56, 
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16, 
+    paddingHorizontal: 16,
     backgroundColor: '#121212',
   },
   headerText: {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   categoryButtonActive: {
     borderColor: "rgba(0, 186, 52, 0.3)",
-    backgroundColor: "rgba(0, 186, 52, 0.1)", 
+    backgroundColor: "rgba(0, 186, 52, 0.1)",
   },
   categoryButtonInactive: {
     borderColor: "transparent",
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   gridMatrix: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginHorizontal: -6, 
+    marginHorizontal: -6,
   },
   cardWrapper: {
     width: "50%",
