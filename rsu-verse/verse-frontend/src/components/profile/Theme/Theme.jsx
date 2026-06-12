@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useRef, useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+
 import {
   StyleSheet,
   View,
@@ -22,11 +24,24 @@ const COLORS = {
 };
 
 export function Theme({ selectedTheme, setSelectedTheme, Themes, navigation }) {
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+      };
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
 
-     
+
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation?.navigate("Profile")}
@@ -42,6 +57,7 @@ export function Theme({ selectedTheme, setSelectedTheme, Themes, navigation }) {
 
       <ScrollView
         style={styles.scrollView}
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -68,7 +84,7 @@ export function Theme({ selectedTheme, setSelectedTheme, Themes, navigation }) {
                       {mode.icon}
                     </View>
 
-        
+
                     <View style={styles.textContent}>
                       <Text style={styles.themeName}>
                         {mode.theme}
@@ -76,7 +92,7 @@ export function Theme({ selectedTheme, setSelectedTheme, Themes, navigation }) {
                     </View>
                   </View>
 
-                  
+
                   {isSelected && (
                     <Check
                       size={18}
@@ -128,7 +144,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 112, 
+    paddingBottom: 112,
   },
   sectionGap: {
     gap: 12,

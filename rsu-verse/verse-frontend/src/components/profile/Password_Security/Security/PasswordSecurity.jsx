@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useRef, useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
   View,
@@ -24,9 +25,9 @@ import {
 const COLORS = {
   void: "#0A0A0A",
   void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#161618", 
+  ink: "#161618",
   ink40: "rgba(22, 22, 24, 0.4)",
-  cyan:"#17CB49", 
+  cyan: "#17CB49",
   white: "#FFFFFF",
   white5: "rgba(255, 255, 255, 0.05)",
   white10: "rgba(255, 255, 255, 0.1)",
@@ -49,6 +50,20 @@ export function PasswordSecurity({
   setBiometricsActive,
   navigation,
 }) {
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+        
+      };
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
@@ -69,15 +84,16 @@ export function PasswordSecurity({
 
       <ScrollView
         style={styles.scrollView}
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-   
+
         <View style={styles.sectionGap}>
           <Text style={styles.sectionHeading}>Update Password</Text>
 
           <View style={styles.passwordCard}>
-         
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Current Password</Text>
               <View style={styles.passwordInputContainer}>
@@ -102,7 +118,7 @@ export function PasswordSecurity({
               </View>
             </View>
 
-      
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>New Password</Text>
               <View style={styles.passwordInputContainer}>
@@ -127,7 +143,7 @@ export function PasswordSecurity({
               </View>
             </View>
 
-           
+
             <TouchableOpacity style={styles.updateButton} activeOpacity={0.8}>
               <Text style={styles.updateButtonText}>Update Password</Text>
             </TouchableOpacity>
@@ -139,7 +155,7 @@ export function PasswordSecurity({
           <Text style={styles.sectionHeading}>Security</Text>
 
           <View style={styles.togglesCard}>
- 
+
             <View style={styles.toggleRow}>
               <View style={styles.toggleRowLeft}>
                 <Fingerprint color={COLORS.white60} size={20} style={styles.rowIcon} />
@@ -167,10 +183,10 @@ export function PasswordSecurity({
               </Pressable>
             </View>
 
-        
+
             <View style={styles.divider} />
 
-   
+
             <View style={styles.toggleRow}>
               <View style={styles.toggleRowLeft}>
                 <Lock color={COLORS.white60} size={20} style={styles.rowIcon} />
@@ -200,12 +216,12 @@ export function PasswordSecurity({
           </View>
         </View>
 
- 
+
         <View style={styles.sectionGap}>
           <Text style={styles.sectionHeading}>Active Sessions</Text>
 
           <View style={styles.sessionsCard}>
-      
+
             <View style={styles.sessionItem}>
               <View style={styles.sessionItemLeft}>
                 <View style={styles.deviceIconWrapper}>
@@ -224,7 +240,7 @@ export function PasswordSecurity({
               <CheckCircle2 size={16} color={COLORS.white40} />
             </View>
 
-       
+
             <View style={[styles.sessionItem, styles.borderedSessionItem]}>
               <View style={styles.sessionItemLeft}>
                 <View style={styles.deviceIconWrapper}>
@@ -277,7 +293,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   headerSpacer: {
-    width: 36, 
+    width: 36,
   },
   scrollView: {
     flex: 1,
@@ -327,7 +343,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.white5,
     borderRadius: 12,
     paddingLeft: 14,
-    paddingRight: 60, 
+    paddingRight: 60,
     paddingVertical: 10,
     fontSize: 14,
     fontWeight: "400",

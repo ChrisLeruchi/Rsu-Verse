@@ -21,7 +21,7 @@ export function PostCard({
   handleSave,
   getVerseIcon,
   handleShare,
-  navigation 
+  navigation
 }) {
 
   const totalCommentsAndReplies = post.engagement?.comments?.reduce((total, comment) => {
@@ -46,10 +46,10 @@ export function PostCard({
         isConfession ? styles.confessionCardBg : styles.voidCardBg
       ]}
     >
-    
+
       <View style={styles.headerLayer}>
         <View style={styles.profileRow}>
-      
+
           <View style={styles.avatarPlaceholder} />
 
           <View style={styles.metaTextColumn}>
@@ -69,7 +69,7 @@ export function PostCard({
                 </View>
               </View>
 
-         
+
               <View style={styles.utilityActionBox}>
                 <Pressable style={styles.iconPadding}>
                   <MoreHorizontal size={18} color="rgba(255,255,255,0.3)" />
@@ -83,7 +83,6 @@ export function PostCard({
         </View>
       </View>
 
-     
       <Pressable
         onPress={handleNavigateToDetail}
         style={styles.contentBodyWrapper}
@@ -95,13 +94,16 @@ export function PostCard({
           </Text>
         </View>
 
-       
-        <Text style={styles.bodyText}>
-          {post.content?.text}
-        </Text>
+        {post.content?.text && (
+          <Text style={styles.bodyText}>
+            {post.content?.text}
+          </Text>
+        )}
       </Pressable>
 
-     
+
+
+
       {post.content?.images && post.content.images.length > 0 && (
         <View style={[
           styles.imagesGrid,
@@ -120,7 +122,7 @@ export function PostCard({
         </View>
       )}
 
-     
+
       {isMarket && (
         <View style={styles.marketContainer}>
           <View style={styles.marketInfoRow}>
@@ -139,7 +141,7 @@ export function PostCard({
         </View>
       )}
 
-    
+
       <View style={styles.toolbarWrapper}>
         <View style={styles.leftActionGroup}>
 
@@ -158,7 +160,7 @@ export function PostCard({
             </Text>
           </Pressable>
 
-         
+
           <Pressable
             onPress={() => handleDownvotes(post.id)}
             style={styles.interactionButton}
@@ -174,15 +176,15 @@ export function PostCard({
             </Text>
           </Pressable>
 
-          
+
           <View style={styles.interactionButton}>
-            <MessageCircle size={22} color="rgba(255,255,255,0.7)" onPress={handleNavigateToDetail}/>
+            <MessageCircle size={22} color="rgba(255,255,255,0.7)" onPress={handleNavigateToDetail} />
             <Text style={styles.metricCounterText}>
               {totalCommentsAndReplies === 0 ? '' : totalCommentsAndReplies}
             </Text>
           </View>
 
-         
+
           <Pressable
             onPress={() => handleRepost(post.id)}
             style={styles.interactionButton}
@@ -198,7 +200,7 @@ export function PostCard({
           </Pressable>
         </View>
 
-  
+
         <View style={styles.rightActionGroup}>
           <Pressable
             onPress={() => handleSave(post.id)}
@@ -226,9 +228,9 @@ export function PostCard({
 const styles = StyleSheet.create({
   cardContainer: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)', 
-    paddingVertical: 20, 
-    gap: 16, 
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    paddingVertical: 20,
+    gap: 16,
   },
   voidCardBg: {
     backgroundColor: '#121212',
@@ -237,19 +239,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(245, 158, 11, 0.04)',
   },
   headerLayer: {
-    paddingHorizontal: 12, 
+    paddingHorizontal: 12,
     width: '100%',
   },
   profileRow: {
     flexDirection: 'row',
-    gap: 6, 
+    gap: 6,
     width: '100%',
   },
   avatarPlaceholder: {
-    width: 45, 
-    height: 45, 
-    borderRadius: 28, 
-    backgroundColor: '#374151', 
+    width: 45,
+    height: 45,
+    borderRadius: 28,
+    backgroundColor: '#374151',
   },
   metaTextColumn: {
     flex: 1,
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
   },
   authorTitle: {
     color: '#FFFFFF',
-    fontSize: 16, 
+    fontSize: 16,
     fontWeight: '600',
   },
   subMetaRow: {
@@ -275,9 +277,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   handleText: {
-    fontSize: 14, 
+    fontSize: 14,
     fontWeight: '300',
-    color: 'rgba(255, 255, 255, 0.3)', 
+    color: 'rgba(255, 255, 255, 0.3)',
   },
   utilityActionBox: {
     flexDirection: 'row',
@@ -292,15 +294,15 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
   },
   contentBodyWrapper: {
-    paddingHorizontal: 12, 
-    gap: 16, 
+    paddingHorizontal: 12,
+    gap: 16,
   },
   badgeWrapper: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     alignSelf: 'flex-start',
   },
   badgeText: {
-    fontSize: 10, 
+    fontSize: 10,
     fontWeight: '700',
     paddingVertical: 4,
     paddingHorizontal: 8,
@@ -309,19 +311,19 @@ const styles = StyleSheet.create({
     color: '#F59E0B',
   },
   textCyan: {
-    color: '#00BA34', 
+    color: '#00BA34',
   },
   bodyText: {
-    fontSize: 16, 
-    lineHeight: 22, 
-    letterSpacing: -0.25, 
+    fontSize: 16,
+    lineHeight: 22,
+    letterSpacing: -0.25,
     color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '400',
   },
   imagesGrid: {
-    marginTop: 12, 
+    marginTop: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)', 
+    borderColor: 'rgba(255, 255, 255, 0.05)',
     overflow: 'hidden',
     gap: 6,
   },
@@ -345,7 +347,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   marketContainer: {
-    paddingHorizontal: 12, 
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -384,7 +386,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   toolbarWrapper: {
-    paddingHorizontal: 12, 
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -393,7 +395,7 @@ const styles = StyleSheet.create({
   leftActionGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12, 
+    gap: 12,
     flex: 1,
   },
   rightActionGroup: {
@@ -405,13 +407,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 32,
-    gap: 4, 
+    gap: 4,
     minWidth: 40,
   },
   metricCounterText: {
-    fontSize: 12, 
+    fontSize: 12,
     color: 'rgba(255, 255, 255, 0.7)',
-    fontFamily: 'System', 
+    fontFamily: 'System',
   },
   textUpvotedGreen: {
     color: '#17CB49',

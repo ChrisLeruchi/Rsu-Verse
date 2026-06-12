@@ -18,7 +18,7 @@ export function Header({
         style={styles.logoWrapper}
       >
         <Image
-          source={require("../../../public/favicon.png")} 
+          source={require("../../../public/VerseLogo2.png")} 
           style={styles.logoImage}
         />
       </Pressable>
@@ -94,9 +94,10 @@ const styles = StyleSheet.create({
   },
 
   logoImage: {
-    width: 80,
-    height: 80,
+    width: 180,
+    height: 180,
     resizeMode: 'contain', 
+    marginLeft: -20
   },
 
   actionsContainer: {

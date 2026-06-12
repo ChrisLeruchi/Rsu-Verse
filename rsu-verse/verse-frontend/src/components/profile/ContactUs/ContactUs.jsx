@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useRef, useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
   View,
@@ -16,13 +17,14 @@ import {
   CheckCircle2,
   AlertCircle,
   ChevronDown,
+  ChevronUp
 } from "lucide-react-native";
 
 const COLORS = {
   void: "#0A0A0A",
   void80: "rgba(10, 10, 10, 0.8)",
   ink: "#161618",
-  cyan: "#06B6D4",
+  cyan: "#00BA34",
   white: "#FFFFFF",
   white5: "rgba(255, 255, 255, 0.05)",
   white10: "rgba(255, 255, 255, 0.1)",
@@ -49,7 +51,21 @@ export function ContactUs({
   handleSubmit,
   navigation,
 }) {
-  
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+        setSelectedTopic("")
+      };
+    }, [])
+  );
+
+
   const handleNativeAttachmentPress = () => {
 
     if (attachment) {
@@ -59,23 +75,23 @@ export function ContactUs({
     }
   };
 
-  
+
   const handleFormSubmit = () => {
     if (selectedTopic && message) {
       handleSubmit?.();
     }
   };
 
- 
+
   if (isSubmitted) {
     return (
       <View style={styles.successContainer}>
         <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
-        
+
         <View style={styles.successIconWrapper}>
           <CheckCircle2 size={32} color={COLORS.white} />
         </View>
-        
+
         <Text style={styles.successTitle}>Message sent</Text>
         <Text style={styles.successSubtitle}>
           Thanks for reaching out. A student support representative will review
@@ -111,11 +127,12 @@ export function ContactUs({
 
       <ScrollView
         style={styles.scrollView}
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled" 
+        keyboardShouldPersistTaps="handled"
       >
-       
+
         <View style={styles.noticeSection}>
           <AlertCircle size={18} color={COLORS.white40} style={styles.noticeIcon} />
           <View style={styles.noticeMeta}>
@@ -126,13 +143,13 @@ export function ContactUs({
           </View>
         </View>
 
-    
+
         <View style={styles.formContainer}>
-          
-        
+
+
           <View style={[styles.inputGroup, { zIndex: 50 }]}>
             <Text style={styles.inputLabel}>What do you need help with?</Text>
-            
+
             <TouchableOpacity
               type="button"
               onPress={() => setIsOpen(!isOpen)}
@@ -142,16 +159,13 @@ export function ContactUs({
               <Text style={selectedTopic ? styles.dropdownTextActive : styles.dropdownTextPlaceholder}>
                 {selectedTopic ? selectedTopic.label : "Select a topic"}
               </Text>
-              <ChevronDown
+              {isOpen ? <ChevronUp size={16} color={COLORS.white40} /> : <ChevronDown
                 size={16}
                 color={COLORS.white40}
-                style={{
-                  transform: [{ rotate: isOpen ? "180deg" : "0deg" }],
-                }}
-              />
+              />}
             </TouchableOpacity>
 
-        
+
             {isOpen && (
               <View style={styles.dropdownMenuOverlay}>
                 {topics.map((topic, idx) => {
@@ -174,7 +188,7 @@ export function ContactUs({
             )}
           </View>
 
-       
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Your message</Text>
             <TextInput
@@ -185,12 +199,12 @@ export function ContactUs({
               multiline={true}
               numberOfLines={5}
               keyboardAppearance="dark"
-              textAlignVertical="top" 
+              textAlignVertical="top"
               style={styles.textareaInput}
             />
           </View>
 
-   
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Attachment (Optional)</Text>
             <TouchableOpacity
@@ -205,7 +219,7 @@ export function ContactUs({
             </TouchableOpacity>
           </View>
 
-          
+
           <TouchableOpacity
             onPress={handleFormSubmit}
             activeOpacity={0.85}
@@ -259,7 +273,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 112, 
+    paddingBottom: 112,
   },
   noticeSection: {
     flexDirection: "row",
@@ -327,7 +341,7 @@ const styles = StyleSheet.create({
   },
   dropdownMenuOverlay: {
     position: "absolute",
-    top: 84, 
+    top: 84,
     left: 0,
     right: 0,
     backgroundColor: COLORS.ink,
@@ -335,7 +349,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.white10,
     borderRadius: 12,
     overflow: "hidden",
-    elevation: 5, 
+    elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -363,11 +377,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "400",
     color: COLORS.white,
     letterSpacing: 0.2,
-    minHeight: 120, 
+    minHeight: 120,
     lineHeight: 22,
   },
   attachmentButtonContainer: {

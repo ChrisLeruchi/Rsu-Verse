@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useRef, useCallback, useState, } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
   View,
@@ -30,6 +31,22 @@ const COLORS = {
 };
 
 export function ManageProfile({ isSellerActive, setIsSellerActive, navigation }) {
+
+
+
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput(""); 
+      };
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
@@ -53,6 +70,7 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation })
 
       <ScrollView 
         style={styles.scrollView}
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -300,6 +318,7 @@ const styles = StyleSheet.create({
   },
   sectionGap: {
     marginTop: 28,
+    gap: 12,
   },
   inputGroup: {
     marginBottom: 16,
@@ -349,7 +368,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 4,
-    marginBottom: 12,
   },
   sectionHeading: {
     fontSize: 14,

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+
+import React, { useRef, useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { ShoppingBag, Search, Tag, ArrowUpRight } from "lucide-react-native";
 import { View, Text, TextInput, Pressable, Image, ScrollView, Linking, Alert, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -36,6 +38,19 @@ export function Market({ posts = [] }) {
     }
   };
 
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+      };
+    }, [])
+  );
+
   return (
     <View style={styles.screenWrapper}>
 
@@ -49,6 +64,7 @@ export function Market({ posts = [] }) {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        ref={scrollViewRef}
       >
         <View style={styles.controlsWrapper}>
           <View style={styles.searchBarContainer}>
@@ -65,6 +81,7 @@ export function Market({ posts = [] }) {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            ref={scrollViewRef}
             contentContainerStyle={styles.categorySlider}
           >
             {[
@@ -100,7 +117,9 @@ export function Market({ posts = [] }) {
           </ScrollView>
         </View>
 
-        <View style={styles.gridMatrix}>
+        <View 
+        style={styles.gridMatrix}
+        >
           {marketItems.map((item) => (
             <View key={item.id} style={styles.cardWrapper}>
               <View style={styles.cardContainer}>

@@ -1,9 +1,23 @@
-import React, { useState } from "react";
+import React, {useRef, useCallback, useState} from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, Modal } from "react-native";
-import { Bell, UserCircle2, LockKeyhole, ArrowRight, NotebookText, SunMoon, EyeOff, HelpCircle, Mail, ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X} from "lucide-react-native";
+import { Bell, UserCircle2, LockKeyhole, ArrowRight, NotebookText, SunMoon, EyeOff, HelpCircle, Mail, ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X } from "lucide-react-native";
 
 export function ProfilePage({ navigation, selectedTheme }) {
   const [isStatsOpen, setIsStatsOpen] = useState(false);
+
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+      };
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -20,6 +34,7 @@ export function ProfilePage({ navigation, selectedTheme }) {
 
       <ScrollView
         style={styles.mainContainer}
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -174,17 +189,17 @@ export function ProfilePage({ navigation, selectedTheme }) {
         onRequestClose={() => setIsStatsOpen(false)}
       >
         <View style={styles.modalOverlay}>
-      
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.backdropPressable}
             activeOpacity={1}
             onPress={() => setIsStatsOpen(false)}
           />
-        
+
           <View style={styles.bottomSheetContainer}>
 
             <View style={styles.sheetHandle} />
-            
+
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Your Stats</Text>
               <TouchableOpacity onPress={() => setIsStatsOpen(false)}>
@@ -346,11 +361,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
   },
-  
+
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.65)", 
+    backgroundColor: "rgba(0, 0, 0, 0.65)",
     justifyContent: "flex-end",
   },
   backdropPressable: {
@@ -361,7 +376,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   bottomSheetContainer: {
-    backgroundColor: "#121214", 
+    backgroundColor: "#121214",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,

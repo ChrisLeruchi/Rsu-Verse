@@ -499,7 +499,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#FFFFFF",
-    flex: 1,
     textAlign: "center"
   },
   shareBtn: {
@@ -507,8 +506,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
   },
-  bgCyan: { backgroundColor: "#00BA34" },
-  bgRose: { backgroundColor: "#F59E0B" },
   disabledBtn: { opacity: 0.3 },
   shareBtnText: {
     color: "#FFFFFF",

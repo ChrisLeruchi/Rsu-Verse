@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useRef, useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
   View,
@@ -12,7 +13,7 @@ import {
 import {
   ArrowLeft,
   BookOpen,
-  ShieldQuestion, 
+  ShieldQuestion,
   FileText,
   Heart,
 } from "lucide-react-native";
@@ -33,11 +34,24 @@ const COLORS = {
 };
 
 export function AboutVerse({ currentYear, navigation }) {
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+      };
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
 
-  
+
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation?.navigate("Profile")}
@@ -51,17 +65,18 @@ export function AboutVerse({ currentYear, navigation }) {
         <View style={styles.headerSpacer} />
       </View>
 
-    
+
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-      
+
         <View style={styles.heroSection}>
           <View style={styles.logoWrapper}>
             <Image
-              source={VerseLogo} 
+              source={VerseLogo}
               style={styles.logoImage}
               resizeMode="contain"
             />
@@ -70,7 +85,7 @@ export function AboutVerse({ currentYear, navigation }) {
           <Text style={styles.heroVersion}>Version 1.0.0</Text>
         </View>
 
-       
+
         <View style={styles.descriptionSection}>
           <Text style={styles.descriptionText}>
             A modern campus space for RSU students to share thoughts, connect
@@ -82,7 +97,7 @@ export function AboutVerse({ currentYear, navigation }) {
           <Text style={styles.sectionHeading}>Safety & Terms</Text>
 
           <View style={styles.cardContainer}>
-      
+
             <TouchableOpacity
               onPress={() => navigation?.navigate("CommunityGuidelines")}
               activeOpacity={0.8}
@@ -107,7 +122,7 @@ export function AboutVerse({ currentYear, navigation }) {
               <Text style={styles.rowActionText}>View</Text>
             </TouchableOpacity>
 
-           
+
             <TouchableOpacity
               onPress={() => navigation?.navigate("PrivacyPolicy")}
               activeOpacity={0.8}
@@ -162,7 +177,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   headerSpacer: {
-    width: 36,  
+    width: 36,
   },
   scrollView: {
     flex: 1,
@@ -171,7 +186,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 24,
-    paddingBottom: 112, 
+    paddingBottom: 112,
   },
   heroSection: {
     alignItems: "center",

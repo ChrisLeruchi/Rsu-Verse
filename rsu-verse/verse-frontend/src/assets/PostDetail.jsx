@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useRoute, useNavigation, useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Send,
@@ -51,6 +51,20 @@ export function PostDetail({
   const [viewReply, setViewReply] = useState(null);
 
   const post = posts.find(p => String(p.id) === String(postId));
+
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+      };
+    }, [])
+  );
+
 
   if (!post) {
     return (
@@ -132,6 +146,7 @@ export function PostDetail({
 
   const isConfession = post.verse === "confession";
 
+
   return (
     <View style={styles.screenWrapper}>
       <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeAreaHeader}>
@@ -152,6 +167,7 @@ export function PostDetail({
       >
         <ScrollView
           style={{ flex: 1 }}
+          ref={scrollViewRef}
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
@@ -205,17 +221,39 @@ export function PostDetail({
               <View style={styles.leftMetrics}>
                 <Pressable onPress={() => handleUpvote?.(post.id)} style={styles.metricBtn}>
                   <ArrowBigUp size={22} fill={post.userInteraction?.voteStatus === "up" ? "#00BA34" : ''} color={post.userInteraction?.voteStatus === "up" ? "#00BA34" : "rgba(255,255,255,0.6)"} />
-                  <Text style={styles.metricText}>{post.engagement?.upvotes || 0}</Text>
+                  <Text
+                    style={[
+                      styles.metricText,
+                      { color: post.userInteraction?.voteStatus === "up" ? "rgba(0, 186, 52, 1)" : "rgba(255, 255, 255, 0.6)" }
+                    ]}
+                  >
+                    {post.engagement?.upvotes || 0}
+                  </Text>
                 </Pressable>
+
 
                 <Pressable onPress={() => handleDownvotes?.(post.id)} style={styles.metricBtn}>
                   <ArrowBigDown size={22} fill={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : ''} color={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : "rgba(255,255,255,0.6)"} />
-                  <Text style={styles.metricText}>{post.engagement?.downvotes || 0}</Text>
+                  <Text
+                    style={[
+                      styles.metricText,
+                      { color: post.userInteraction?.voteStatus === "down" ? "rgba(245, 158, 11, 1)" : "rgba(255, 255, 255, 0.6)" }
+                    ]}
+                  >
+                    {post.engagement?.downvotes || 0}
+                  </Text>
                 </Pressable>
 
                 <Pressable onPress={() => handleRepost?.(post.id)} style={styles.metricBtn}>
-                  {post.userInteraction?.reposts ? <Repeat1 size={22} color="#FFFFFF" /> : <Repeat size={22} color="rgba(255,255,255,0.6)"/>}
-                  <Text style={styles.metricText}>{post.engagement?.reposts || ""}</Text>
+                  {post.userInteraction?.reposts ? <Repeat1 size={22} color="#FFFFFF" /> : <Repeat size={22} color="rgba(255,255,255,0.6)" />}
+                  <Text
+                    style={[
+                      styles.metricText,
+                      { color: post.userInteraction?.reposts ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.6)" }
+                    ]}
+                  >
+                    {post.engagement?.reposts || ''}
+                  </Text>
                 </Pressable>
               </View>
 
@@ -365,7 +403,7 @@ export function PostDetail({
         </ScrollView>
 
         <View style={[
-          styles.fixedFooterInputArea, 
+          styles.fixedFooterInputArea,
           { paddingBottom: insets.bottom > 0 ? insets.bottom : 12 }
         ]}>
           {replyingTo && (
@@ -536,7 +574,7 @@ const styles = StyleSheet.create({
   },
   leftMetrics: { flexDirection: "row", gap: 24 },
   metricBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metricText: { color: "rgba(255, 255, 255, 0.4)", fontSize: 12, fontWeight: "500" },
+  metricText: { fontSize: 12, fontWeight: "500" },
   commentsSection: { paddingVertical: 4 },
   emptyCommentsBox: {
     alignItems: "center",

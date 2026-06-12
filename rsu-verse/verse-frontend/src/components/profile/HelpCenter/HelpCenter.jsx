@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useRef, useCallback, useState} from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
   View,
@@ -57,11 +58,26 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
     },
   ];
 
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+        setSearchQuery("");
+      };
+    }, [])
+  );
+
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
 
-      
+
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation?.navigate("Profile")}
@@ -76,10 +92,11 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
 
       <ScrollView
         style={styles.scrollView}
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-      
+
         <View style={styles.introSection}>
           <View style={styles.introHeadingWrapper}>
             <Text style={styles.introTitle}>How can we help?</Text>
@@ -101,7 +118,7 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
           </View>
         </View>
 
-  
+
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeading}>Popular Articles</Text>
 
@@ -135,12 +152,12 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
           </View>
         </View>
 
-     
+
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeading}>Browse Topics</Text>
 
           <View style={styles.gridRow}>
-           
+
             <TouchableOpacity
               onPress={() => navigation?.navigate("TopicMarket")}
               activeOpacity={0.8}
@@ -153,7 +170,7 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
               </View>
             </TouchableOpacity>
 
-  
+
             <TouchableOpacity
               onPress={() => navigation?.navigate("TopicPrivacy")}
               activeOpacity={0.8}
@@ -168,7 +185,7 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
           </View>
         </View>
 
-      
+
         <View style={styles.ctaContainer}>
           <View style={styles.ctaHeadingWrapper}>
             <Text style={styles.ctaTitle}>Still need help?</Text>
@@ -216,7 +233,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   headerSpacer: {
-    width: 36, 
+    width: 36,
   },
   scrollView: {
     flex: 1,
@@ -225,7 +242,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 112, 
+    paddingBottom: 112,
   },
   introSection: {
     paddingHorizontal: 4,
@@ -262,7 +279,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.white5,
     borderRadius: 12,
-    paddingLeft: 44, 
+    paddingLeft: 44,
     paddingRight: 16,
     paddingVertical: 12,
     fontSize: 14,

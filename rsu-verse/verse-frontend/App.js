@@ -4,9 +4,8 @@ import { HeaderLayout } from './src/components/navigation/HeaderLayout';
 import { Feed } from './src/components/feed/Feed';
 import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, ShoppingBag, Sun, Moon } from 'lucide-react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, getFocusedRouteNameFromRoute, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as Crypto from 'expo-crypto';
 import { NavBar } from './src/components/navigation/NavBar';
@@ -28,22 +27,17 @@ import { ContactUs } from './src/components/profile/ContactUs/ContactUs';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+const CustomDarkTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#121212',
+  },
+};
 
 
-function ProfileScreen({ selectedTheme }) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Profile'>
-        {(props) => (
-          <ProfilePage
-            {...props}
-            selectedTheme={selectedTheme}
-          />
-        )}
-      </Stack.Screen>
-    </Stack.Navigator>
-  );
-}
+
+
 
 const campusFeed = [
 
@@ -795,22 +789,44 @@ const getVerseIcon = (verse) => {
   }
 };
 
-function HomeStackNavigator({ filteredPosts, activeFilter, setActiveFilter, handleUpvote, handleDownvotes, handleRepost, handleSave, handleShare, handlePlusClick }) {
+function HomeStackNavigator({
+  posts,
+  setPosts,
+  filteredPosts,
+  activeFilter,
+  setActiveFilter,
+  handleUpvote,
+  handleDownvotes,
+  handleRepost,
+  handleSave,
+  handleShare,
+  handlePlusClick,
+  getVerseIcon
+}) {
   return (
-    <View style={styles.appContainer}>
-      <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeAreaHeader}>
-        <HeaderLayout
-          activeFilter={activeFilter === "all" ? "home" : activeFilter}
-          setActiveFilter={(tab) => {
-            if (tab === "home") setActiveFilter("all");
-            else setActiveFilter(tab);
-          }}
-        />
-      </SafeAreaView>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+        gestureResponseDistance: 80,
+        cardStyle: { backgroundColor: '#121212' },
+        contentStyle: { backgroundColor: '#121212' },
+      }}
+    >
+      <Stack.Screen name='HomeFeed'>
+        {(props) => (
+          <View style={styles.appContainer}>
+            <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeAreaHeader}>
+              <HeaderLayout
+                activeFilter={activeFilter === "all" ? "home" : activeFilter}
+                setActiveFilter={(tab) => {
+                  if (tab === "home") setActiveFilter("all");
+                  else setActiveFilter(tab);
+                }}
+              />
+            </SafeAreaView>
 
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='HomeFeed'>
-          {(props) => (
             <Feed
               {...props}
               posts={filteredPosts}
@@ -824,16 +840,55 @@ function HomeStackNavigator({ filteredPosts, activeFilter, setActiveFilter, hand
               onPlusClick={handlePlusClick}
               getVerseIcon={getVerseIcon}
             />
-          )}
-        </Stack.Screen>
-      </Stack.Navigator>
-    </View>
+          </View>
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen name='Comments'>
+        {(props) => (
+          <PostDetail
+            {...props}
+            postId={props.route.params?.postId}
+            posts={posts}
+            setPosts={setPosts}
+            handleSave={handleSave}
+            handleRepost={handleRepost}
+            handleDownvotes={handleDownvotes}
+            handleUpvote={handleUpvote}
+            getVerseIcon={getVerseIcon}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
   );
 }
 
-function Search({ setActiveFilter, recents, setRecents, search, setSearch, matchingPosts, navigation, getVerseIcon }) {
+function SearchStackNavigator({
+  setActiveFilter,
+  recents,
+  setRecents,
+  search,
+  setSearch,
+  matchingPosts,
+  posts,
+  handleSave,
+  handleRepost,
+  handleDownvotes,
+  handleUpvote,
+  getVerseIcon
+}) {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+        gestureResponseDistance: 80,
+        cardStyle: { backgroundColor: '#121212' },   
+        contentStyle: { backgroundColor: '#121212' }, 
+      }}
+    >
+  
       <Stack.Screen name='SearchPage'>
         {(props) => (
           <SearchPage
@@ -848,9 +903,25 @@ function Search({ setActiveFilter, recents, setRecents, search, setSearch, match
           />
         )}
       </Stack.Screen>
+
+
+      <Stack.Screen name='Search_feed'>
+        {(props) => (
+          <SearchFeed
+            {...props}
+            posts={posts}
+            handleSave={handleSave}
+            handleRepost={handleRepost}
+            handleDownvotes={handleDownvotes}
+            handleUpvote={handleUpvote}
+            getVerseIcon={getVerseIcon}
+          />
+        )}
+      </Stack.Screen>
     </Stack.Navigator>
-  )
+  );
 }
+
 
 function MarketPlace({ posts }) {
   return (
@@ -867,50 +938,7 @@ function MarketPlace({ posts }) {
   )
 }
 
-function CommentSection({ posts, setPosts, handleSave, handleRepost, handleDownvotes, handleUpvote, handleCommentUpvote, getVerseIcon, route }) {
-  const { postId } = route.params || {};
 
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='PostDetail'>
-        {(props) => (
-          <PostDetail
-            {...props}
-            postId={postId}
-            posts={posts}
-            setPosts={setPosts}
-            handleSave={handleSave}
-            handleRepost={handleRepost}
-            handleDownvotes={handleDownvotes}
-            handleUpvote={handleUpvote}
-            getVerseIcon={getVerseIcon}
-          />
-        )}
-      </Stack.Screen>
-    </Stack.Navigator>
-  )
-}
-function SFeed({ posts, handleSave, handleRepost,
-  handleUpvote, handleDownvotes, getVerseIcon,
-}) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Search_feed'>
-        {(props) => (
-          <SearchFeed
-            {...props}
-            posts={posts}
-            handleSave={handleSave}
-            handleRepost={handleRepost}
-            handleDownvotes={handleDownvotes}
-            handleUpvote={handleUpvote}
-            getVerseIcon={getVerseIcon}
-          />
-        )}
-      </Stack.Screen>
-    </Stack.Navigator>
-  )
-}
 
 function PostCreation({ setPosts, setActiveFilter }) {
   return (
@@ -928,12 +956,73 @@ function PostCreation({ setPosts, setActiveFilter }) {
   )
 }
 
-function ProfileManagement({ isSellerActive, setIsSellerActive }) {
+
+
+function ProfileManagement({
+  isSellerActive,
+  setIsSellerActive,
+  selectedTheme,
+  setSelectedTheme,
+  Themes,
+  showCurrentPassword,
+  setShowCurrentPassword,
+  showNewPassword,
+  setShowNewPassword,
+  twoFactorActive,
+  setTwoFactorActive,
+  biometricsActive,
+  setBiometricsActive,
+  anonymousDefault,
+  setAnonymousDefault,
+  hideDetails,
+  setHideDetails,
+  allowDirectMessages,
+  setAllowDirectMessages,
+  currentYear,
+  searchQuery,
+  setSearchQuery,
+  isOpen,
+  setIsOpen,
+  selectedTopic,
+  setSelectedTopic,
+  message,
+  setMessage,
+  attachment,
+  setAttachment,
+  topics,
+  handleSubmit,
+  pushMaster,
+  setPushMaster,
+  emailDigest,
+  setEmailDigest,
+  socialAlerts,
+  setSocialAlerts,
+  confessionAlerts,
+  setConfessionAlerts,
+  marketAlerts,
+  setMarketAlerts,
+  verseAlerts,
+  setVerseAlerts
+}) {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name='Manage_Profile'
-      >
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+        gestureResponseDistance: 80,
+
+        cardStyle: { backgroundColor: '#121212' },
+
+        contentStyle: { backgroundColor: '#121212' },
+      }}
+    >
+
+      <Stack.Screen name="Profile">
+        {(props) => <ProfilePage {...props} selectedTheme={selectedTheme} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="Manage_Profile">
         {(props) => (
           <ManageProfile
             {...props}
@@ -942,54 +1031,9 @@ function ProfileManagement({ isSellerActive, setIsSellerActive }) {
           />
         )}
       </Stack.Screen>
-    </Stack.Navigator>
-  )
-}
-
-function About({ currentYear, }) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='About_Verse'>
-        {(props) => (
-          <AboutVerse
-            {...props}
-            currentYear={currentYear}
-          />
-        )}
-      </Stack.Screen>
-    </Stack.Navigator>
-  )
-}
-
-function Help({ searchQuery, setSearchQuery, }) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Help_Center'>
-        {(props) => (
-          <HelpCenter
-            {...props}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        )}
-      </Stack.Screen>
-    </Stack.Navigator>
-  )
-}
 
 
-function SecurityManagement({
-  showCurrentPassword,
-  setShowCurrentPassword,
-  showNewPassword,
-  setShowNewPassword,
-  twoFactorActive,
-  setTwoFactorActive,
-  biometricsActive,
-  setBiometricsActive, }) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Manage_Security'>
+      <Stack.Screen name="Manage_Security">
         {(props) => (
           <PasswordSecurity
             {...props}
@@ -1004,14 +1048,9 @@ function SecurityManagement({
           />
         )}
       </Stack.Screen>
-    </Stack.Navigator>
-  )
-}
 
-function ThemeManagement({ selectedTheme, setSelectedTheme, Themes }) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='ThemeSettings'>
+
+      <Stack.Screen name="Theme_Management">
         {(props) => (
           <Theme
             {...props}
@@ -1021,23 +1060,8 @@ function ThemeManagement({ selectedTheme, setSelectedTheme, Themes }) {
           />
         )}
       </Stack.Screen>
-    </Stack.Navigator>
-  );
-}
 
-
-function PrivacyManagaement({
-  anonymousDefault,
-  setAnonymousDefault,
-  hideDetails,
-  setHideDetails,
-  allowDirectMessages,
-  setAllowDirectMessages,
-
-}) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Privacy_Management'>
+      <Stack.Screen name="Privacy_Management">
         {(props) => (
           <PrivacySafety
             {...props}
@@ -1050,24 +1074,25 @@ function PrivacyManagaement({
           />
         )}
       </Stack.Screen>
-    </Stack.Navigator>
-  );
-}
 
-function Contact({ isOpen,
-  setIsOpen,
-  selectedTopic,
-  setSelectedTopic,
-  message,
-  setMessage,
-  isSubmitted,
-  attachment,
-  setAttachment,
-  topics,
-  handleSubmit, }) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Contact_Us'>
+
+      <Stack.Screen name="About_Verse">
+        {(props) => <AboutVerse {...props} currentYear={currentYear} />}
+      </Stack.Screen>
+
+
+      <Stack.Screen name="Help_Center">
+        {(props) => (
+          <HelpCenter
+            {...props}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+        )}
+      </Stack.Screen>
+
+
+      <Stack.Screen name="Contact_Us">
         {(props) => (
           <ContactUs
             {...props}
@@ -1084,26 +1109,8 @@ function Contact({ isOpen,
           />
         )}
       </Stack.Screen>
-    </Stack.Navigator>
-  )
-}
 
-function NotificationManagement({
-  pushMaster,
-  setPushMaster,
-  emailDigest,
-  setEmailDigest,
-  socialAlerts,
-  setSocialAlerts,
-  confessionAlerts,
-  setConfessionAlerts,
-  marketAlerts,
-  setMarketAlerts,
-  verseAlerts,
-  setVerseAlerts, }) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Notification'>
+      <Stack.Screen name="Notification">
         {(props) => (
           <Notification
             {...props}
@@ -1123,8 +1130,12 @@ function NotificationManagement({
         )}
       </Stack.Screen>
     </Stack.Navigator>
-  )
+  );
 }
+
+
+
+
 export default function App() {
   const [posts, setPosts] = useState(campusFeed);
   const [activeFilter, setActiveFilter] = useState("all");
@@ -1329,7 +1340,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider style={styles.container}>
-      <NavigationContainer>
+      <NavigationContainer theme={CustomDarkTheme}>
         <View style={styles.appContainer}>
           <StatusBar barStyle="light-content" backgroundColor="#121212" />
           <Tab.Navigator
@@ -1337,11 +1348,18 @@ export default function App() {
 
               const { routes, index } = props.state;
               const currentRouteName = routes[index].name;
+              const nestedRouteName = getFocusedRouteNameFromRoute(routes[index])
 
 
               if (currentRouteName === 'Comments' ||
                 currentRouteName === 'CreatePost' ||
-                currentRouteName === 'Search'
+                currentRouteName === 'Contact_Us' ||
+                currentRouteName === 'Help_Center' ||
+                currentRouteName === 'Privacy_Management' ||
+                currentRouteName === 'Theme_Management' ||
+                currentRouteName === 'Notification' ||
+                currentRouteName === 'Manage_Security' ||
+                nestedRouteName === 'Manage_Profile'
               ) {
                 return null;
               }
@@ -1362,6 +1380,9 @@ export default function App() {
             <Tab.Screen name="HomeIndex">
               {(props) => (
                 <HomeStackNavigator
+                  {...props}
+                  posts={posts}
+                  setPosts={setPosts}
                   filteredPosts={filteredPosts}
                   activeFilter={activeFilter}
                   setActiveFilter={setActiveFilter}
@@ -1371,19 +1392,6 @@ export default function App() {
                   handleSave={handleSave}
                   handleShare={handleShare}
                   handlePlusClick={() => handlePlusClick(props.navigation)}
-                />
-              )}
-            </Tab.Screen>
-            <Tab.Screen name='Comments'>
-              {(props) => (
-                <CommentSection
-                  {...props}
-                  posts={posts}
-                  setPosts={setPosts}
-                  handleSave={handleSave}
-                  handleRepost={handleRepost}
-                  handleDownvotes={handleDownvotes}
-                  handleUpvote={handleUpvote}
                   getVerseIcon={getVerseIcon}
                 />
               )}
@@ -1401,7 +1409,7 @@ export default function App() {
 
             <Tab.Screen name='Search'>
               {(props) => (
-                <Search
+                <SearchStackNavigator
                   {...props}
                   setActiveFilter={setActiveFilter}
                   recents={recents}
@@ -1409,16 +1417,6 @@ export default function App() {
                   search={search}
                   setSearch={setSearch}
                   matchingPosts={matchingPosts}
-
-                  getVerseIcon={getVerseIcon}
-                />
-              )}
-            </Tab.Screen>
-
-            <Tab.Screen name='Search_feed'>
-              {(props) => (
-                <SearchFeed
-                  {...props}
                   posts={posts}
                   handleSave={handleSave}
                   handleRepost={handleRepost}
@@ -1429,116 +1427,43 @@ export default function App() {
               )}
             </Tab.Screen>
 
-
             <Tab.Screen name="Profile">
-              {(props) => (
-                <ProfileScreen
-                  {...props}
-                  selectedTheme={selectedTheme}
-                />
-              )}
-            </Tab.Screen>
-
-            <Tab.Screen
-              name="Manage_Profile"
-              options={{
-                unmountOnBlur: true
-              }}
-            >
               {(props) => (
                 <ProfileManagement
                   {...props}
-                  isSellerActive={isSellerActive}
-                  setIsSellerActive={setIsSellerActive}
-                />
-              )}
-            </Tab.Screen>
-
-            <Tab.Screen name="Manage_Security">
-              {(props) => (
-                <SecurityManagement
-                  {...props}
-                  showCurrentPassword={showCurrentPassword}
-                  showNewPassword={showNewPassword}
-                  twoFactorActive={twoFactorActive}
-                  biometricsActive={biometricsActive}
-                  setShowCurrentPassword={setShowCurrentPassword}
-                  setShowNewPassword={setShowNewPassword}
-                  setTwoFactorActive={setTwoFactorActive}
-                  setBiometricsActive={setBiometricsActive}
-                />
-              )}
-            </Tab.Screen>
-
-            <Tab.Screen name="Notification">
-              {(props) => (
-                <NotificationManagement
-                  {...props}
-                  pushMaster={pushMaster}
-                  emailDigest={emailDigest}
-                  socialAlerts={socialAlerts}
-                  confessionAlerts={confessionAlerts}
-                  marketAlerts={marketAlerts}
-                  verseAlerts={verseAlerts}
-                  setPushMaster={setPushMaster}
-                  setEmailDigest={setEmailDigest}
-                  setSocialAlerts={setSocialAlerts}
-                  setConfessionAlerts={setConfessionAlerts}
-                  setMarketAlerts={setMarketAlerts}
-                  setVerseAlerts={setVerseAlerts}
-                />
-              )}
-            </Tab.Screen>
-
-            <Tab.Screen name="Theme_Management">
-              {(props) => (
-                <ThemeManagement
-                  {...props}
+                  // Theme settings
                   selectedTheme={selectedTheme}
                   setSelectedTheme={setSelectedTheme}
                   Themes={Themes}
-                />
-              )}
-            </Tab.Screen>
 
-            <Tab.Screen name="Privacy_Management">
-              {(props) => (
-                <PrivacyManagaement
-                  {...props}
+                  // Seller state
+                  isSellerActive={isSellerActive}
+                  setIsSellerActive={setIsSellerActive}
+
+                  // Security / Password management
+                  showCurrentPassword={showCurrentPassword}
+                  setShowCurrentPassword={setShowCurrentPassword}
+                  showNewPassword={showNewPassword}
+                  setShowNewPassword={setShowNewPassword}
+                  twoFactorActive={twoFactorActive}
+                  setTwoFactorActive={setTwoFactorActive}
+                  biometricsActive={biometricsActive}
+                  setBiometricsActive={setBiometricsActive}
+
+                  // Privacy settings
                   anonymousDefault={anonymousDefault}
-                  hideDetails={hideDetails}
-                  allowDirectMessages={allowDirectMessages}
                   setAnonymousDefault={setAnonymousDefault}
+                  hideDetails={hideDetails}
                   setHideDetails={setHideDetails}
+                  allowDirectMessages={allowDirectMessages}
                   setAllowDirectMessages={setAllowDirectMessages}
-                />
-              )}
-            </Tab.Screen>
 
-            <Tab.Screen name="About_Verse">
-              {(props) => (
-                <About
-                  {...props}
+                  // App utility info
                   currentYear={currentYear}
-                />
-              )}
-            </Tab.Screen>
-
-
-            <Tab.Screen name="Help_Center">
-              {(props) => (
-                <Help
-                  {...props}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
-                />
-              )}
-            </Tab.Screen>
 
-            <Tab.Screen name="Contact_Us">
-              {(props) => (
-                <Contact
-                  {...props}
+                  // Contact us form state
                   isOpen={isOpen}
                   setIsOpen={setIsOpen}
                   selectedTopic={selectedTopic}
@@ -1549,9 +1474,24 @@ export default function App() {
                   setAttachment={setAttachment}
                   topics={topics}
                   handleSubmit={handleSubmit}
+
+                  // Notification settings
+                  pushMaster={pushMaster}
+                  setPushMaster={setPushMaster}
+                  emailDigest={emailDigest}
+                  setEmailDigest={setEmailDigest}
+                  socialAlerts={socialAlerts}
+                  setSocialAlerts={setSocialAlerts}
+                  confessionAlerts={confessionAlerts}
+                  setConfessionAlerts={setConfessionAlerts}
+                  marketAlerts={marketAlerts}
+                  setMarketAlerts={setMarketAlerts}
+                  verseAlerts={verseAlerts}
+                  setVerseAlerts={setVerseAlerts}
                 />
               )}
             </Tab.Screen>
+
 
             <Tab.Screen name="Market">
               {(props) => (

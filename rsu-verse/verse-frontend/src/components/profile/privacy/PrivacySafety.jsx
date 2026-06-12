@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useRef, useCallback, useState} from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
   View,
@@ -21,7 +22,7 @@ const COLORS = {
   void: "#0A0A0A",
   void80: "rgba(10, 10, 10, 0.8)",
   ink: "#161618",
-  cyan: "#17CB49", 
+  cyan: "#17CB49",
   white: "#FFFFFF",
   white5: "rgba(255, 255, 255, 0.05)",
   white10: "rgba(255, 255, 255, 0.1)",
@@ -42,11 +43,25 @@ export function PrivacySafety({
   setAllowDirectMessages,
   navigation,
 }) {
+
+  const scrollViewRef = useRef(null);
+  const [localInput, setLocalInput] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+
+      return () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setLocalInput("");
+      };
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
 
-   
+
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation?.navigate("Profile")}
@@ -60,18 +75,19 @@ export function PrivacySafety({
         <View style={styles.headerSpacer} />
       </View>
 
-    
+
       <ScrollView
         style={styles.scrollView}
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-      
+
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Sharing</Text>
 
           <View style={styles.cardContainer}>
-           
+
             <View style={styles.rowItem}>
               <View style={styles.rowLeft}>
                 <EyeOff style={styles.rowIcon} color={COLORS.white60} size={20} />
@@ -100,10 +116,10 @@ export function PrivacySafety({
               </TouchableOpacity>
             </View>
 
-         
+
             <View style={styles.divider} />
 
-          
+
             <View style={styles.rowItem}>
               <View style={styles.rowLeft}>
                 <Shield style={styles.rowIcon} color={COLORS.white60} size={20} />
@@ -134,7 +150,7 @@ export function PrivacySafety({
           </View>
         </View>
 
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Messages</Text>
 
@@ -219,7 +235,7 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   headerSpacer: {
-    width: 36, 
+    width: 36,
   },
   scrollView: {
     flex: 1,
@@ -227,7 +243,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 112, 
+    paddingBottom: 112,
   },
   section: {
     marginBottom: 24,
@@ -278,14 +294,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "300",
     color: COLORS.white40,
-   
+
   },
   divider: {
     height: 1,
     backgroundColor: COLORS.white5,
     marginHorizontal: 16,
   },
- 
+
   toggleTrack: {
     width: 40,
     height: 24,
