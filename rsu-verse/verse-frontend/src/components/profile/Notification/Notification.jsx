@@ -1,153 +1,375 @@
-import { NavLink } from "react-router-dom";
-import { ArrowLeft, Bell, MessageSquare, Flame, Store, Megaphone, Mail } from "lucide-react";
+import React from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
+  Pressable,
+} from "react-native";
+import {
+  ArrowLeft,
+  Bell,
+  MessageSquare,
+  Flame,
+  Store,
+  Megaphone,
+  Mail,
+} from "lucide-react-native";
 
-export function Notification({pushMaster, setPushMaster, emailDigest, setEmailDigest,socialAlerts, setSocialAlerts, confessionAlerts, setConfessionAlerts, marketAlerts, setMarketAlerts, verseAlerts, setVerseAlerts}) {
+const COLORS = {
+  void: "#0A0A0A",
+  void80: "rgba(10, 10, 10, 0.8)",
+  ink: "#161618",
+  ink40: "rgba(22, 22, 24, 0.4)",
+  cyan: "#17CB49",
+  white: "#FFFFFF",
+  white5: "rgba(255, 255, 255, 0.05)",
+  white10: "rgba(255, 255, 255, 0.1)",
+  white20: "rgba(255, 255, 255, 0.2)",
+  white30: "rgba(255, 255, 255, 0.3)",
+  white40: "rgba(255, 255, 255, 0.4)",
+  white50: "rgba(255, 255, 255, 0.5)",
+  white60: "rgba(255, 255, 255, 0.6)",
+  white90: "rgba(255, 255, 255, 0.9)",
+};
 
+export function Notification({
+  pushMaster,
+  setPushMaster,
+  emailDigest,
+  setEmailDigest,
+  socialAlerts,
+  setSocialAlerts,
+  confessionAlerts,
+  setConfessionAlerts,
+  marketAlerts,
+  setMarketAlerts,
+  verseAlerts,
+  setVerseAlerts,
+  navigation,
+}) {
   return (
-    <div className="w-full max-w-md mx-auto flexflex-col min-h-screen pb-28 bg-void text-white">
-      <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-4 bg-void/80 backdrop-blur-md border-b border-white/5">
-        <NavLink
-          to="/profile"
-          className="p-1 text-white/60 hover:text-white transition-colors duration-200"
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+
+
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation?.navigate("Profile")}
+          style={styles.headerAction}
+          activeOpacity={0.7}
         >
-          <ArrowLeft size={20} strokeWidth={2.5} />
-        </NavLink>
-        <h1 className="text-[20px] font-semibold tracking-tight">Notifications</h1>
-        <div className="w-9" />
-      </header>
+          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+        </TouchableOpacity>
 
-      <main className="flex-1 overflow-y-auto flex flex-col gap-7 px-4 pt-4">
-        <section className="flex flex-col gap-3">
+        <Text style={styles.headerTitle}>Notifications</Text>
+        <View style={styles.headerSpacer} />
+      </View>
 
-          <div className="flex flex-col bg-ink rounded-2xl border border-white/5 p-1">
-            {/* Push Notifications Master */}
-            <div className="p-3.5 flex items-center justify-between gap-4">
-              <div className="flex gap-3 items-center">
-                <Bell className="text-white/60 shrink-0" size={20} />
-                <div className="flex flex-col">
-                  <span className="text-[16px] font-medium text-white/90">Push Notifications</span>
-                  <span className="text-[14px] font-light text-white/40 mt-0.5">Get notified about important activity</span>
-                </div>
-              </div>
-              <button
-                onClick={() => setPushMaster(!pushMaster)}
-                className={`w-10 h-6 rounded-full transition-colors duration-200 shrink-0 relative p-0.5 ${pushMaster ? 'bg-cyan' : 'bg-white/10'}`}
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.sectionGap}>
+          <View style={styles.cardContainer}>
+            <View style={styles.row}>
+              <View style={styles.rowLeft}>
+                <Bell className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <View style={styles.textContent}>
+                  <Text style={styles.rowTitle}>Push Notifications</Text>
+                  <Text style={styles.rowDescription}>
+                    Get notified about important activity
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => setPushMaster(!pushMaster)}
+                style={[
+                  styles.switchTrack,
+                  pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                ]}
               >
-                <div className={`w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ${pushMaster ? 'translate-x-4 bg-white' : 'translate-x-0 bg-white/60'}`} />
-              </button>
-            </div>
+                <View
+                  style={[
+                    styles.switchThumb,
+                    pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                  ]}
+                />
+              </Pressable>
+            </View>
 
-            <div className="h-px bg-white/5 mx-4" />
+            <View style={styles.divider} />
 
-            {/* Email Digest */}
-            <div className="p-3.5 flex items-center justify-between gap-4">
-              <div className="flex gap-3 items-center">
-                <Mail className="text-white/60 shrink-0" size={20} />
-                <div className="flex flex-col">
-                  <span className="text-[16px] font-medium text-white/90">Weekly Recap
-                  </span>
-                  <span className="text-[14px] font-light text-white/40 mt-0.5">Catch up on trending posts and listings</span>
-                </div>
-              </div>
-              <button
-                onClick={() => setEmailDigest(!emailDigest)}
-                className={`w-10 h-6 rounded-full transition-colors duration-200 shrink-0 relative p-0.5 ${emailDigest ? 'bg-cyan' : 'bg-white/10'}`}
+            <View style={styles.row}>
+              <View style={styles.rowLeft}>
+                <Mail className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <View style={styles.textContent}>
+                  <Text style={styles.rowTitle}>Weekly Recap</Text>
+                  <Text style={styles.rowDescription}>
+                    Catch up on trending posts and listings
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => setEmailDigest(!emailDigest)}
+                style={[
+                  styles.switchTrack,
+                  emailDigest ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                ]}
               >
-                <div className={`w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ${emailDigest ? 'translate-x-4 bg-white' : 'translate-x-0 bg-white/60'}`} />
-              </button>
-            </div>
-          </div>
-        </section>
+                <View
+                  style={[
+                    styles.switchThumb,
+                    emailDigest ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                  ]}
+                />
+              </Pressable>
+            </View>
+          </View>
+        </View>
 
-        <section className="flex flex-col gap-3">
-          <p className="text-[14px] font-medium tracking-wide text-white/30 uppercase px-1">Activity</p>
+        <View style={styles.sectionGap}>
+          <Text style={styles.sectionHeading}>Activity</Text>
 
-          <div className="flex flex-col bg-ink rounded-2xl border border-white/5 p-1">
-            {/* Gist & Main Stream Activity */}
-            <div className="p-3.5 flex items-start justify-between gap-4">
-              <div className="flex gap-3 pt-0.5">
-                <MessageSquare className="text-white/60 shrink-0" size={20} />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[16px] font-medium text-white/90">Replies & Mentions</span>
-                  <span className="text-[14px] font-light text-white/40 leading-normal">Get notified when someone replies to your post or mentions you.</span>
-                </div>
-              </div>
-              <button
+          <View style={styles.cardContainer}>
+            <View style={[styles.row, !pushMaster && styles.disabledRow]}>
+              <View style={styles.rowLeft}>
+                <MessageSquare className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <View style={styles.textContent}>
+                  <Text style={styles.rowTitle}>Replies & Mentions</Text>
+                  <Text style={styles.rowDescription}>
+                    Get notified when someone replies to your post or mentions you.
+                  </Text>
+                </View>
+              </View>
+              <Pressable
                 disabled={!pushMaster}
-                onClick={() => setSocialAlerts(!socialAlerts)}
-                className={`w-10 h-6 rounded-full transition-colors duration-200 shrink-0 relative p-0.5 ${!pushMaster ? 'opacity-30 cursor-not-allowed bg-white/10' : socialAlerts ? 'bg-cyan' : 'bg-white/10'}`}
+                onPress={() => setSocialAlerts(!socialAlerts)}
+                style={[
+                  styles.switchTrack,
+                  socialAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                ]}
               >
-                <div className={`w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ${socialAlerts && pushMaster ? 'translate-x-4 bg-white' : 'translate-x-0 bg-white/60'}`} />
-              </button>
-            </div>
+                <View
+                  style={[
+                    styles.switchThumb,
+                    socialAlerts && pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                  ]}
+                />
+              </Pressable>
+            </View>
 
-            <div className="h-px bg-white/5 mx-4" />
+            <View style={styles.divider} />
 
-            <div className="p-3.5 flex items-start justify-between gap-4">
-              <div className="flex gap-3 pt-0.5">
-                <Flame className="text-white/60 shrink-0" size={20} />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[16px] font-medium text-white/90">Anonymous Activity</span>
-                  <span className="text-[14px] font-light text-white/40 leading-normal">Replies and reactions on anonymous posts.</span>
-                </div>
-              </div>
-              <button
+            <View style={[styles.row, !pushMaster && styles.disabledRow]}>
+              <View style={styles.rowLeft}>
+                <Flame className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <View style={styles.textContent}>
+                  <Text style={styles.rowTitle}>Anonymous Activity</Text>
+                  <Text style={styles.rowDescription}>
+                    Replies and reactions on anonymous posts.
+                  </Text>
+                </View>
+              </View>
+              <Pressable
                 disabled={!pushMaster}
-                onClick={() => setConfessionAlerts(!confessionAlerts)}
-                className={`w-10 h-6 rounded-full transition-colors duration-200 shrink-0 relative p-0.5 ${!pushMaster ? 'opacity-30 cursor-not-allowed bg-white/10' : confessionAlerts ? 'bg-cyan' : 'bg-white/10'}`}
+                onPress={() => setConfessionAlerts(!confessionAlerts)}
+                style={[
+                  styles.switchTrack,
+                  confessionAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                ]}
               >
-                <div className={`w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ${confessionAlerts && pushMaster ? 'translate-x-4 bg-white' : 'translate-x-0 bg-white/60'}`} />
-              </button>
-            </div>
-          </div>
-        </section>
+                <View
+                  style={[
+                    styles.switchThumb,
+                    confessionAlerts && pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                  ]}
+                />
+              </Pressable>
+            </View>
+          </View>
+        </View>
 
-        <section className="flex flex-col gap-3">
-          <p className="text-[14px] font-medium tracking-wide text-white/30 uppercase px-1">Marketplace Notifications</p>
 
-          <div className="flex flex-col bg-ink rounded-2xl border border-white/5 p-1">
-            <div className="p-3.5 flex items-start justify-between gap-4">
-              <div className="flex gap-3 pt-0.5">
-                <Store className="text-white/60 shrink-0" size={20} />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[16px] font-medium text-white/90">Marketplace Messages</span>
-                  <span className="text-[14px] font-light text-white/40 leading-normal">Get notified when someone messages you about an item.</span>
-                </div>
-              </div>
-              <button
+        <View style={styles.sectionGap}>
+          <Text style={styles.sectionHeading}>Marketplace Notifications</Text>
+
+          <View style={styles.cardContainer}>
+
+            <View style={[styles.row, !pushMaster && styles.disabledRow]}>
+              <View style={styles.rowLeft}>
+                <Store className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <View style={styles.textContent}>
+                  <Text style={styles.rowTitle}>Marketplace Messages</Text>
+                  <Text style={styles.rowDescription}>
+                    Get notified when someone messages you about an item.
+                  </Text>
+                </View>
+              </View>
+              <Pressable
                 disabled={!pushMaster}
-                onClick={() => setMarketAlerts(!marketAlerts)}
-                className={`w-10 h-6 rounded-full transition-colors duration-200 shrink-0 relative p-0.5 ${!pushMaster ? 'opacity-30 cursor-not-allowed bg-white/10' : marketAlerts ? 'bg-cyan' : 'bg-white/10'}`}
+                onPress={() => setMarketAlerts(!marketAlerts)}
+                style={[
+                  styles.switchTrack,
+                  marketAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                ]}
               >
-                <div className={`w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ${marketAlerts && pushMaster ? 'translate-x-4 bg-white' : 'translate-x-0 bg-white/60'}`} />
-              </button>
-            </div>
-          </div>
-        </section>
+                <View
+                  style={[
+                    styles.switchThumb,
+                    marketAlerts && pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                  ]}
+                />
+              </Pressable>
+            </View>
+          </View>
+        </View>
 
-        <section className="flex flex-col gap-3">
-          <p className="text-[14px] font-medium tracking-wide text-white/30 uppercase px-1">Verse</p>
 
-          <div className="flex flex-col bg-ink rounded-2xl border border-white/5 p-1">
-            <div className="p-3.5 flex items-start justify-between gap-4">
-              <div className="flex gap-3 pt-0.5">
-                <Megaphone className="text-white/60 shrink-0" size={20} />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[16px] font-medium text-white/90">Verse Notifications</span>
-                  <span className="text-[14px] font-light text-white/40 leading-normal">Recieve notifications from Verse</span>
-                </div>
-              </div>
-              <button
+        <View style={styles.sectionGap}>
+          <Text style={styles.sectionHeading}>Verse</Text>
+
+          <View style={styles.cardContainer}>
+
+            <View style={[styles.row, !pushMaster && styles.disabledRow]}>
+              <View style={styles.rowLeft}>
+                <Megaphone className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <View style={styles.textContent}>
+                  <Text style={styles.rowTitle}>Verse Notifications</Text>
+                  <Text style={styles.rowDescription}>
+                    Recieve notifications from Verse
+                  </Text>
+                </View>
+              </View>
+              <Pressable
                 disabled={!pushMaster}
-                onClick={() => setVerseAlerts(!verseAlerts)}
-                className={`w-10 h-6 rounded-full transition-colors duration-200 shrink-0 relative p-0.5 ${!pushMaster ? 'opacity-30 cursor-not-allowed bg-white/10' : verseAlerts ? 'bg-cyan' : 'bg-white/10'}`}
+                onPress={() => setVerseAlerts(!verseAlerts)}
+                style={[
+                  styles.switchTrack,
+                  verseAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                ]}
               >
-                <div className={`w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ${verseAlerts && pushMaster ? 'translate-x-4 bg-white' : 'translate-x-0 bg-white/60'}`} />
-              </button>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-  )
+                <View
+                  style={[
+                    styles.switchThumb,
+                    verseAlerts && pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                  ]}
+                />
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.void,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: COLORS.void80,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.white5,
+  },
+  headerAction: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.white,
+    letterSpacing: -0.2,
+  },
+  headerSpacer: {
+    width: 36,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 112,
+  },
+  sectionGap: {
+    marginTop: 28,
+  },
+  sectionHeading: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white30,
+    textTransform: "uppercase",
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+  cardContainer: {
+    backgroundColor: COLORS.ink,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    padding: 4,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    padding: 14,
+    gap: 16,
+  },
+  disabledRow: {
+    opacity: 0.3,
+  },
+  rowLeft: {
+    flexDirection: "row",
+    flex: 1,
+    gap: 12,
+  },
+  rowIcon: {
+    marginTop: 2,
+  },
+  textContent: {
+    flex: 1,
+  },
+  rowTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white90,
+  },
+  rowDescription: {
+    fontSize: 12,
+    fontWeight: "300",
+    color: COLORS.white40,
+    marginTop: 2,
+    lineHeight: 18,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: COLORS.white5,
+    marginHorizontal: 16,
+  },
+  switchTrack: {
+    width: 40,
+    height: 24,
+    borderRadius: 12,
+    padding: 2,
+    justifyContent: "center",
+  },
+  switchThumb: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+});

@@ -303,7 +303,7 @@ export function SearchFeed({
         ) : (
           <View style={styles.noResultsCard}>
             <Text style={styles.noResultsText}>
-              No related campus results found for {query}
+              No related results found for {query}
             </Text>
           </View>
         )}
@@ -451,7 +451,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.8,
   },
   textRose: {
     color: "#F59E0B",

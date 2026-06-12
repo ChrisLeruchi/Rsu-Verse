@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 16,
-    paddingBottom: 48,
+    paddingBottom: 100,
     paddingTop: 16,
     gap: 16,
   },

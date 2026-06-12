@@ -1,57 +1,192 @@
-import { NavLink } from "react-router-dom";
-import { ArrowLeft, Check } from "lucide-react";
+import React from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
+} from "react-native";
+import { ArrowLeft, Check } from "lucide-react-native";
 
-export function Theme({selectedTheme, setSelectedTheme, Themes}) {
+const COLORS = {
+  void: "#0A0A0A",
+  void80: "rgba(10, 10, 10, 0.8)",
+  ink: "#161618",
+  white: "#FFFFFF",
+  white5: "rgba(255, 255, 255, 0.05)",
+  white30: "rgba(255, 255, 255, 0.3)",
+  white40: "rgba(255, 255, 255, 0.4)",
+  white60: "rgba(255, 255, 255, 0.6)",
+};
 
+export function Theme({ selectedTheme, setSelectedTheme, Themes, navigation }) {
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col min-h-screen pb-28 bg-void text-white">
-      <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-4 bg-void/80 backdrop-blur-md border-b border-white/5">
-        <NavLink
-          to="/profile"
-          className="p-1 text-white/60 hover:text-white transition-colors duration-200"
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+
+     
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation?.navigate("Profile")}
+          style={styles.headerAction}
+          activeOpacity={0.7}
         >
-          <ArrowLeft size={20} strokeWidth={2.5} />
-        </NavLink>
-        <h1 className="text-[20px] font-semibold tracking-tight">Theme</h1>
-        <div className="w-9" />
-      </header>
+          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+        </TouchableOpacity>
 
-      <main className="flex-1 overflow-y-auto flex flex-col gap-7 px-4 pt-4">
-        <section className="flex flex-col gap-3">
-          <p className="text-[14px] font-medium tracking-wide text-white/30 uppercase px-1">Appearance</p>
+        <Text style={styles.headerTitle}>Theme</Text>
+        <View style={styles.headerSpacer} />
+      </View>
 
-          <div className="flex flex-col bg-ink rounded-2xl border border-white/5 overflow-hidden">
-          {Themes.map((mode) => (
-            <div
-              key={mode.id}
-              onClick={() => setSelectedTheme(mode.theme)}
-              className={`p-4 flex items-center justify-between cursor-pointer transition-colors duration-150 relative
-                    border-b border-white/5
-                    hover:bg-white/[0.01] active:bg-white/[0.02]
-            `}
-            >
-              <div className="flex gap-3.5 items-center">
-                <div className="shrink-0 flex items-center justify-center w-6 h-6">
-                  {mode.icon}
-                </div>
-                <div className="flex flex-col">
-                  <span className={`text-[16px] font-medium transition-colors text-white`}>
-                    {mode.theme}
-                  </span>
-                  <span className="text-[14px] font-light text-white/40 mt-0.5 leading-normal">
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.sectionGap}>
+          <Text style={styles.sectionHeading}>Appearance</Text>
 
-                  </span>
-                </div>
-              </div>
+          <View style={styles.cardContainer}>
+            {Themes.map((mode, index) => {
+              const isSelected = selectedTheme === mode.theme;
+              const isLastItem = index === Themes.length - 1;
 
-              {selectedTheme === mode.theme && (
-                <Check size={18} className="text-white shrink-0 animate-scaleIn" strokeWidth={2.5} />
-              )}
-            </div>
-          ))}
-          </div>
-        </section>
-      </main>
-    </div>
-  )
+              return (
+                <TouchableOpacity
+                  key={mode.id}
+                  onPress={() => setSelectedTheme(mode.theme)}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.rowItem,
+                    !isLastItem && styles.rowBorder,
+                  ]}
+                >
+                  <View style={styles.rowLeft}>
+                    <View style={styles.iconWrapper}>
+                      {mode.icon}
+                    </View>
+
+        
+                    <View style={styles.textContent}>
+                      <Text style={styles.themeName}>
+                        {mode.theme}
+                      </Text>
+                    </View>
+                  </View>
+
+                  
+                  {isSelected && (
+                    <Check
+                      size={18}
+                      color={COLORS.white}
+                      strokeWidth={2.5}
+                      style={styles.checkIcon}
+                    />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.void,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: COLORS.void80,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.white5,
+  },
+  headerAction: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.white,
+    letterSpacing: -0.4,
+  },
+  headerSpacer: {
+    width: 36,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 112, 
+  },
+  sectionGap: {
+    gap: 12,
+  },
+  sectionHeading: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white30,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    paddingHorizontal: 4,
+  },
+  cardContainer: {
+    backgroundColor: COLORS.ink,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    overflow: "hidden",
+  },
+  rowItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    minHeight: 56,
+  },
+  rowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.white5,
+  },
+  rowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    flex: 1,
+  },
+  iconWrapper: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  textContent: {
+    flex: 1,
+    flexDirection: "col",
+  },
+  themeName: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white,
+  },
+  emptySubText: {
+    fontSize: 14,
+    fontWeight: "300",
+    color: COLORS.white,
+    marginTop: 2,
+  },
+  checkIcon: {
+    marginLeft: 12,
+  },
+});

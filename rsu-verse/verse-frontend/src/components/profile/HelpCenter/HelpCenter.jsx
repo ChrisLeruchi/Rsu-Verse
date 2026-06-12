@@ -1,129 +1,397 @@
-import { NavLink } from "react-router-dom";
-import { ArrowLeft, Search, Store, MessageSquare, UserCheck, ChevronRight, MessageCircle } from "lucide-react";
+import React from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
+} from "react-native";
+import {
+  ArrowLeft,
+  Search,
+  Store,
+  MessageSquare,
+  UserCheck,
+  ChevronRight,
+  MessageCircle,
+} from "lucide-react-native";
 
-export function HelpCenter({searchQuery, setSearchQuery}) {
-  
+const COLORS = {
+  void: "#0A0A0A",
+  void80: "rgba(10, 10, 10, 0.8)",
+  ink: "#161618",
+  cyan: "#00BA34",
+  white: "#FFFFFF",
+  white5: "rgba(255, 255, 255, 0.05)",
+  white10: "rgba(255, 255, 255, 0.1)",
+  white20: "rgba(255, 255, 255, 0.2)",
+  white30: "rgba(255, 255, 255, 0.3)",
+  white40: "rgba(255, 255, 255, 0.4)",
+  white50: "rgba(255, 255, 255, 0.5)",
+  white60: "rgba(255, 255, 255, 0.6)",
+  white90: "rgba(255, 255, 255, 0.9)",
+};
+
+export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
   const popularArticles = [
     {
       id: "market-safety",
       title: "How to buy and sell safely on campus",
       category: "Marketplace",
-      icon: <Store size={16} className="text-white/40" />
+      icon: <Store size={16} color={COLORS.white40} />,
     },
     {
       id: "anon-works",
       title: "How anonymous posts protect your identity",
       category: "Privacy",
-      icon: <MessageSquare size={16} className="text-white/40" />
+      icon: <MessageSquare size={16} color={COLORS.white40} />,
     },
     {
       id: "verification",
       title: "Fixing student verification issues",
       category: "Account",
-      icon: <UserCheck size={16} className="text-white/40" />
-    }
+      icon: <UserCheck size={16} color={COLORS.white40} />,
+    },
   ];
 
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col min-h-screen pb-28 bg-void text-white">
-      <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-4 bg-void/80 backdrop-blur-md border-b border-white/5">
-        <NavLink 
-          to="/profile" 
-          className="p-1 text-white/60 hover:text-white transition-colors duration-200"
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+
+      
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation?.navigate("Profile")}
+          style={styles.headerAction}
+          activeOpacity={0.7}
         >
-          <ArrowLeft size={20} strokeWidth={2.5} />
-        </NavLink>
-        <h1 className="text-[20px] font-semibold tracking-tight">Help Center</h1>
-        <div className="w-9" />
-      </header>
+          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Help Center</Text>
+        <View style={styles.headerSpacer} />
+      </View>
 
-      <main className="flex-1 overflow-y-auto flex flex-col gap-7 px-4 pt-4">
-        <section className="flex flex-col gap-4 px-1">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-[20px] font-bold tracking-tight">How can we help?</h2>
-            <p className="text-[16px] text-white/40 font-light">Search for guides or browse campus help topics.</p>
-          </div>
-          
-          <div className="relative flex items-center">
-            <Search className="absolute left-3.5 text-white/30" size={20} />
-            <input 
-              type="text" 
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+      
+        <View style={styles.introSection}>
+          <View style={styles.introHeadingWrapper}>
+            <Text style={styles.introTitle}>How can we help?</Text>
+            <Text style={styles.introSubtitle}>
+              Search for guides or browse campus help topics.
+            </Text>
+          </View>
+
+          <View style={styles.searchWrapper}>
+            <Search style={styles.searchIcon} size={20} color={COLORS.white30} />
+            <TextInput
+              style={styles.searchInput}
               placeholder="Search help articles..."
+              placeholderTextColor={COLORS.white30}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-ink border border-white/5 rounded-xl pl-11 pr-4 py-3 text-[16px] font-normal text-white placeholder-white/30 focus:outline-none focus:border-white/20 transition-all duration-200"
+              onChangeText={setSearchQuery}
+              keyboardAppearance="dark"
             />
-          </div>
-        </section>
+          </View>
+        </View>
 
-        <section className="flex flex-col gap-2.5">
-          <p className="text-[14px] font-medium tracking-wide text-white/30 uppercase px-1">Popular Articles</p>
-          
-          <div className="flex flex-col bg-ink rounded-2xl border border-white/5 overflow-hidden">
-            {popularArticles.map((article, index) => (
-              <NavLink 
-                key={article.id}
-                to={`/profile/help/${article.id}`} 
-                className={`p-4 flex items-center justify-between hover:bg-white/[0.01] active:bg-white/[0.02] transition-colors group
-                  ${index !== popularArticles.length - 1 ? 'border-b border-white/5' : ''}
-                `}
-              >
-                <div className="flex gap-3.5 items-center">
-                  <div className="p-2 bg-void rounded-xl border border-white/5 group-hover:border-white/10 transition-colors">
-                    {article.icon}
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[16px] font-medium text-white/90 group-hover:text-white transition-colors">{article.title}</span>
-                    <span className="text-[14px] font-light text-white/40">{article.category}</span>
-                  </div>
-                </div>
-                <ChevronRight size={16} className="text-white/20 group-hover:text-white/40 transition-colors" />
-              </NavLink>
-            ))}
-          </div>
-        </section>
+  
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionHeading}>Popular Articles</Text>
 
-        <section className="flex flex-col gap-2.5">
-          <p className="text-[14px] font-medium tracking-wide text-white/30 uppercase px-1">Browse Topics</p>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <NavLink to="/profile/help/topics/market" className="p-4 bg-ink border border-white/5 rounded-2xl flex flex-col gap-3 hover:bg-white/[0.01] active:bg-white/[0.02] transition-colors group">
-              <Store size={20} className="text-white/50" />
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[16px] font-medium text-white/90">Marketplace</span>
-                <span className="text-[14px] font-light text-white/40">Selling guidelines & tips</span>
-              </div>
-            </NavLink>
+          <View style={styles.cardContainer}>
+            {popularArticles.map((article, index) => {
+              const isLastItem = index === popularArticles.length - 1;
+              return (
+                <TouchableOpacity
+                  key={article.id}
+                  onPress={() => navigation?.navigate("ArticleDetail", { id: article.id })}
+                  activeOpacity={0.8}
+                  style={[styles.rowItem, !isLastItem && styles.rowBorder]}
+                >
+                  <View style={styles.rowLeft}>
+                    <View style={styles.iconBox}>
+                      {article.icon}
+                    </View>
+                    <View style={styles.metaWrapper}>
+                      <Text style={styles.articleTitle} numberOfLines={1}>
+                        {article.title}
+                      </Text>
+                      <Text style={styles.articleCategory}>
+                        {article.category}
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight size={16} color={COLORS.white20} />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
 
-            <NavLink to="/profile/help/topics/privacy" className="p-4 bg-ink border border-white/5 rounded-2xl flex flex-col gap-3 hover:bg-white/[0.01] active:bg-white/[0.02] transition-colors group">
-              <MessageSquare size={20} className="text-white/50" />
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[16px] font-medium text-white/90">Anonymity</span>
-                <span className="text-[14px] font-light text-white/40">How your data stays safe</span>
-              </div>
-            </NavLink>
-          </div>
-        </section>
+     
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionHeading}>Browse Topics</Text>
 
-        <section className="mt-2">
-          <div className="bg-ink rounded-2xl border border-white/5 p-4 flex flex-col gap-4 text-center items-center">
-            <div className="flex flex-col gap-1">
-              <span className="text-[16px] font-medium text-white/90">Still need help?</span>
-              <span className="text-[14px] font-light text-white/40 max-w-xs leading-normal">
-                If you can't find an answer, chat directly with a student support representative.
-              </span>
-            </div>
-            
-            <NavLink 
-              to="/profile/contact" 
-              className="w-full bg-cyan text-white font-semibold text-[14px] py-2.5 rounded-xl transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+          <View style={styles.gridRow}>
+           
+            <TouchableOpacity
+              onPress={() => navigation?.navigate("TopicMarket")}
+              activeOpacity={0.8}
+              style={styles.gridCard}
             >
-              <MessageCircle size={16} />
-              <span>Contact Support</span>
-            </NavLink>
-          </div>
-        </section>
-      </main>
-    </div>
-  )
+              <Store size={20} color={COLORS.white50} />
+              <View style={styles.gridCardMeta}>
+                <Text style={styles.gridCardTitle}>Marketplace</Text>
+                <Text style={styles.gridCardSubtitle}>Selling guidelines & tips</Text>
+              </View>
+            </TouchableOpacity>
+
+  
+            <TouchableOpacity
+              onPress={() => navigation?.navigate("TopicPrivacy")}
+              activeOpacity={0.8}
+              style={styles.gridCard}
+            >
+              <MessageSquare size={20} color={COLORS.white50} />
+              <View style={styles.gridCardMeta}>
+                <Text style={styles.gridCardTitle}>Anonymity</Text>
+                <Text style={styles.gridCardSubtitle}>How your data stays safe</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+      
+        <View style={styles.ctaContainer}>
+          <View style={styles.ctaHeadingWrapper}>
+            <Text style={styles.ctaTitle}>Still need help?</Text>
+            <Text style={styles.ctaSubtitle}>
+              {`If you can't find an answer, chat directly with a student support representative.`}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => navigation?.navigate("ContactSupport")}
+            activeOpacity={0.85}
+            style={styles.ctaButton}
+          >
+            <MessageCircle size={16} color={COLORS.white} />
+            <Text style={styles.ctaButtonText}>Contact Support</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.void,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: COLORS.void80,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.white5,
+  },
+  headerAction: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.white,
+    letterSpacing: -0.4,
+  },
+  headerSpacer: {
+    width: 36, 
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 112, 
+  },
+  introSection: {
+    paddingHorizontal: 4,
+    gap: 16,
+    marginBottom: 28,
+  },
+  introHeadingWrapper: {
+    gap: 4,
+  },
+  introTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.white,
+    letterSpacing: -0.4,
+  },
+  introSubtitle: {
+    fontSize: 16,
+    fontWeight: "300",
+    color: COLORS.white40,
+  },
+  searchWrapper: {
+    position: "relative",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchIcon: {
+    position: "absolute",
+    left: 14,
+    zIndex: 1,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: COLORS.ink,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    borderRadius: 12,
+    paddingLeft: 44, 
+    paddingRight: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    fontWeight: "400",
+    color: COLORS.white,
+  },
+  sectionContainer: {
+    gap: 10,
+    marginBottom: 28,
+  },
+  sectionHeading: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white30,
+    textTransform: "uppercase",
+    paddingHorizontal: 4,
+  },
+  cardContainer: {
+    backgroundColor: COLORS.ink,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    overflow: "hidden",
+  },
+  rowItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+  },
+  rowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.white5,
+  },
+  rowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    flex: 1,
+    marginRight: 16,
+  },
+  iconBox: {
+    padding: 8,
+    backgroundColor: COLORS.void,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+  },
+  metaWrapper: {
+    flex: 1,
+    gap: 2,
+  },
+  articleTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white90,
+  },
+  articleCategory: {
+    fontSize: 12,
+    fontWeight: "300",
+    color: COLORS.white40,
+  },
+  gridRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  gridCard: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: COLORS.ink,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    borderRadius: 16,
+    gap: 12,
+  },
+  gridCardMeta: {
+    gap: 2,
+  },
+  gridCardTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white90,
+  },
+  gridCardSubtitle: {
+    fontSize: 12,
+    fontWeight: "300",
+    color: COLORS.white40,
+    lineHeight: 18,
+  },
+  ctaContainer: {
+    backgroundColor: COLORS.ink,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    padding: 16,
+    alignItems: "center",
+    gap: 16,
+    marginTop: 8,
+  },
+  ctaHeadingWrapper: {
+    alignItems: "center",
+    gap: 4,
+  },
+  ctaTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: COLORS.white90,
+  },
+  ctaSubtitle: {
+    fontSize: 12,
+    fontWeight: "300",
+    color: COLORS.white40,
+    textAlign: "center",
+    lineHeight: 20,
+    maxWidth: 280,
+  },
+  ctaButton: {
+    width: "100%",
+    backgroundColor: COLORS.cyan,
+    borderRadius: 12,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  ctaButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+});

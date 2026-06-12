@@ -1,162 +1,477 @@
-import { ArrowLeft, Camera, Store, GraduationCap, Globe} from "lucide-react";
-import { NavLink } from "react-router-dom";
+import React from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
+  Pressable,
+} from "react-native";
+import { ArrowLeft, Camera, Store, GraduationCap, Globe } from "lucide-react-native";
 
-export function ManageProfile({isSellerActive, setIsSellerActive}) {
+const COLORS = {
+  void: "#0A0A0A",
+  void80: "rgba(10, 10, 10, 0.8)",
+  ink: "#161618", 
+  ink40: "rgba(22, 22, 24, 0.4)",
+  cyan:"#17CB49", 
+  white: "#FFFFFF",
+  white5: "rgba(255, 255, 255, 0.05)",
+  white10: "rgba(255, 255, 255, 0.1)",
+  white20: "rgba(255, 255, 255, 0.2)",
+  white30: "rgba(255, 255, 255, 0.3)",
+  white40: "rgba(255, 255, 255, 0.4)",
+  white50: "rgba(255, 255, 255, 0.5)",
+  white60: "rgba(255, 255, 255, 0.6)",
+  white90: "rgba(255, 255, 255, 0.9)",
+};
 
-
+export function ManageProfile({ isSellerActive, setIsSellerActive, navigation }) {
   return (
-    <div className="w-full max-2-md mx-auto flex flex-col min-h-screen pb-28 bg-void text-white">
-      <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-4 bg-void/80 backdrop-blur-md border-b border-white/5">
-        <NavLink
-          to="/profile"
-          className="p-1 text-white/60 hover:text-white transition-colors duration-200"
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+      
+      
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation?.navigate('Profile')}
+          style={styles.headerAction}
+          activeOpacity={0.7}
         >
-          <ArrowLeft size={20} strokeWidth={2.5} />
-        </NavLink>
+          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+        </TouchableOpacity>
 
-        <h1 className="text-[20px] font-semibold  flex justify-center">
-          Edit Profile
-        </h1>
+        <Text style={styles.headerTitle}>Edit Profile</Text>
 
-        <button className="text-[18px] font-normal text-white hover:text-white/80 transition-colors duration-200">
-          Save
-        </button>
-      </header>
+        <TouchableOpacity style={styles.headerAction} activeOpacity={0.7}>
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
+      </View>
 
-      <main className="flex-1 overflow-y-auto flex flex-col gap-7 px-4 pt-4">
-        <section className="flex flex-col items-center justify-center justify-center py-2 relative group">
-          <div className="relative cursor-pointer">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr fro-zinc-800 to-zinc-700 border-2 border-white/10 overflow-hidden flex items-center justify-center">
-              <span className="text-[28px] font-light text-white/40 tracking-tight">
-                CI
-              </span>
-            </div>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+      
+        <View style={styles.avatarSection}>
+          <TouchableOpacity activeOpacity={0.9} style={styles.avatarWrapper}>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarInitials}>CI</Text>
+            </View>
 
-            <div className="absolute bottom-0 right-0 p-2 bg-ink text-void rounded-full shadow-lg border border-void/20 transition-transform duration-200 hover:scale-105">
-              <Camera size={14} fill="white" strokeWidth={2.5} />
-            </div >
-          </div>
-          <p className="text-[14px] text-white/40 mt-3 tracking-wide">
-            Tap
-          </p>
-        </section>
+            <View style={styles.cameraBadge}>
+              <Camera size={14} color="white" fill="white" strokeWidth={2.5} />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.avatarTapText}>Tap</Text>
+        </View>
 
-        <section className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-light text-white/50 px-0.5">
-              Display Name
-            </label>
-            <input
-              type="text"
+     
+        <View style={styles.sectionGap}>
+ 
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Display Name</Text>
+            <TextInput
               defaultValue="Christopher Igwe"
-              className="w-full bg-ink/40 border/40 border border-white/5 rounded-xl px-3.5 py-2.5 text-[16px] font-normal tracking-wide text-white focus:outline-none focus:border-white/20 transition-all duration-200"
+              style={styles.input}
               placeholder="Name seen on public actions"
+              placeholderTextColor={COLORS.white30}
+              keyboardAppearance="dark"
             />
-          </div>
+          </View>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-light text-white/50 px-0.5">
-              Username
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-[16px] text-white/30 font-light">@</span>
-              <input
-                type="text"
+   
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Username</Text>
+            <View style={styles.usernameContainer}>
+              <Text style={styles.usernamePrefix}>@</Text>
+              <TextInput
                 defaultValue="chris_igwe"
-                className="w-full bg-ink/40 border border-white/5 rounded-xl pl-8 pr-3.5 py-2.5 text-[16px] font-normal tracking-wide text-white focus:outline-none focus:border-white/20 transition-all duration-200"
+                style={[styles.input, styles.usernameInput]}
                 placeholder="your_handle"
+                placeholderTextColor={COLORS.white30}
+                autoCapitalize="none"
+                keyboardAppearance="dark"
               />
-            </div>
-          </div>
+            </View>
+          </View>
 
-          <div>
-            <label className="text-[14px] font-light text-white/50 px-0.5">
-              Bio
-            </label>
-            <textarea
-              rows={3}
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Bio</Text>
+            <TextInput
               defaultValue="Coffee addict."
-              className="w-full bg-ink/40 border borde-white/5 rounded-xl px-3.5 py-2.5 text-[16px] font-normal tracking-wide text-white resize-none focus:outline-none focus:border-white/20 transition-all duration-200 leading-relaxed"
+              style={[styles.input, styles.textarea]}
               placeholder="Tell the campus who you are..."
+              placeholderTextColor={COLORS.white30}
+              multiline={true}
+              numberOfLines={3}
+              textAlignVertical="top"
+              keyboardAppearance="dark"
             />
-          </div>
-        </section>
+          </View>
+        </View>
 
-        <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between px-1">
-            <p className="text-[14px] font-medium tracking-wide text-white/30 uppercase">Campus Credentials</p>
-            <span className="text-[14px] font-medium tracking-wider text-white/40 flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full">
-              <GraduationCap size={14} /> Verified
-            </span>
-          </div>
+    
+        <View style={styles.sectionGap}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionHeading}>Student Profile</Text>
+            <View style={styles.verifiedBadge}>
+              <GraduationCap size={14} color={COLORS.white40} />
+              <Text style={styles.verifiedText}>Verified</Text>
+            </View>
+          </View>
 
-          <div className="flex flex-col bg-ink rounded-2xl border border-white/5 divide-y divide-white/5 overflow-hidden">
-            <div className="p-4 flex justify-between items-center bg-white/[0.01]">
-              <span className="text-[16px] font-light text-white/60">Faculty</span>
-              <span className="text-[16px] font-medium text-white/90">Engineering</span>
-            </div>
-            <div className="p-4 flex justify-between items-center bg-white/[0.01]">
-              <span className="text-[16px] font-light text-white/60">Department</span>
-              <span className="text-[16px] font-medium text-white/90">Computer Engineering</span>
-            </div>
-            <div className="p-4 flex justify-between items-center bg-white/[0.01]">
-              <span className="text-[16px] font-light text-white/60">Level</span>
-              <span className="text-[16px] font-medium text-white/90">500 Level</span>
-            </div>
-          </div>
-          <p className="text-[12px] text-white/30 px-1 leading-normal">
+          <View style={styles.credentialsCard}>
+            <View style={styles.cardRow}>
+              <Text style={styles.cardRowLabel}>Faculty</Text>
+              <Text style={styles.cardRowValue}>Engineering</Text>
+            </View>
+            <View style={styles.cardRow}>
+              <Text style={styles.cardRowLabel}>Department</Text>
+              <Text style={styles.cardRowValue}>Computer Engineering</Text>
+            </View>
+            <View style={[styles.cardRow, { borderBottomWidth: 0 }]}>
+              <Text style={styles.cardRowLabel}>Level</Text>
+              <Text style={styles.cardRowValue}>500 Level</Text>
+            </View>
+          </View>
+          <Text style={styles.infoFooterText}>
             Academic verification details are extracted from portal registration data and cannot be modified manually.
-          </p>
-        </section>
+          </Text>
+        </View>
 
-        <section className="flex flex-col gap-3">
-          <p className="text-[14px] font-medium tracking-wide text-white/30 uppercase px-1">Marketplace Settings</p>
+        <View style={styles.sectionGap}>
+          <Text style={styles.sectionHeading}>Marketplace Settings</Text>
           
-          <div className="flex flex-col bg-ink rounded-2xl border border-white/5 p-4 gap-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex gap-3 pt-0.5">
-                <Store className="text-white/60 shrink-0" size={20} />
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[16px] font-medium text-white/90">Activate Campus Storefront</span>
-                  <span className="text-[14px] font-light text-white/40 leading-normal">Enables verification options to list gadgets, books, or fashion in the RSU Marketplace.</span>
-                </div>
-              </div>
-              <button 
-                onClick={() => setIsSellerActive(!isSellerActive)}
-                className={`w-10 h-6 rounded-full transition-colors duration-200 shrink-0 relative p-0.5 ${isSellerActive ? 'bg-cyan' : 'bg-white/10'}`}
-              >
-                <div className={`w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ${isSellerActive ? 'translate-x-4 bg-white' : 'translate-x-0 bg-white/60'} px-1`}>
-                </div>
-              </button>
-            </div>
+          <View style={styles.marketplaceCard}>
+            <View style={styles.toggleRow}>
+              <View style={styles.toggleRowLeft}>
+                <Store color={COLORS.white60} size={20} style={styles.storeIcon} />
+                <View style={styles.toggleTextContent}>
+                  <Text style={styles.toggleTitle}>Activate Campus Storefront</Text>
+                  <Text style={styles.toggleDescription}>
+                    Enables verification options to list gadgets, books, or fashion in the RSU Marketplace.
+                  </Text>
+                </View>
+              </View>
 
+         
+              <Pressable
+                onPress={() => setIsSellerActive(!isSellerActive)}
+                style={[
+                  styles.switchTrack,
+                  isSellerActive ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.switchThumb,
+                    isSellerActive ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                  ]}
+                />
+              </Pressable>
+            </View>
+
+    
             {isSellerActive && (
-              <div className="pt-3 border-t border-white/5 flex flex-col gap-3.5 animate-fadeIn">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[14px] font-light text-white/50 px-0.5">Shop / Brand Name</label>
-                  <input 
-                    type="text" 
+              <View style={styles.sellerFieldsContainer}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Shop / Brand Name</Text>
+                  <TextInput
                     placeholder="e.g., Chris Logistics or Threads Hub"
-                    className="w-full bg-void/40 border border-white/5 rounded-xl px-3.5 py-2.5 text-[16px] font-normal tracking-wide text-white focus:outline-none focus:border-white/20 transition-all duration-200"
+                    placeholderTextColor={COLORS.white30}
+                    style={[styles.input, styles.nestedInput]}
+                    keyboardAppearance="dark"
                   />
-                </div>
+                </View>
                 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[14px] font-light text-white/50 px-0.5">Contact Link (WhatsApp / Telegram)</label>
-                  <div className="relative flex items-center">
-                    <Globe className="absolute left-3.5 text-[16px] text-white/30" size={16} />
-                    <input 
-                      type="url" 
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Contact Link (WhatsApp / Telegram)</Text>
+                  <View style={styles.usernameContainer}>
+                    <Globe size={16} color={COLORS.white30} style={styles.globeIcon} />
+                    <TextInput
                       placeholder="https://wa.me/..."
-                      className="w-full bg-void/40 border border-white/5 rounded-xl pl-10 pr-3.5 py-2.5 text-[16px] font-normal tracking-wide text-white focus:outline-none focus:border-white/20 transition-all duration-200"
+                      placeholderTextColor={COLORS.white30}
+                      style={[styles.input, styles.nestedInput, styles.globeInput]}
+                      autoCapitalize="none"
+                      keyboardType="url"
+                      keyboardAppearance="dark"
                     />
-                  </div>
-                </div>
-              </div>
+                  </View>
+                </View>
+              </View>
             )}
-          </div>
-        </section>
-      </main>
-    </div>
-  )
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.void,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: COLORS.void80,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.white5,
+  },
+  headerAction: {
+    padding: 4,
+    minWidth: 40,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.white,
+    textAlign: "center",
+    flex: 1,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "400",
+    color: COLORS.white,
+    textAlign: "right",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 112, 
+  },
+  avatarSection: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+  },
+  avatarWrapper: {
+    position: "relative",
+  },
+  avatarCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: "#27272A", 
+    borderWidth: 2,
+    borderColor: COLORS.white10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarInitials: {
+    fontSize: 28,
+    fontWeight: "300",
+    color: COLORS.white40,
+    letterSpacing: -0.5,
+  },
+  cameraBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    padding: 8,
+    backgroundColor: COLORS.ink,
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.2)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  avatarTapText: {
+    fontSize: 14,
+    color: COLORS.white40,
+    marginTop: 12,
+    letterSpacing: 0.5,
+  },
+  sectionGap: {
+    marginTop: 28,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "300",
+    color: COLORS.white50,
+    paddingHorizontal: 2,
+    marginBottom: 6,
+  },
+  input: {
+    width: "100%",
+    backgroundColor: COLORS.ink40,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 14,
+    fontWeight: "400",
+    color: COLORS.white,
+    
+  },
+  usernameContainer: {
+    position: "relative",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  usernamePrefix: {
+    position: "absolute",
+    left: 14,
+    fontSize: 14,
+    color: COLORS.white30,
+    fontWeight: "300",
+    zIndex: 1,
+  },
+  usernameInput: {
+    paddingLeft: 32,
+  },
+  textarea: {
+    minHeight: 80,
+    paddingTop: 10,
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+  sectionHeading: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white30,
+    textTransform: "uppercase",
+  },
+  verifiedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.white5,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 99,
+    gap: 4,
+  },
+  verifiedText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white40,
+  },
+  credentialsCard: {
+    backgroundColor: COLORS.ink,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    overflow: "hidden",
+  },
+  cardRow: {
+    padding: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.01)",
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.white5,
+  },
+  cardRowLabel: {
+    fontSize: 14,
+    fontWeight: "300",
+    color: COLORS.white60,
+  },
+  cardRowValue: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white90,
+  },
+  infoFooterText: {
+    fontSize: 12,
+    color: COLORS.white30,
+    paddingHorizontal: 4,
+    marginTop: 12,
+    lineHeight: 16,
+  },
+  marketplaceCard: {
+    backgroundColor: COLORS.ink,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.white5,
+    padding: 16,
+  },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+  toggleRowLeft: {
+    flexDirection: "row",
+    flex: 1,
+    gap: 12,
+  },
+  storeIcon: {
+    marginTop: 2,
+  },
+  toggleTextContent: {
+    flex: 1,
+  },
+  toggleTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.white90,
+    marginBottom: 2,
+  },
+  toggleDescription: {
+    fontSize: 12,
+    fontWeight: "300",
+    color: COLORS.white40,
+    lineHeight: 18,
+  },
+  switchTrack: {
+    width: 40,
+    height: 24,
+    borderRadius: 12,
+    padding: 2,
+    justifyContent: "center",
+  },
+  switchThumb: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
+  },
+  sellerFieldsContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.white5,
+  },
+  nestedInput: {
+    backgroundColor: "rgba(10, 10, 10, 0.4)", 
+  },
+  globeIcon: {
+    position: "absolute",
+    left: 14,
+    zIndex: 1,
+  },
+  globeInput: {
+    paddingLeft: 40,
+  },
+});

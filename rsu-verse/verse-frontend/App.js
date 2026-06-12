@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, StatusBar, Share, Alert, View, Text, } from 'react-native';
 import { HeaderLayout } from './src/components/navigation/HeaderLayout';
 import { Feed } from './src/components/feed/Feed';
-import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, ShoppingBag } from 'lucide-react-native';
+import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, ShoppingBag, Sun, Moon } from 'lucide-react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,17 +15,33 @@ import { PostDetail } from './src/assets/PostDetail';
 import { CreatePost } from './src/components/create/CreatePost';
 import { SearchPage } from './src/components/search/SearchPage';
 import { SearchFeed } from './src/components/search/SearchFeed';
+import { ProfilePage } from './src/components/profile/ProfilePage';
+import { ManageProfile } from './src/components/profile/Manage-Profile/ManageProfile';
+import { PasswordSecurity } from './src/components/profile/Password_Security/Security/PasswordSecurity';
+import { Notification } from './src/components/profile/Notification/Notification';
+import { Theme } from './src/components/profile/Theme/Theme';
+import { PrivacySafety } from './src/components/profile/privacy/PrivacySafety';
+import { AboutVerse } from './src/components/profile/AboutVerse/AboutVerse';
+import { HelpCenter } from './src/components/profile/HelpCenter/HelpCenter';
+import { ContactUs } from './src/components/profile/ContactUs/ContactUs';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 
 
-function ProfileScreenPlaceholder() {
+function ProfileScreen({ selectedTheme }) {
   return (
-    <View style={placeholderStyles.centerContainer}>
-      <Text style={placeholderStyles.text}>Profile Screen (Empty for now)</Text>
-    </View>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Profile'>
+        {(props) => (
+          <ProfilePage
+            {...props}
+            selectedTheme={selectedTheme}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
   );
 }
 
@@ -69,61 +85,6 @@ const campusFeed = [
       price: 385000,
       condition: "Used",
       category: "gadgets",
-      negotiable: true
-    },
-    theme: {
-      bg: "bg-emerald/10",
-      text: "text-emerald",
-      glow: "glow-emerald",
-      border: "border-emerald/20"
-    }
-  },
-  {
-    id: `rsu-verse-${Crypto.randomUUID()}`,
-    verse: "market",
-    time: "45m",
-    author: {
-      anonymous: false,
-      name: "Tari B.",
-      faculty: "Management Sciences",
-      department: "Accountancy",
-      level: "300",
-      rating: 4.9,
-      totalSales: 42,
-      hostel: "NDDC Block B"
-    },
-    content: {
-      text: "Nexus Compact Mini Fridge (50L capacity). Extremely energy-efficient, gets cold very fast and retains freezing even hours after a power outage. Clean interior with zero rust. Perfect size for hostel rooms.",
-      images: ["https://images.unsplash.com/photo-1571175452281-014d7e357ab9?q=80&w=600&auto=format&fit=crop"],
-      tags: ["nexus", "fridge", "appliances", "hostel"]
-    },
-    meta: {
-      createdAt: "2026-06-10T17:45:00Z",
-      location: "NDDC Female Hostel",
-      edited: false
-    },
-    engagement: {
-      upvotes: 31,
-      downvotes: 1,
-      comments: [
-        {
-          id: Crypto.randomUUID(),
-          author: { name: "Amaka", department: "Marketing" },
-          text: "Can I come check it out tomorrow morning?",
-          createdAt: "2026-06-10T18:05:00Z",
-          engagement: { upvotes: 2, downvotes: 0, replies: [], shares: 0, saves: 0, reposts: 0 }
-        }
-      ],
-      shares: 8,
-      saves: 25,
-      reposts: 3
-    },
-    userInteraction: { voteStatus: null, saved: false, reposts: false },
-    marketPlace: {
-      description: "Nexus 50L Compact Mini Fridge",
-      price: 95000,
-      condition: "Used",
-      category: "appliances",
       negotiable: true
     },
     theme: {
@@ -966,12 +927,256 @@ function PostCreation({ setPosts, setActiveFilter }) {
     </Stack.Navigator>
   )
 }
+
+function ProfileManagement({ isSellerActive, setIsSellerActive }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name='Manage_Profile'
+      >
+        {(props) => (
+          <ManageProfile
+            {...props}
+            isSellerActive={isSellerActive}
+            setIsSellerActive={setIsSellerActive}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
+
+function About({ currentYear, }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='About_Verse'>
+        {(props) => (
+          <AboutVerse
+            {...props}
+            currentYear={currentYear}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
+
+function Help({ searchQuery, setSearchQuery, }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Help_Center'>
+        {(props) => (
+          <HelpCenter
+            {...props}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
+
+
+function SecurityManagement({
+  showCurrentPassword,
+  setShowCurrentPassword,
+  showNewPassword,
+  setShowNewPassword,
+  twoFactorActive,
+  setTwoFactorActive,
+  biometricsActive,
+  setBiometricsActive, }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Manage_Security'>
+        {(props) => (
+          <PasswordSecurity
+            {...props}
+            showCurrentPassword={showCurrentPassword}
+            setShowCurrentPassword={setShowCurrentPassword}
+            showNewPassword={showNewPassword}
+            setShowNewPassword={setShowNewPassword}
+            twoFactorActive={twoFactorActive}
+            setTwoFactorActive={setTwoFactorActive}
+            biometricsActive={biometricsActive}
+            setBiometricsActive={setBiometricsActive}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
+
+function ThemeManagement({ selectedTheme, setSelectedTheme, Themes }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='ThemeSettings'>
+        {(props) => (
+          <Theme
+            {...props}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
+            Themes={Themes}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  );
+}
+
+
+function PrivacyManagaement({
+  anonymousDefault,
+  setAnonymousDefault,
+  hideDetails,
+  setHideDetails,
+  allowDirectMessages,
+  setAllowDirectMessages,
+
+}) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Privacy_Management'>
+        {(props) => (
+          <PrivacySafety
+            {...props}
+            anonymousDefault={anonymousDefault}
+            setAnonymousDefault={setAnonymousDefault}
+            hideDetails={hideDetails}
+            setHideDetails={setHideDetails}
+            allowDirectMessages={allowDirectMessages}
+            setAllowDirectMessages={setAllowDirectMessages}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  );
+}
+
+function Contact({ isOpen,
+  setIsOpen,
+  selectedTopic,
+  setSelectedTopic,
+  message,
+  setMessage,
+  isSubmitted,
+  attachment,
+  setAttachment,
+  topics,
+  handleSubmit, }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Contact_Us'>
+        {(props) => (
+          <ContactUs
+            {...props}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            selectedTopic={selectedTopic}
+            setSelectedTopic={setSelectedTopic}
+            message={message}
+            setMessage={setMessage}
+            attachment={attachment}
+            setAttachment={setAttachment}
+            topics={topics}
+            handleSubmit={handleSubmit}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
+
+function NotificationManagement({
+  pushMaster,
+  setPushMaster,
+  emailDigest,
+  setEmailDigest,
+  socialAlerts,
+  setSocialAlerts,
+  confessionAlerts,
+  setConfessionAlerts,
+  marketAlerts,
+  setMarketAlerts,
+  verseAlerts,
+  setVerseAlerts, }) {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Notification'>
+        {(props) => (
+          <Notification
+            {...props}
+            pushMaster={pushMaster}
+            setPushMaster={setPushMaster}
+            emailDigest={emailDigest}
+            setEmailDigest={setEmailDigest}
+            setSocialAlerts={setSocialAlerts}
+            socialAlerts={socialAlerts}
+            marketAlerts={marketAlerts}
+            setMarketAlerts={setMarketAlerts}
+            verseAlerts={verseAlerts}
+            setVerseAlerts={setVerseAlerts}
+            setConfessionAlerts={setConfessionAlerts}
+            confessionAlerts={confessionAlerts}
+          />
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  )
+}
 export default function App() {
   const [posts, setPosts] = useState(campusFeed);
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("/");
   const [recents, setRecents] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedTheme, setSelectedTheme] = useState("Dark");
+  const [isSellerActive, setIsSellerActive] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [twoFactorActive, setTwoFactorActive] = useState(false);
+  const [biometricsActive, setBiometricsActive] = useState(true);
+  const [pushMaster, setPushMaster] = useState(true);
+  const [emailDigest, setEmailDigest] = useState(false);
+
+  const [socialAlerts, setSocialAlerts] = useState(true);
+  const [confessionAlerts, setConfessionAlerts] = useState(false);
+  const [marketAlerts, setMarketAlerts] = useState(true);
+  const [verseAlerts, setVerseAlerts] = useState(true);
+  const [anonymousDefault, setAnonymousDefault] = useState(true);
+  const [hideDetails, setHideDetails] = useState(false);
+  const [allowDirectMessages, setAllowDirectMessages] = useState(true);
+  const currentYear = new Date().getFullYear();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const [attachment, setAttachment] = useState(null);
+
+  const topics = [
+    { id: "marketplace", label: "Marketplace & Orders" },
+    { id: "account", label: "Account & Verification" },
+    { id: "privacy", label: "Privacy & Reporting" },
+    { id: "technical", label: "App Bugs & Feedback" }
+  ];
+
+  const Themes = [
+    {
+      id: Crypto.randomUUID(),
+      theme: "Light",
+      icon: <Sun size={16} color="white" />
+    },
+    {
+      id: Crypto.randomUUID(),
+      theme: "Dark",
+      icon: <Moon size={16} color="white" />
+    }
+  ]
+
 
 
   const matchingPosts = posts.filter((post) => {
@@ -992,6 +1197,12 @@ export default function App() {
 
     return matchesText || matchesAuthor || matchesTags || matchesVerse;
   })
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (selectedTopic && message) {
+      setIsSubmitted(true);
+    }
+  };
 
   const handlePlusClick = (navigation) => {
     setActiveFilter("plus");
@@ -1219,7 +1430,129 @@ export default function App() {
             </Tab.Screen>
 
 
-            <Tab.Screen name="Profile" component={ProfileScreenPlaceholder} />
+            <Tab.Screen name="Profile">
+              {(props) => (
+                <ProfileScreen
+                  {...props}
+                  selectedTheme={selectedTheme}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen
+              name="Manage_Profile"
+              options={{
+                unmountOnBlur: true
+              }}
+            >
+              {(props) => (
+                <ProfileManagement
+                  {...props}
+                  isSellerActive={isSellerActive}
+                  setIsSellerActive={setIsSellerActive}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen name="Manage_Security">
+              {(props) => (
+                <SecurityManagement
+                  {...props}
+                  showCurrentPassword={showCurrentPassword}
+                  showNewPassword={showNewPassword}
+                  twoFactorActive={twoFactorActive}
+                  biometricsActive={biometricsActive}
+                  setShowCurrentPassword={setShowCurrentPassword}
+                  setShowNewPassword={setShowNewPassword}
+                  setTwoFactorActive={setTwoFactorActive}
+                  setBiometricsActive={setBiometricsActive}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen name="Notification">
+              {(props) => (
+                <NotificationManagement
+                  {...props}
+                  pushMaster={pushMaster}
+                  emailDigest={emailDigest}
+                  socialAlerts={socialAlerts}
+                  confessionAlerts={confessionAlerts}
+                  marketAlerts={marketAlerts}
+                  verseAlerts={verseAlerts}
+                  setPushMaster={setPushMaster}
+                  setEmailDigest={setEmailDigest}
+                  setSocialAlerts={setSocialAlerts}
+                  setConfessionAlerts={setConfessionAlerts}
+                  setMarketAlerts={setMarketAlerts}
+                  setVerseAlerts={setVerseAlerts}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen name="Theme_Management">
+              {(props) => (
+                <ThemeManagement
+                  {...props}
+                  selectedTheme={selectedTheme}
+                  setSelectedTheme={setSelectedTheme}
+                  Themes={Themes}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen name="Privacy_Management">
+              {(props) => (
+                <PrivacyManagaement
+                  {...props}
+                  anonymousDefault={anonymousDefault}
+                  hideDetails={hideDetails}
+                  allowDirectMessages={allowDirectMessages}
+                  setAnonymousDefault={setAnonymousDefault}
+                  setHideDetails={setHideDetails}
+                  setAllowDirectMessages={setAllowDirectMessages}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen name="About_Verse">
+              {(props) => (
+                <About
+                  {...props}
+                  currentYear={currentYear}
+                />
+              )}
+            </Tab.Screen>
+
+
+            <Tab.Screen name="Help_Center">
+              {(props) => (
+                <Help
+                  {...props}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                />
+              )}
+            </Tab.Screen>
+
+            <Tab.Screen name="Contact_Us">
+              {(props) => (
+                <Contact
+                  {...props}
+                  isOpen={isOpen}
+                  setIsOpen={setIsOpen}
+                  selectedTopic={selectedTopic}
+                  setSelectedTopic={setSelectedTopic}
+                  message={message}
+                  setMessage={setMessage}
+                  attachment={attachment}
+                  setAttachment={setAttachment}
+                  topics={topics}
+                  handleSubmit={handleSubmit}
+                />
+              )}
+            </Tab.Screen>
+
             <Tab.Screen name="Market">
               {(props) => (
                 <MarketPlace
@@ -1227,6 +1560,8 @@ export default function App() {
                 />
               )}
             </Tab.Screen>
+
+
 
           </Tab.Navigator>
         </View>
@@ -1252,16 +1587,3 @@ const styles = StyleSheet.create({
 });
 
 
-const placeholderStyles = StyleSheet.create({
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#121212',
-  },
-  text: {
-    color: 'rgba(255, 255, 255, 0.4)',
-    fontSize: 16,
-    fontWeight: '500',
-  }
-});
