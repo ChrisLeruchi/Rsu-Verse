@@ -1,79 +1,94 @@
-import React from "react";
-import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+import React, { useCallback } from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { FlashList } from "@shopify/flash-list"
 import { Plus } from "lucide-react-native";
-import { PostCard } from "../../assets/Postcard"; 
+import { PostCard } from "../../assets/Postcard";
 import { FeedFilter } from "./FeedFilter";
+import { FeedPostSkeleton } from "./FeedPostSkeleton";
+import { HapticEngine } from "../../../haptics";
 
-export function Feed({ 
-  posts, 
-  activeFilter, 
-  setActiveFilter, 
-  handleUpvote, 
-  handleDownvotes, 
-  handleRepost, 
-  handleSave, 
-  onPlusClick, 
-  getVerseIcon, 
+export function Feed({
+  posts,
+  activeFilter,
+  isLoading,
+  setActiveFilter,
+  handleUpvote,
+  handleDownvotes,
+  handleRepost,
+  handleSave,
+  onPlusClick,
+  getVerseIcon,
   handleShare,
   navigation
 }) {
 
+  const getItemType = useCallback((item) => {
+    if (isLoading) return 'skeleton';
+    return item?.verse || 'standard'
+  }, [isLoading]);
+
+  const renderItem = useCallback(({ item }) => {
+    if (isLoading) {
+      return <FeedPostSkeleton />
+    }
+    return (
+      <PostCard
+        post={item}
+        handleUpvote={handleUpvote}
+        handleDownvotes={handleDownvotes}
+        handleRepost={handleRepost}
+        handleShare={handleShare}
+        handleSave={handleSave}
+        getVerseIcon={getVerseIcon}
+        navigation={navigation}
+      />
+    );
+  }, [isLoading, handleUpvote, handleDownvotes, handleRepost, handleShare, handleSave, getVerseIcon, navigation]);
 
   return (
     <View style={styles.feedLayoutWrapper}>
-     
+
       <FeedFilter
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
       />
 
 
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id.toString()}
+      <FlashList
+        data={isLoading ? [1, 2, 3] : posts}
+        renderItem={renderItem}
+        getItemType={getItemType}
+        keyExtractor={(item, index) => isLoading ? `skeleton-${index}` : item.id.toString()}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        
- 
-      
-        
+        estimatedItemSize={260}
+
         ListEmptyComponent={
-          <View style={styles.emptyFeedStateBox}>
-            <Text style={styles.emptyHeadingText}>
-              No posts in this Verse yet.
-            </Text>
-            <Text style={styles.emptySubheadingText}>
-              Be the first to start the conversation.
-            </Text>
-          </View>
+          isLoading && posts.length === 0 ? (
+            <View style={styles.emptyFeedStateBox}>
+              <Text style={styles.emptyHeadingText}>
+                No posts in this Verse yet.
+              </Text>
+              <Text style={styles.emptySubheadingText}>
+                Be the first to start the conversation.
+              </Text>
+            </View>
+          ) : null
         }
-        
-       
-        renderItem={({ item }) => (
-          <PostCard
-            post={item}
-            handleUpvote={handleUpvote}
-            handleDownvotes={handleDownvotes}
-            handleRepost={handleRepost}
-            handleShare={handleShare}
-            handleSave={handleSave}
-            getVerseIcon={getVerseIcon}
-            navigation={navigation}
-          />
-        )}
       />
 
-  
-      <Pressable 
+
+      <Pressable
         onPress={() => {
+          HapticEngine.medium();
           onPlusClick?.();
         }}
         style={styles.floatingActionButton}
       >
-        <Plus 
-          size={24} 
-          strokeWidth={2.5} 
-          color="#FFFFFF" 
+        <Plus
+          size={24}
+          strokeWidth={2.5}
+          color="#FFFFFF"
         />
         <Text style={styles.fabLabelText}>Post</Text>
       </Pressable>
@@ -82,23 +97,23 @@ export function Feed({
 }
 
 const styles = StyleSheet.create({
- 
+
   feedLayoutWrapper: {
     flex: 1,
     width: "100%",
-    maxWidth: 448, 
-    alignSelf: "center", 
-    backgroundColor: "#121212", 
+    maxWidth: 448,
+    alignSelf: "center",
+    backgroundColor: '#000000',
     position: "relative",
   },
 
   listContainer: {
-    paddingBottom: 112, 
+    paddingBottom: 112,
   },
 
 
   emptyFeedStateBox: {
-    paddingVertical: 64, 
+    paddingVertical: 64,
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
@@ -106,33 +121,33 @@ const styles = StyleSheet.create({
 
 
   emptyHeadingText: {
-    fontSize: 12, 
-    fontWeight: "600", 
-    color: "rgba(255, 255, 255, 0.4)", 
-    letterSpacing: 0.5, 
+    fontSize: 12,
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.4)",
+    letterSpacing: 0.5,
     textAlign: "center",
   },
 
- 
+
   emptySubheadingText: {
     fontSize: 10,
-    color: "rgba(255, 255, 255, 0.2)", 
+    color: "rgba(255, 255, 255, 0.2)",
     textAlign: "center",
   },
 
 
   floatingActionButton: {
     position: "absolute",
-    bottom: 88, 
-    right: 20,  
+    bottom: 88,
+    right: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8, 
+    gap: 8,
     backgroundColor: "#00BA34",
     padding: 12,
-    borderRadius: 9999, 
-    
+    borderRadius: 9999,
+
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -143,8 +158,8 @@ const styles = StyleSheet.create({
 
   fabLabelText: {
     color: "#FFFFFF",
-    fontSize: 18, 
-    fontWeight: "600", 
-    letterSpacing: 0.5, 
+    fontSize: 18,
+    fontWeight: "600",
+    letterSpacing: 0.5,
   }
 });

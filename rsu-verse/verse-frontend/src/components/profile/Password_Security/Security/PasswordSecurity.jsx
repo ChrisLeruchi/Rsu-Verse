@@ -23,9 +23,9 @@ import {
 } from "lucide-react-native";
 
 const COLORS = {
-  void: "#0A0A0A",
+  void: "#000000",
   void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#161618",
+  ink: "#1A1A1A",
   ink40: "rgba(22, 22, 24, 0.4)",
   cyan: "#17CB49",
   white: "#FFFFFF",
@@ -59,7 +59,7 @@ export function PasswordSecurity({
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
-        
+
       };
     }, [])
   );
@@ -70,8 +70,7 @@ export function PasswordSecurity({
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation?.navigate("Profile")}
-          style={styles.headerAction}
+          onPress={() => navigation?.goBack()} style={styles.headerAction}
           activeOpacity={0.7}
         >
           <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
@@ -279,9 +278,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void80,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
+    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
@@ -314,13 +311,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     marginBottom: 12,
   },
-  passwordCard: {
-    backgroundColor: COLORS.ink,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
-    padding: 16,
-  },
+
   inputGroup: {
     marginBottom: 16,
   },
@@ -338,9 +329,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    backgroundColor: COLORS.void40,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
+    backgroundColor: COLORS.ink,
     borderRadius: 12,
     paddingLeft: 14,
     paddingRight: 60,
@@ -379,8 +368,6 @@ const styles = StyleSheet.create({
   togglesCard: {
     backgroundColor: COLORS.ink,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     padding: 4,
   },
   toggleRow: {
@@ -413,11 +400,7 @@ const styles = StyleSheet.create({
     color: COLORS.white40,
     lineHeight: 18,
   },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.white5,
-    marginHorizontal: 16,
-  },
+
   switchTrack: {
     width: 40,
     height: 24,
@@ -433,8 +416,6 @@ const styles = StyleSheet.create({
   sessionsCard: {
     backgroundColor: COLORS.ink,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     overflow: "hidden",
   },
   sessionItem: {
@@ -444,10 +425,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "rgba(255, 255, 255, 0.01)",
   },
-  borderedSessionItem: {
-    borderTopWidth: 1,
-    borderTopColor: COLORS.white5,
-  },
+
   sessionItemLeft: {
     flexDirection: "row",
     alignItems: "center",
@@ -457,8 +435,6 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: COLORS.void,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
   },
   sessionMeta: {
     flexDirection: "column",
@@ -495,8 +471,6 @@ const styles = StyleSheet.create({
   logoutOthersButton: {
     width: "100%",
     backgroundColor: COLORS.ink,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     borderRadius: 16,
     padding: 16,
     flexDirection: "row",

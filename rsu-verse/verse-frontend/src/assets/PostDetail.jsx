@@ -317,9 +317,9 @@ export function PostDetail({
                               onPress={() => setViewReply(viewReply === comment.id ? null : comment.id)}
                               style={styles.actionInlineLink}
                             >
-                              <Text style={[styles.controlLinkText, viewReply === comment.id && styles.activeTextLink]}>
-                                {viewReply === comment.id ? "Hide Replies" : `View ${replyCount === 0 ? '' : replyCount} repl${replyCount > 1 || replyCount === 0 ? 'ies' : 'y'}`}
-                              </Text>
+                              {replyCount > 0 ? <Text style={[styles.controlLinkText, viewReply === comment.id && styles.activeTextLink]}>
+                                {viewReply === comment.id ? 'Hide replies' : `View ${replyCount === 0 ? '' : replyCount} repl${replyCount > 1 || replyCount === 0 ? 'ies' : 'y'}`}
+                              </Text> : ''}
                             </Pressable>
                           </View>
 
@@ -445,10 +445,10 @@ export function PostDetail({
 const styles = StyleSheet.create({
   screenWrapper: {
     flex: 1,
-    backgroundColor: "#0D0F14",
+    backgroundColor: '#000000',
   },
   safeAreaHeader: {
-    backgroundColor: "#0D0F14",
+    backgroundColor: '#000000',
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.04)",
   },
@@ -483,10 +483,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cardDefault: {
-    backgroundColor: "#131722",
+    backgroundColor: '#000000',
   },
   cardConfession: {
-    backgroundColor: "rgba(245, 158, 11, 0.04)",
+    backgroundColor: "rgba(245, 158, 11, 0.1)",
   },
   authorRow: {
     paddingHorizontal: 16,
@@ -731,7 +731,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   fixedFooterInputArea: {
-    backgroundColor: "rgba(13, 15, 20, 0.96)",
+    backgroundColor: "#000000",
     borderTopWidth: 1,
     borderTopColor: "rgba(255, 255, 255, 0.05)",
     paddingHorizontal: 16,
@@ -779,7 +779,7 @@ const styles = StyleSheet.create({
   },
   nativeCommentInput: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    backgroundColor: "#1A1A1A",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.04)",
     borderRadius: 20,
@@ -800,7 +800,7 @@ const styles = StyleSheet.create({
     opacity: 0.25,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
-  errorContainer: { flex: 1, backgroundColor: "#0D0F14", alignItems: "center", justifyCenter: "center", padding: 24 },
+  errorContainer: { flex: 1, backgroundColor: "#1A1A1A", alignItems: "center", justifyCenter: "center", padding: 24 },
   errorText: { color: "rgba(255, 255, 255, 0.4)", fontSize: 13, textAlign: "center" },
   backButtonInline: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 14 },
   backButtonInlineText: { color: "#00BA34", fontSize: 13, fontWeight: "600" },

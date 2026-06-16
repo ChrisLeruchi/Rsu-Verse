@@ -21,18 +21,21 @@ import {
 import VerseLogo from '../../../../public/favicon.png'
 
 const COLORS = {
-  void: "#0A0A0A",
+  void: "#000000",
   void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#161618",
+  ink: "#1A1A1A",
+  ink40: "rgba(22, 22, 24, 0.4)",
+  cyan: "#17CB49",
   white: "#FFFFFF",
   white5: "rgba(255, 255, 255, 0.05)",
+  white10: "rgba(255, 255, 255, 0.1)",
+  white20: "rgba(255, 255, 255, 0.2)",
   white30: "rgba(255, 255, 255, 0.3)",
   white40: "rgba(255, 255, 255, 0.4)",
   white50: "rgba(255, 255, 255, 0.5)",
   white60: "rgba(255, 255, 255, 0.6)",
   white90: "rgba(255, 255, 255, 0.9)",
 };
-
 export function AboutVerse({ currentYear, navigation }) {
   const scrollViewRef = useRef(null);
   const [localInput, setLocalInput] = useState("");
@@ -54,8 +57,7 @@ export function AboutVerse({ currentYear, navigation }) {
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation?.navigate("Profile")}
-          style={styles.headerAction}
+          onPress={() => navigation?.goBack()} style={styles.headerAction}
           activeOpacity={0.7}
         >
           <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
@@ -163,9 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void80,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
+    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
@@ -207,7 +207,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: COLORS.white,
-    letterSpacing: -0.4,
   },
   heroVersion: {
     fontSize: 14,
@@ -226,7 +225,6 @@ const styles = StyleSheet.create({
     color: COLORS.white60,
     textAlign: "center",
     lineHeight: 24,
-    letterSpacing: -0.16,
   },
   linksSection: {
     gap: 10,
@@ -242,8 +240,6 @@ const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: COLORS.ink,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     overflow: "hidden",
   },
   rowItem: {
@@ -252,10 +248,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
   },
-  rowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
-  },
+
   rowLeft: {
     flexDirection: "row",
     alignItems: "center",

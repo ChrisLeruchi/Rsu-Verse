@@ -21,9 +21,9 @@ import {
 } from "lucide-react-native";
 
 const COLORS = {
-  void: "#0A0A0A",
+  void: "#000000",
   void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#161618",
+  ink: "#1A1A1A",
   ink40: "rgba(22, 22, 24, 0.4)",
   cyan: "#17CB49",
   white: "#FFFFFF",
@@ -72,8 +72,7 @@ export function Notification({
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation?.navigate("Profile")}
-          style={styles.headerAction}
+          onPress={() => navigation?.goBack()} style={styles.headerAction}
           activeOpacity={0.7}
         >
           <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
@@ -295,9 +294,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void80,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
+    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
@@ -333,8 +330,6 @@ const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: COLORS.ink,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     padding: 4,
   },
   row: {
@@ -370,11 +365,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     lineHeight: 18,
   },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.white5,
-    marginHorizontal: 16,
-  },
+
   switchTrack: {
     width: 40,
     height: 24,

@@ -14,9 +14,9 @@ import {
 import { ArrowLeft, Camera, Store, GraduationCap, Globe } from "lucide-react-native";
 
 const COLORS = {
-  void: "#0A0A0A",
+  void: "#000000",
   void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#161618", 
+  ink: "#1A1A1A", 
   ink40: "rgba(22, 22, 24, 0.4)",
   cyan:"#17CB49", 
   white: "#FFFFFF",
@@ -30,9 +30,19 @@ const COLORS = {
   white90: "rgba(255, 255, 255, 0.9)",
 };
 
-export function ManageProfile({ isSellerActive, setIsSellerActive, navigation }) {
+export function ManageProfile({ isSellerActive, setIsSellerActive, navigation, bio, setBio, displayName, setDisplayName, username, setUsername }) {
+
+  const [localBio, setLocalBio] = useState(bio || "")
+  const [localDisplayName, setLocalDisplayName] = useState(displayName || "")
+  const [localUsername, setLocalUsername] = useState(username || "")
 
 
+  const handleSave = ()=>{
+    setBio(localBio)
+    setDisplayName(localDisplayName)
+    setUsername(localUsername)
+    navigation?.goBack();
+  }
 
   const scrollViewRef = useRef(null);
   const [localInput, setLocalInput] = useState("");
@@ -46,6 +56,8 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation })
       };
     }, [])
   );
+  
+  const isDisabled = localDisplayName === '' || localUsername === ''
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -54,7 +66,7 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation })
       
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation?.navigate('Profile')}
+          onPress={() => navigation?.goBack()}
           style={styles.headerAction}
           activeOpacity={0.7}
         >
@@ -63,8 +75,12 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation })
 
         <Text style={styles.headerTitle}>Edit Profile</Text>
 
-        <TouchableOpacity style={styles.headerAction} activeOpacity={0.7}>
-          <Text style={styles.saveButtonText}>Save</Text>
+        <TouchableOpacity style={styles.headerAction} activeOpacity={0.7}
+        disabled={isDisabled} 
+        onPress={handleSave}>
+          <Text style= {isDisabled ? styles.disabledSaveButtonText : styles.saveButtonText
+            
+          }>Save</Text>
         </TouchableOpacity>
       </View>
 
@@ -94,7 +110,8 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation })
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Display Name</Text>
             <TextInput
-              defaultValue="Christopher Igwe"
+              value={localDisplayName}
+              onChangeText={setLocalDisplayName}
               style={styles.input}
               placeholder="Name seen on public actions"
               placeholderTextColor={COLORS.white30}
@@ -108,7 +125,8 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation })
             <View style={styles.usernameContainer}>
               <Text style={styles.usernamePrefix}>@</Text>
               <TextInput
-                defaultValue="chris_igwe"
+                value={localUsername}
+                onChangeText={setLocalUsername}
                 style={[styles.input, styles.usernameInput]}
                 placeholder="your_handle"
                 placeholderTextColor={COLORS.white30}
@@ -122,7 +140,8 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation })
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Bio</Text>
             <TextInput
-              defaultValue="Coffee addict."
+              value={localBio}
+              onChangeText={setLocalBio}
               style={[styles.input, styles.textarea]}
               placeholder="Tell the campus who you are..."
               placeholderTextColor={COLORS.white30}
@@ -242,9 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: "between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void80,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
+    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
@@ -261,6 +278,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "400",
     color: COLORS.white,
+    textAlign: "right",
+  },
+  disabledSaveButtonText: {
+    fontSize: 16,
+    fontWeight: "400",
+    color: COLORS.white40,
     textAlign: "right",
   },
   scrollView: {
@@ -283,7 +306,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: "#27272A", 
+    backgroundColor: "#1A1A1A", 
     borderWidth: 2,
     borderColor: COLORS.white10,
     alignItems: "center",
@@ -332,7 +355,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    backgroundColor: COLORS.ink40,
+    backgroundColor: COLORS.ink,
     borderWidth: 1,
     borderColor: COLORS.white5,
     borderRadius: 12,
@@ -402,8 +425,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.01)",
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
   },
   cardRowLabel: {
     fontSize: 14,

@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, Modal } from "react-native";
 import { Bell, UserCircle2, LockKeyhole, ArrowRight, NotebookText, SunMoon, EyeOff, HelpCircle, Mail, ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X } from "lucide-react-native";
 
-export function ProfilePage({ navigation, selectedTheme }) {
+export function ProfilePage({ navigation, selectedTheme, bio, setBio, displayName, setDisplayName, username, setUsername }) {
   const [isStatsOpen, setIsStatsOpen] = useState(false);
 
   const scrollViewRef = useRef(null);
@@ -11,7 +11,6 @@ export function ProfilePage({ navigation, selectedTheme }) {
 
   useFocusEffect(
     useCallback(() => {
-
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
@@ -21,7 +20,7 @@ export function ProfilePage({ navigation, selectedTheme }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#09090B" />
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Your Profile</Text>
@@ -42,7 +41,7 @@ export function ProfilePage({ navigation, selectedTheme }) {
           <View style={styles.avatarPlaceholder} />
           <View style={styles.identityMeta}>
             <View style={styles.profileNameRow}>
-              <Text style={styles.profileName}>Christopher Igwe</Text>
+              <Text style={styles.profileName}>{displayName}</Text>
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => setIsStatsOpen(true)}
@@ -51,7 +50,7 @@ export function ProfilePage({ navigation, selectedTheme }) {
                 <ChevronDown size={18} color="rgba(255, 255, 255, 0.4)" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.bio}>13th disciple  📿 </Text>
+            <Text style={styles.bio}>{bio}</Text>
 
             <View style={styles.tagRow}>
               <View style={styles.deptTag}>
@@ -106,7 +105,6 @@ export function ProfilePage({ navigation, selectedTheme }) {
           </View>
         </View>
 
-
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Preferences</Text>
           <View style={styles.cardGroup}>
@@ -138,7 +136,6 @@ export function ProfilePage({ navigation, selectedTheme }) {
             </TouchableOpacity>
           </View>
         </View>
-
 
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Support</Text>
@@ -189,7 +186,6 @@ export function ProfilePage({ navigation, selectedTheme }) {
         onRequestClose={() => setIsStatsOpen(false)}
       >
         <View style={styles.modalOverlay}>
-
           <TouchableOpacity
             style={styles.backdropPressable}
             activeOpacity={1}
@@ -197,7 +193,6 @@ export function ProfilePage({ navigation, selectedTheme }) {
           />
 
           <View style={styles.bottomSheetContainer}>
-
             <View style={styles.sheetHandle} />
 
             <View style={styles.sheetHeader}>
@@ -242,13 +237,12 @@ export function ProfilePage({ navigation, selectedTheme }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#09090B",
+    backgroundColor: "#000000",
   },
   mainContainer: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 100,
   },
@@ -259,9 +253,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    backgroundColor: "rgba(9, 9, 11, 0.8)",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
   headerTitle: {
     fontSize: 18,
@@ -286,7 +278,7 @@ const styles = StyleSheet.create({
   heroRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
     marginBottom: 24,
     gap: 16,
   },
@@ -294,9 +286,9 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#27272A",
+    backgroundColor: "#16181C",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "#2F3336",
   },
   identityMeta: {
     flexDirection: "column",
@@ -338,12 +330,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: "#16181C",
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: "#2F3336",
   },
   tagText: {
     color: "rgba(255, 255, 255, 0.8)",
@@ -361,11 +353,9 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
   },
-
-
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.65)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "flex-end",
   },
   backdropPressable: {
@@ -376,19 +366,17 @@ const styles = StyleSheet.create({
     right: 0,
   },
   bottomSheetContainer: {
-    backgroundColor: "#121214",
+    backgroundColor: "#000000",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingHorizontal: 20,
     paddingBottom: 40,
     paddingTop: 10,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 16,
@@ -398,6 +386,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
+    paddingHorizontal: 16
   },
   sheetTitle: {
     fontSize: 16,
@@ -412,10 +401,7 @@ const styles = StyleSheet.create({
   },
   metricBox: {
     width: "100%",
-    backgroundColor: "#1A1A1E",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: "#1A1A1A",
     padding: 16,
   },
   metricHeaderRow: {
@@ -437,18 +423,14 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     letterSpacing: -0.5,
   },
-
   sectionHeader: {
     fontSize: 16,
     fontWeight: "600",
+    paddingHorizontal: 16,
     color: "rgba(255, 255, 255, 0.9)",
-    paddingHorizontal: 4,
   },
   cardGroup: {
-    backgroundColor: "#16161A",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "#1A1A1A",
     overflow: "hidden",
   },
   rowItemBordered: {
@@ -456,8 +438,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
   rowItemClean: {
     flexDirection: "row",

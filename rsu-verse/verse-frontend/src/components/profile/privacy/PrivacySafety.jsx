@@ -1,4 +1,4 @@
-import React, {useRef, useCallback, useState} from "react";
+import React, { useRef, useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
@@ -19,9 +19,10 @@ import {
 } from "lucide-react-native";
 
 const COLORS = {
-  void: "#0A0A0A",
+  void: "#000000",
   void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#161618",
+  ink: "#1A1A1A",
+  ink40: "rgba(22, 22, 24, 0.4)",
   cyan: "#17CB49",
   white: "#FFFFFF",
   white5: "rgba(255, 255, 255, 0.05)",
@@ -29,11 +30,10 @@ const COLORS = {
   white20: "rgba(255, 255, 255, 0.2)",
   white30: "rgba(255, 255, 255, 0.3)",
   white40: "rgba(255, 255, 255, 0.4)",
+  white50: "rgba(255, 255, 255, 0.5)",
   white60: "rgba(255, 255, 255, 0.6)",
-  white80: "rgba(255, 255, 255, 0.8)",
-  white95: "rgba(255, 255, 255, 0.95)",
+  white90: "rgba(255, 255, 255, 0.9)",
 };
-
 export function PrivacySafety({
   anonymousDefault,
   setAnonymousDefault,
@@ -64,8 +64,7 @@ export function PrivacySafety({
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation?.navigate("Profile")}
-          style={styles.headerAction}
+          onPress={() => navigation?.goBack()} style={styles.headerAction}
           activeOpacity={0.7}
         >
           <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
@@ -222,9 +221,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void80,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
+    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
@@ -254,7 +251,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: COLORS.white30,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
     paddingHorizontal: 4,
   },
   cardContainer: {
@@ -288,18 +284,13 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: COLORS.white95,
+    color: COLORS.white90,
   },
   rowSubText: {
     fontSize: 12,
     fontWeight: "300",
     color: COLORS.white40,
 
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.white5,
-    marginHorizontal: 16,
   },
 
   toggleTrack: {
@@ -341,14 +332,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: COLORS.ink,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     borderRadius: 16,
     padding: 16,
   },
   navigationTitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: COLORS.white80,
+    color: COLORS.white90,
   },
 });

@@ -183,19 +183,17 @@ export function Market({ posts = [] }) {
 const styles = StyleSheet.create({
   screenWrapper: {
     flex: 1,
-    backgroundColor: "#121212",
+    backgroundColor: "#000000",
   },
   safeAreaHeader: {
-    backgroundColor: '#121212',
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: '#000000',
   },
   headerContainer: {
     height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    backgroundColor: '#121212',
+    backgroundColor: '#000000',
   },
   headerText: {
     fontSize: 26,
@@ -211,15 +209,11 @@ const styles = StyleSheet.create({
   controlsWrapper: {
     gap: 12,
     marginBottom: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
     paddingBottom: 16,
   },
   searchBarContainer: {
     flexDirection: "row",
     backgroundColor: "#1A1A1A",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 12,
     alignItems: "center",
     paddingHorizontal: 14,
@@ -240,7 +234,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
-    borderWidth: 1,
   },
   categoryButtonActive: {
     borderColor: "rgba(0, 186, 52, 0.3)",
@@ -271,8 +264,6 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     backgroundColor: "#1A1A1A",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
     flexGrow: 1,
     justifyContent: "space-between",
     padding: 8,
@@ -284,7 +275,7 @@ const styles = StyleSheet.create({
   imageBox: {
     width: "100%",
     aspectRatio: 1,
-    backgroundColor: "#121212",
+    backgroundColor: "#1A1A1A",
     borderRadius: 6,
     overflow: "hidden",
     position: "relative",
@@ -307,8 +298,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   conditionText: {
     fontSize: 11,
@@ -327,8 +316,7 @@ const styles = StyleSheet.create({
   },
   cardFooterPanel: {
     paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.05)",
+    
     gap: 8,
     marginTop: 8,
   },

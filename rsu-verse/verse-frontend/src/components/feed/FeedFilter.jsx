@@ -1,5 +1,8 @@
 import { View, ScrollView, StyleSheet, Pressable, Text } from "react-native";
+import React, {useState, useRef, useCallback,} from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, Clock } from "lucide-react-native";
+import { HapticEngine } from "../../../haptics";
 
 
 export function FeedFilter({ activeFilter, setActiveFilter }) {
@@ -9,16 +12,30 @@ export function FeedFilter({ activeFilter, setActiveFilter }) {
     { id: "new", label: "New", icon: Clock, isRose: false },
     { id: "gist", label: "Gist", icon: MessagesSquare, isRose: false },
     { id: 'confession', label: "Confession", icon: Flame, isRose: true },
-    { id: "Music", label: "Music", icon: Music, isRose: false },
+    { id: "music", label: "Music", icon: Music, isRose: false },
     { id: "politics", label: "Politics", icon: Landmark, isRose: false },
     { id: "relationship", label: "Relationship", icon: HeartHandshake, isRose: false },
   ]
+
+   const scrollViewRef = useRef(null);
+    const [localInput, setLocalInput] = useState("");
+  
+    useFocusEffect(
+      useCallback(() => {
+  
+        return () => {
+          scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+          setLocalInput("");
+        };
+      }, [])
+    );
   return (
-    <View style={styles.stickContainer}>
+    <View style={styles.stickyContainer}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        ref={scrollViewRef}
       >
         {filters.map((verse) => {
           const Icon = verse.icon
@@ -36,7 +53,9 @@ export function FeedFilter({ activeFilter, setActiveFilter }) {
           return (
             <Pressable
               key={verse.id}
-              onPress={() => setActiveFilter(verse.id)}
+              onPress={() => {
+                HapticEngine.selection();
+                setActiveFilter(verse.id)}}
               style={[
                 styles.tabButton,
                 isActive ? {
@@ -71,7 +90,7 @@ const styles = StyleSheet.create({
   
   stickyContainer: {
     width: "100%",
-    backgroundColor: "rgba(18, 18, 18, 0.8)",  
+    backgroundColor: "#000000",  
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
@@ -79,6 +98,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: '#000000'
   },
 
   tabButton: {

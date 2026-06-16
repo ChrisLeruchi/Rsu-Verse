@@ -1,31 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { 
-  ShoppingBag, 
-  MessagesSquare, 
-  ArrowLeft, 
-  Image as ImageIcon, 
-  ShieldAlert, 
-  X, 
-  Flame, 
-  Landmark, 
-  Music, 
-  HeartHandshake, 
-  ChevronDown, 
-  Check 
+import {
+  ShoppingBag,
+  MessagesSquare,
+  ArrowLeft,
+  Image as ImageIcon,
+  ShieldAlert,
+  X,
+  Flame,
+  Landmark,
+  Music,
+  HeartHandshake,
+  ChevronDown,
+  Check
 } from "lucide-react-native";
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  Pressable, 
-  Image, 
-  ScrollView, 
-  Platform, 
-  KeyboardAvoidingView, 
-  Alert, 
-  StyleSheet 
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Image,
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
+  Alert,
+  Keyboard,
+  StyleSheet
 } from "react-native";
 import * as Crypto from 'expo-crypto';
 import * as ImagePicker from "expo-image-picker";
@@ -45,6 +46,21 @@ export function CreatePost({ setPosts, setActiveFilter }) {
   const [category, setCategory] = useState("general");
 
   const [isOpen, setIsOpen] = useState(false);
+
+  // Focus reference management
+  const inputRef = useRef(null);
+
+  // Manage keyboard auto-focus side effects dynamically
+  useEffect(() => {
+    if (verse !== "market") {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      Keyboard.dismiss();
+    }
+  }, [verse]);
 
   const handlePickImage = async () => {
     if (images.length >= 4) {
@@ -96,7 +112,7 @@ export function CreatePost({ setPosts, setActiveFilter }) {
         glow: "glow-cyan",
         border: "border-cyan/20"
       };
-    } else if (["market", "music", "politics", "relationship"].includes(verse)) {
+    } else if (["music", "politics", "relationship"].includes(verse)) {
       themeConfig = {
         bg: "bg-cyan/10",
         text: "text-cyan",
@@ -111,7 +127,6 @@ export function CreatePost({ setPosts, setActiveFilter }) {
     const newTransmission = {
       id: `rsu-verse-${Crypto.randomUUID()}`,
       verse,
-      time: "Just Now",
       author: {
         anonymous: verse === "market" ? false : isAnonymous,
         name: displayName,
@@ -158,7 +173,6 @@ export function CreatePost({ setPosts, setActiveFilter }) {
 
     setPosts((prevPosts) => [newTransmission, ...prevPosts]);
 
-    // Clear form states after post submission
     setText("");
     setPrice("");
     setCondition("Used");
@@ -176,13 +190,26 @@ export function CreatePost({ setPosts, setActiveFilter }) {
     }
   };
 
+  const handleCancel = () => {
+    navigation.navigate("HomeIndex");
+    setActiveFilter('all');
+    setText("")
+    setPrice("");
+    setVerse("gist");
+    setImages([]);
+    setPrice("");
+    setCondition("Used");
+    setCategory("general");
+    setIsOpen(false);
+  }
+
   const channels = [
-    { id: "gist", label: "Gist", icon: <MessagesSquare size={16} color={verse === "gist" ? "#00BA34" : "rgba(255,255,255,0.4)"} />, activeStyle: styles.activeCyan },
-    { id: "market", label: "Market", icon: <ShoppingBag size={16} color={verse === "market" ? "#00BA34" : "rgba(255,255,255,0.4)"} />, activeStyle: styles.activeCyan },
-    { id: "confession", label: "Confession", icon: <Flame size={16} color={verse === "confession" ? "#F59E0B" : "rgba(255,255,255,0.4)"} />, activeStyle: styles.activeRose },
-    { id: "music", label: "Music", icon: <Music size={16} color={verse === "music" ? "#00BA34" : "rgba(255,255,255,0.4)"} />, activeStyle: styles.activeCyan },
-    { id: "politics", label: "Politics", icon: <Landmark size={16} color={verse === "politics" ? "#00BA34" : "rgba(255,255,255,0.4)"} />, activeStyle: styles.activeCyan },
-    { id: "relationship", label: "Relationship", icon: <HeartHandshake size={16} color={verse === "relationship" ? "#00BA34" : "rgba(255,255,255,0.4)"} />, activeStyle: styles.activeCyan },
+    { id: "gist", label: "Gist", icon: <MessagesSquare size={14} color={verse === "gist" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
+    { id: "market", label: "Market", icon: <ShoppingBag size={14} color={verse === "market" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
+    { id: "confession", label: "Confession", icon: <Flame size={14} color={verse === "confession" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
+    { id: "music", label: "Music", icon: <Music size={14} color={verse === "music" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
+    { id: "politics", label: "Politics", icon: <Landmark size={14} color={verse === "politics" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
+    { id: "relationship", label: "Relationship", icon: <HeartHandshake size={14} color={verse === "relationship" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
   ];
 
   const isShareDisabled = verse === "market"
@@ -194,26 +221,24 @@ export function CreatePost({ setPosts, setActiveFilter }) {
       <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeHeader}>
         <View style={styles.headerRow}>
           <Pressable
-            onPress={() => {
-              setActiveFilter("all");
-              navigation.navigate("HomeIndex");
-            }}
+            onPress={handleCancel}
             disabled={isSubmitting}
-            style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.6 }]}
+            style={styles.backBtn}
           >
-            <ArrowLeft size={20} color="#FFFFFF" />
+            <Text style={styles.cancelText}>Cancel</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>New Post</Text>
+
           <Pressable
             onPress={handleBroadcast}
             disabled={isShareDisabled}
             style={[
               styles.shareBtn,
-              verse === "confession" ? styles.bgRose : styles.bgCyan, isShareDisabled && styles.disabledBtn
+              verse === "confession" ? styles.bgRose ? styles.bgRose : styles.bgCyan : styles.bgCyan,
+              isShareDisabled && styles.disabledBtn
             ]}
           >
             <Text style={styles.shareBtnText}>
-              {isSubmitting ? "Posting..." : "Post"}
+              {isSubmitting ? "Posting" : "Post"}
             </Text>
           </Pressable>
         </View>
@@ -226,57 +251,57 @@ export function CreatePost({ setPosts, setActiveFilter }) {
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={[
-            styles.scrollContent, 
+            styles.scrollContent,
             { paddingBottom: insets.bottom + 40 }
           ]}
+          nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps={verse === "market" ? "handled" : "always"}
         >
-          <View style={styles.profileBar}>
-            <View style={styles.avatarMock} />
-            <Text style={styles.profileName}>
-              {isAnonymous && verse !== "market" ? "Comp Eng" : "Christopher Igwe"}
-            </Text>
-          </View>
 
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionLabel}>Select Verse</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.channelsScroll}
+              keyboardShouldPersistTaps="always"
             >
-              {channels.map((channel) => (
-                <Pressable
-                  key={channel.id}
-                  onPress={() => setVerse(channel.id)}
-                  style={[
-                    styles.channelButton,
-                    verse === channel.id ? channel.activeStyle : styles.inactiveChannel
-                  ]}
-                >
-                  {channel.icon}
-                  <Text
+              {channels.map((channel) => {
+                const isSelected = verse === channel.id;
+                return (
+                  <Pressable
+                    key={channel.id}
+                    onPress={() => setVerse(channel.id)}
                     style={[
-                      styles.channelButtonText,
-                      verse === channel.id ? (channel.id === "confession" ? styles.textRose : styles.textCyan) : styles.textInactive
+                      styles.channelButton,
+                      isSelected ? (channel.id === "confession" ? styles.bgRoseTab : styles.bgCyanTab) : styles.inactiveChannel
                     ]}
                   >
-                    {channel.label}
-                  </Text>
-                </Pressable>
-              ))}
+                    {channel.icon}
+                    <Text style={[styles.channelButtonText, isSelected ? styles.textWhite : styles.textInactive]}>
+                      {channel.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </ScrollView>
           </View>
 
-          <View style={styles.paddingWrapper}>
-            <View style={styles.editorCard}>
+
+          <View style={styles.composeFlowContainer}>
+            <View style={styles.avatarColumn}>
+              <View style={styles.avatarMock} />
+            </View>
+
+            <View style={styles.editorColumn}>
               <TextInput
+                ref={inputRef}
                 value={text}
                 maxLength={500}
                 onChangeText={setText}
                 multiline
-                placeholder={verse === "market" ? "Describe what you want to sell..." : "What's on your mind?..."}
-                placeholderTextColor="rgba(255, 255, 255, 0.2)"
+                placeholder={verse === "market" ? "What are you selling? Describe it here..." : "What's happening?..."}
+                placeholderTextColor="rgba(255, 255, 255, 0.4)"
                 style={styles.textAreaInput}
                 textAlignVertical="top"
               />
@@ -284,23 +309,32 @@ export function CreatePost({ setPosts, setActiveFilter }) {
               {images.length > 0 && (
                 <View style={styles.imagesGrid}>
                   {images.map((url, index) => (
-                    <View key={index} style={styles.imagePreviewWrapper}>
+                    <View key={index} style={[
+                      styles.imagePreviewWrapper,
+                      images.length === 1 ? styles.singleImageWidth : styles.multiImageWidth
+                    ]}>
                       <Image source={{ uri: url }} style={styles.previewImage} />
                       <Pressable
                         onPress={() => handleRemoveImage(index)}
                         style={styles.removeImageBadge}
                       >
-                        <X size={12} color="rgba(255,255,255,0.8)" />
+                        <X size={14} color="#FFFFFF" />
                       </Pressable>
                     </View>
                   ))}
                 </View>
               )}
 
+
+            </View>
+          </View>
+
+          {/* Optional Sub-spec Blocks Formats */}
+          {verse === "market" && (
+            <View style={styles.specSectionWrapper}>
               <View style={styles.editorToolbar}>
                 <Pressable onPress={handlePickImage} style={styles.mediaPickerBtn}>
                   <ImageIcon size={20} color={verse === "confession" ? "#F59E0B" : "#00BA34"} />
-                  <Text style={styles.mediaPickerBtnText}>Media</Text>
                 </Pressable>
 
                 <View style={styles.metaCounters}>
@@ -310,18 +344,13 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                   {images.length > 0 && (
                     <>
                       <Text style={styles.counterDot}>•</Text>
-                      <Text style={styles.counterText}>{images.length} attached</Text>
+                      <Text style={styles.counterText}>{images.length}/4</Text>
                     </>
                   )}
                 </View>
               </View>
-            </View>
-          </View>
-
-          {verse === "market" && (
-            <View style={styles.paddingWrapper}>
               <View style={styles.specCard}>
-                <Text style={styles.specTitle}>ITEM SPEC</Text>
+                <Text style={styles.specTitle}>Item Specifications</Text>
 
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>PRICE (₦)</Text>
@@ -331,8 +360,8 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                     onChangeText={(val) => {
                       if (val === "" || Number(val) >= 0) setPrice(val);
                     }}
-                    placeholder="e.g 10000"
-                    placeholderTextColor="rgba(255,255,255,0.2)"
+                    placeholder="Set your price"
+                    placeholderTextColor="rgba(255,255,255,0.3)"
                     style={styles.numericInput}
                   />
                 </View>
@@ -340,26 +369,21 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>CONDITION</Text>
                   <View style={styles.segmentedControl}>
-                    {["Brand New", "Used", "Fixable"].map((cond) => (
-                      <Pressable
-                        key={cond}
-                        disabled={isSubmitting}
-                        onPress={() => setCondition(cond)}
-                        style={[
-                          styles.segmentButton,
-                          condition === cond ? styles.activeSegment : styles.inactiveSegment
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.segmentText,
-                            condition === cond ? styles.textCyan : styles.textInactive
-                          ]}
+                    {["Brand New", "Used", "Fixable"].map((cond) => {
+                      const isSelected = condition === cond;
+                      return (
+                        <Pressable
+                          key={cond}
+                          disabled={isSubmitting}
+                          onPress={() => setCondition(cond)}
+                          style={[styles.segmentButton, isSelected && styles.activeSegment]}
                         >
-                          {cond === "Fixable" ? "Needs Repair" : cond}
-                        </Text>
-                      </Pressable>
-                    ))}
+                          <Text style={[styles.segmentText, isSelected ? styles.textWhite : styles.textInactive]}>
+                            {cond === "Fixable" ? "Needs Repair" : cond}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
                   </View>
                 </View>
 
@@ -382,17 +406,16 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                           { id: "food", label: "Provisions" }
                         ].find(c => c.id === category)?.label || "Select Category"}
                       </Text>
-                      <View style={[styles.chevronWrapper, isOpen && styles.chevronRotated]}>
-                        <ChevronDown size={18} color={isOpen ? "#00BA34" : "rgba(255,255,255,0.4)"} />
-                      </View>
+                      <ChevronDown size={16} color="rgba(255,255,255,0.4)" />
                     </Pressable>
 
                     {isOpen && (
                       <View style={styles.dropdownMenuPlate}>
-                        <ScrollView 
-                          nestedScrollEnabled={true} 
+                        <ScrollView
+                          nestedScrollEnabled={true}
                           style={styles.dropdownScroll}
                           showsVerticalScrollIndicator={true}
+                          keyboardShouldPersistTaps="handled"
                         >
                           {[
                             { id: "all", label: "All" },
@@ -416,17 +439,13 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                                 style={({ pressed }) => [
                                   styles.dropdownItem,
                                   isSelected && styles.dropdownItemActive,
-                                  pressed && { backgroundColor: "rgba(255,255,255,0.02)" }
+                                  pressed && { backgroundColor: "rgba(255,255,255,0.03)" }
                                 ]}
                               >
-                                <Text style={[styles.itemText, isSelected ? styles.textCyan : styles.textInactive]}>
+                                <Text style={[styles.itemText, isSelected ? styles.textCyan : styles.textWhite]}>
                                   {cat.label}
                                 </Text>
-                                {isSelected && (
-                                  <View style={styles.checkIndicator}>
-                                    <Check size={14} color="#00BA34" strokeWidth={3} />
-                                  </View>
-                                )}
+                                {isSelected && <Check size={14} color="#00BA34" strokeWidth={3} />}
                               </Pressable>
                             );
                           })}
@@ -435,22 +454,19 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                     )}
                   </View>
                 </View>
-
               </View>
             </View>
           )}
 
           {verse !== "market" && (
-            <View style={styles.paddingWrapper}>
+            <View style={styles.specSectionWrapper}>
               <View style={styles.anonymousBanner}>
                 <View style={styles.anonBannerLeft}>
-                  <View style={styles.alertIconFrame}>
-                    <ShieldAlert size={18} color="rgba(255,255,255,0.4)" />
-                  </View>
+                  <ShieldAlert size={18} color="rgba(255,255,255,0.4)" />
                   <View style={styles.anonMetadata}>
                     <Text style={styles.anonTitleText}>Post Anonymously</Text>
                     <Text style={styles.anonDescText} numberOfLines={1}>
-                      Your department will be displayed
+                      {isAnonymous ? 'Only your faculty will be visible' : 'Both your faculty and department will be visible'}
                     </Text>
                   </View>
                 </View>
@@ -467,6 +483,23 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                   <View style={[styles.switchThumb, isAnonymous ? styles.thumbRight : styles.thumbLeft]} />
                 </Pressable>
               </View>
+              <View style={styles.editorToolbar}>
+                <Pressable onPress={handlePickImage} style={styles.mediaPickerBtn}>
+                  <ImageIcon size={20} color={verse === "confession" ? "#F59E0B" : "#00BA34"} />
+                </Pressable>
+
+                <View style={styles.metaCounters}>
+                  <Text style={[styles.counterText, text.length >= 480 && styles.counterAlert]}>
+                    {text.length}/500
+                  </Text>
+                  {images.length > 0 && (
+                    <>
+                      <Text style={styles.counterDot}>•</Text>
+                      <Text style={styles.counterText}>{images.length}/4</Text>
+                    </>
+                  )}
+                </View>
+              </View>
             </View>
           )}
         </ScrollView>
@@ -478,140 +511,124 @@ export function CreatePost({ setPosts, setActiveFilter }) {
 const styles = StyleSheet.create({
   screenWrapper: {
     flex: 1,
-    backgroundColor: "#0D0F14",
+    backgroundColor: '#000000',
   },
   safeHeader: {
-    backgroundColor: "#0D0F14",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: '#000000',
   },
   headerRow: {
-    height: 64,
+    height: 56,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
   },
   backBtn: {
-    padding: 4,
+    paddingVertical: 4,
   },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+  cancelText: {
     color: "#FFFFFF",
-    textAlign: "center"
+    fontSize: 15,
   },
   shareBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 6,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  disabledBtn: { opacity: 0.3 },
+  bgCyan: { backgroundColor: "#00BA34" },
+  bgRose: { backgroundColor: "#F59E0B" },
+  disabledBtn: { opacity: 0.5 },
   shareBtnText: {
     color: "#FFFFFF",
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "700",
   },
   scrollContent: {
-    gap: 4,
-  },
-  profileBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  avatarMock: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#1E2533",
-  },
-  profileName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    gap: 6,
   },
   sectionContainer: {
-    gap: 12,
     paddingVertical: 12,
-  },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.3)",
-    textTransform: "uppercase",
-    paddingHorizontal: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   channelsScroll: {
     paddingHorizontal: 16,
-    gap: 8,
+    gap: 6,
   },
   channelButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    borderRadius: 8,
+    borderColor: "rgba(255,255,255,0.15)",
   },
   inactiveChannel: {
     backgroundColor: "transparent",
-    borderColor: "transparent",
   },
-  activeCyan: {
-    backgroundColor: "rgba(0, 186, 52, 0.08)",
-    borderColor: "rgba(0, 186, 52, 0.2)",
+  bgCyanTab: {
+    backgroundColor: "rgba(0, 186, 52, 0.2)",
+    borderColor: "#00BA34",
   },
-  activeRose: {
-    backgroundColor: "rgba(245, 158, 11, 0.08)",
-    borderColor: "rgba(245, 158, 11, 0.2)",
+  bgRoseTab: {
+    backgroundColor: "rgba(245, 158, 11, 0.2)",
+    borderColor: "#F59E0B",
   },
   channelButtonText: {
     fontSize: 14,
     fontWeight: "600",
   },
+  textWhite: { color: "#FFFFFF" },
   textCyan: { color: "#00BA34" },
-  textRose: { color: "#F59E0B" },
-  textInactive: { color: "rgba(255,255,255,0.4)" },
-  paddingWrapper: {
+  textInactive: { color: "rgba(255,255,255,0.5)" },
+
+  composeFlowContainer: {
+    flexDirection: "row",
     paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingTop: 16,
+    width: '100%',
   },
-  editorCard: {
-    backgroundColor: "#131722",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
-    padding: 16,
-    minHeight: 220,
+  avatarColumn: {
+    marginRight: 12,
+  },
+  avatarMock: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#262626",
+  },
+  editorColumn: {
+    flex: 1,
   },
   textAreaInput: {
-    flex: 1,
-    color: "rgba(255, 255, 255, 0.9)",
+    color: "#FFFFFF",
     fontSize: 16,
-    lineHeight: 24,
-    minHeight: 120,
+    lineHeight: 20,
+    height: 160,
+    paddingTop: 4,
   },
   imagesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
     marginTop: 12,
-    marginBottom: 8,
   },
   imagePreviewWrapper: {
-    width: "48%",
     aspectRatio: 16 / 10,
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: "hidden",
     position: "relative",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    backgroundColor: "#0D0F14",
+    backgroundColor: "#161616",
+  },
+  singleImageWidth: {
+    width: "100%",
+  },
+  multiImageWidth: {
+    width: "48%",
   },
   previewImage: {
     width: "100%",
@@ -622,28 +639,25 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 6,
     right: 6,
-    backgroundColor: "rgba(0,0,0,0.75)",
-    padding: 4,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    width: 24,
+    height: 24,
     borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   editorToolbar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.05)",
-    paddingTop: 12,
-    marginTop: "auto",
+    marginTop: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   mediaPickerBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  mediaPickerBtnText: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "rgba(255,255,255,0.6)",
+    padding: 4,
   },
   metaCounters: {
     flexDirection: "row",
@@ -652,7 +666,7 @@ const styles = StyleSheet.create({
   },
   counterText: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.3)",
+    color: "rgba(255,255,255,0.4)",
   },
   counterAlert: {
     color: "#F59E0B",
@@ -660,13 +674,16 @@ const styles = StyleSheet.create({
   },
   counterDot: {
     fontSize: 10,
-    color: "rgba(255,255,255,0.15)",
+    color: "rgba(255,255,255,0.2)",
+  },
+
+  specSectionWrapper: {
+    marginTop: 8,
   },
   specCard: {
-    backgroundColor: "#131722",
-    borderRadius: 14,
+    backgroundColor: "#0A0A0A",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: "rgba(255,255,255,0.08)",
     padding: 16,
     gap: 16,
   },
@@ -674,20 +691,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: "#00BA34",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   inputGroup: {
     gap: 6,
   },
   inputLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600",
-    color: "rgba(255,255,255,0.3)",
+    color: "rgba(255,255,255,0.4)",
   },
   numericInput: {
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
     borderRadius: 8,
-    backgroundColor: "#0D0F14",
+    backgroundColor: "#000000",
     paddingHorizontal: 12,
     paddingVertical: 10,
     color: "#FFFFFF",
@@ -695,11 +714,11 @@ const styles = StyleSheet.create({
   },
   segmentedControl: {
     flexDirection: "row",
-    backgroundColor: "#0D0F14",
-    padding: 4,
+    backgroundColor: "#000000",
+    padding: 3,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: "rgba(255,255,255,0.12)",
     gap: 4,
   },
   segmentButton: {
@@ -707,15 +726,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: "center",
     borderRadius: 6,
-    borderWidth: 1,
   },
   activeSegment: {
-    backgroundColor: "rgba(0,186,52,0.08)",
-    borderColor: "rgba(0,186,52,0.15)",
-  },
-  inactiveSegment: {
-    backgroundColor: "transparent",
-    borderColor: "transparent",
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
   segmentText: {
     fontSize: 14,
@@ -729,45 +742,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 52,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.15)",
+    height: 46,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
     borderRadius: 8,
-    backgroundColor: "#0D0F14",
+    backgroundColor: "#000000",
     paddingHorizontal: 12,
   },
   dropdownTriggerActive: {
     borderColor: "#00BA34",
-    backgroundColor: "rgba(0, 186, 52, 0.02)",
   },
   triggerText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  textWhite: {
-    color: "#FFFFFF",
+    fontSize: 14,
   },
   textMuted: {
-    color: "rgba(255,255,255,0.25)",
-  },
-  chevronWrapper: {
-    transform: [{ rotate: "0deg" }],
-  },
-  chevronRotated: {
-    transform: [{ rotate: "180deg" }],
+    color: "rgba(255,255,255,0.4)",
   },
   dropdownMenuPlate: {
     position: "absolute",
-    bottom: 58,
+    bottom: 52,
     left: 0,
     right: 0,
-    maxHeight: 200,
-    backgroundColor: "#171C28",
-    borderRadius: 10,
+    maxHeight: 180,
+    backgroundColor: "#161616",
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "rgba(255,255,255,0.15)",
     overflow: "hidden",
-    zIndex: 100,
+    zIndex: 999,
     elevation: 5,
   },
   dropdownScroll: {
@@ -779,27 +781,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 12,
     paddingHorizontal: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.03)",
   },
   dropdownItemActive: {
-    backgroundColor: "rgba(0, 186, 52, 0.04)",
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
   itemText: {
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  checkIndicator: {
-    width: 20,
-    height: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    fontSize: 14,
   },
   anonymousBanner: {
-    backgroundColor: "#131722",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
-    borderRadius: 14,
+    backgroundColor: "#000000",
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -812,13 +802,6 @@ const styles = StyleSheet.create({
     gap: 12,
     flex: 1,
   },
-  alertIconFrame: {
-    padding: 8,
-    backgroundColor: "#0D0F14",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
-  },
   anonMetadata: {
     flex: 1,
   },
@@ -829,18 +812,18 @@ const styles = StyleSheet.create({
   },
   anonDescText: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.3)",
-    marginTop: 2,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 1,
   },
   switchTrack: {
-    width: 40,
-    height: 20,
+    width: 46,
+    height: 24,
     borderRadius: 12,
     padding: 2,
     justifyContent: "center",
   },
   switchTrackOff: {
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255,255,255,0.2)",
   },
   switchTrackCyan: {
     backgroundColor: "#00BA34",
@@ -849,8 +832,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#F59E0B",
   },
   switchThumb: {
-    width: 18,
-    height: 18,
+    width: 20,
+    height: 20,
     borderRadius: 10,
     backgroundColor: "#FFFFFF",
   },

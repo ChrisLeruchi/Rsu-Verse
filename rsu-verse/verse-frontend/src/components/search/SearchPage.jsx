@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   SafeAreaView,
   StatusBar,
+  Keyboard,
 } from "react-native";
-import { ChevronLeft, Search, Clock, ArrowUpRight, Store } from "lucide-react-native";
+import { ChevronLeft, Search, Clock, ArrowUpRight, X } from "lucide-react-native";
 
 export function SearchPage({
   setActiveFilter,
@@ -17,76 +18,154 @@ export function SearchPage({
   setRecents,
   search,
   setSearch,
-  matchingPosts,
-  getVerseIcon,
+  posts,
   navigation
 }) {
   const [isFocused, setIsFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
 
+  
+  useEffect(() => {
+    if (!search || search.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const newSuggestions = [];
+    const query = search.toLowerCase().trim();
+
+    posts.forEach(post => {
+      post.content?.tags?.forEach(tag => {
+        if (
+          tag.toLowerCase().includes(query) &&
+          tag.toLowerCase() !== 'market' && post.verse !== 'market' &&
+          !newSuggestions.some(s => s.value === tag)
+        ) {
+          newSuggestions.push({ type: 'tag', value: tag, display: '#' + tag });
+        }
+      });
+
+      if (
+        post.verse &&
+        post.verse !== 'market' &&
+        post.verse.toLowerCase().includes(query) &&
+        !newSuggestions.some(s => s.value === post.verse)
+      ) {
+        newSuggestions.push({ type: 'verse', value: post.verse, display: post.verse });
+      }
+
+      if (
+        post.author?.faculty &&
+        post.author.faculty.toLowerCase().includes(query) && post.verse !== 'market' &&
+        !newSuggestions.some(s => s.value === post.author.faculty)
+      ) {
+        newSuggestions.push({ type: 'faculty', value: post.author.faculty, display: post.author.faculty });
+      }
+
+      if (
+        post.author?.department &&
+        post.author.department.toLowerCase().includes(query) && post.verse !== 'market' &&
+        !newSuggestions.some(s => s.value === post.author.department)
+      ) {
+        newSuggestions.push({ type: 'department', value: post.author.department, display: post.author.department });
+      }
+
+      if (post.verse !== 'market' && post.content?.text && post.verse !== 'market') {
+        const textLower = post.content.text.toLowerCase();
+        const index = textLower.indexOf(query);
+
+        if (index !== -1) {
+          const start = Math.max(0, index - 15);
+          const end = Math.min(post.content.text.length, index + 25);
+          let snippet = (start > 0 ? "..." : "") + post.content.text.substring(start, end) + "...";
+
+          if (!newSuggestions.some(s => s.display === snippet)) {
+            newSuggestions.push({ type: 'content', value: post.content.text, display: snippet });
+          }
+        }
+      }
+    });
+
+    setSuggestions(newSuggestions.slice(0, 6));
+  }, [search, posts]);
+
+  const handleSearchNavigation = (term) => {
+    const cleanedTerm = term.trim();
+    if (!cleanedTerm) return;
+
+    Keyboard.dismiss();
+
+    setRecents((prev) => {
+      const filtered = prev.filter((item) => item.toLowerCase() !== cleanedTerm.toLowerCase());
+      return [cleanedTerm, ...filtered].slice(0, 6);
+    });
+
+
+    navigation.navigate('Search_feed', { query: cleanedTerm });
+  };
+
+  const handleRecentSearch = (term) => {
+    setSearch(term)
+    handleSearchNavigation(term)
+  }
+
+ const handleSuggestedSearch = (term) => {
+    const cleanedTerm = term ? term.trim() : "";
+    if (!cleanedTerm) return;
+
+    setSearch(cleanedTerm);
+    
+    handleSearchNavigation(cleanedTerm);
+  };
   const handleClearAll = () => {
     setRecents([]);
   };
 
   const handleBackPress = () => {
-    const state = navigation.getState();
-    const currentRouteName = state?.routes[state.index]?.name;
-
-    if (currentRouteName !== "Search" && currentRouteName !== "SearchFeed") {
+    setSearch('');
     setActiveFilter("all");
-    setSearch(''); 
-  }
-    setActiveFilter("all");
-    
-    
     if (navigation) navigation.goBack();
   };
-
-  const filteredRecents = recents.filter((item) =>
-    item.toLowerCase().includes(search.toLowerCase())
-  );
 
   const isSearching = search.trim().length > 0;
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#09090B" />
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
       <View style={styles.container}>
-
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={handleBackPress}
-            activeOpacity={0.7}
-            style={styles.backButton}
-          >
-            <ChevronLeft size={22} color="rgba(255, 255, 255, 0.8)" />
-          </TouchableOpacity>
+          <Pressable onPress={handleBackPress} activeOpacity={0.7} style={styles.backButton}>
+            <ChevronLeft size={24} color="#FFFFFF" />
+          </Pressable>
 
-          <View
-            style={[
-              styles.searchBarContainer,
-              isFocused && styles.searchBarFocused
-            ]}
-          >
-            <Search size={18} color="rgba(255, 255, 255, 0.3)" style={styles.searchIcon} />
+          <View style={[styles.searchBarContainer, isFocused && styles.searchBarFocused]}>
+            <Search size={18} color={isFocused ? "#FFFFFF" : "rgba(255, 255, 255, 0.4)"} style={styles.searchIcon} />
             <TextInput
               value={search}
-              onChangeText={(text) => setSearch(text)}
+              onChangeText={setSearch}
               placeholder="Search"
-              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              placeholderTextColor="rgba(255, 255, 255, 0.4)"
               style={styles.input}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               autoCorrect={false}
               keyboardAppearance="dark"
+              returnKeyType="search"
+              onSubmitEditing={() => handleSearchNavigation(search)}
             />
+            {search.length > 0 ?
+              <Pressable
+                onPress={() => setSearch('')}
+              >
+                <X size={16} color="#FFFFFF" />
+              </Pressable> : ''}
           </View>
         </View>
 
-
         <ScrollView
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="always"
           contentContainerStyle={styles.scrollContent}
         >
           {!isSearching ? (
@@ -94,114 +173,72 @@ export function SearchPage({
               {recents.length > 0 && (
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionTitleRow}>
-                    <Clock size={14} color="rgba(255, 255, 255, 0.4)" />
-                    <Text style={styles.sectionTitleText}>Recents</Text>
+                    <Clock size={14} color="rgba(255, 255, 255, 0.6)" />
+                    <Text style={styles.sectionTitleText}>Recent searches</Text>
                   </View>
-                  <TouchableOpacity onPress={handleClearAll} activeOpacity={0.6}>
+                  <Pressable onPress={handleClearAll} activeOpacity={0.6} style={styles.clearAllButton}>
                     <Text style={styles.clearAllText}>Clear all</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               )}
 
-              {filteredRecents.length > 0 ? (
-                filteredRecents.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => setSearch(item)}
-                    activeOpacity={0.6}
+              {recents.length > 0 ? (
+                recents.map((item, index) => (
+                  <Pressable
+                    key={`recent-${index}`}
+                    onPress={() => handleRecentSearch(item)}
+                    activeOpacity={0.7}
                     style={styles.recentItem}
                   >
-                    <Text style={styles.recentItemText}>{item}</Text>
+                    <Text style={styles.recentItemText} numberOfLines={1}>
+                      {item}
+                    </Text>
                     <ArrowUpRight size={16} color="rgba(255, 255, 255, 0.3)" />
-                  </TouchableOpacity>
+                  </Pressable>
                 ))
               ) : (
                 <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyStateTitle}>Search for anything</Text>
                   <Text style={styles.emptyStateText}>
-                    Try searching for names, departments, topics or keywords
+                    Find communities, department updates, campus confessions, or trending keywords instantly.
                   </Text>
                 </View>
               )}
             </>
           ) : (
-            <View style={styles.resultsWrapper}>
-              <Text style={styles.resultsCountText}>
-                {matchingPosts.length > 0 &&
-                  `SEARCH RESULTS (${matchingPosts.length})`
-                }
-              </Text>
-
-
-              <View style={styles.postsList}>
-                {matchingPosts.length > 0 ? (
-                  matchingPosts.map((post) => (
-                    <TouchableOpacity
-                      key={post.id}
-                      activeOpacity={0.85}
-                      onPress={() => {
-                        if (navigation) {
-                          navigation.navigate('Search_feed', {
-                            query: search,
-                            clickedPostId: post.id
-                          });
-                        }
-                      }}
-                      style={styles.postCard}
-                    >
-
-                      <View style={styles.postCardHeader}>
-                        <View style={styles.verseMetaContainer}>
-                          {post.verse === "market" ? (
-                            <>
-                              <Store size={14} color="rgba(255, 255, 255, 0.4)" />
-                              <Text style={styles.verseText}>Marketplace</Text>
-                            </>
-                          ) : (
-                            <>
-                              {getVerseIcon && getVerseIcon(post.verse)}
-                              <Text style={[styles.verseText, styles.capitalizeText]}>
-                                {post.verse}
-                              </Text>
-                            </>
-                          )}
-                        </View>
-
-                        {post.verse === "market" && post.marketPlace && (
-                          <Text style={styles.priceText}>
-                            ₦{post.marketPlace.price.toLocaleString()}
-                          </Text>
-                        )}
-                      </View>
-
-
-                      <Text
-                        style={styles.postBodyText}
-                        numberOfLines={2}
-                        ellipsizeMode="tail"
-                      >
-                        {post.content?.text}
+            <View style={styles.suggestionsWrapper}>
+              {suggestions.length > 0 ? (
+                suggestions.map((suggestion, index) => (
+                  <Pressable
+                    key={`suggest-${index}`}
+                    onPress={() => handleSuggestedSearch(suggestion.value)}
+                    activeOpacity={0.7}
+                    style={styles.suggestionItemRow}
+                  >
+                    <View style={styles.suggestionLeftGroup}>
+                      <Search size={16} color="rgba(255, 255, 255, 0.4)" />
+                      <Text style={styles.suggestionItemText} numberOfLines={1}>
+                        {suggestion.display}
                       </Text>
-
-
-                      {post.content?.tags && post.content.tags.length > 0 && (
-                        <View style={styles.tagsContainer}>
-                          {post.content.tags.map((tag, tIdx) => (
-                            <View key={tIdx} style={styles.tagBadge}>
-                              <Text style={styles.tagText}>#{tag}</Text>
-                            </View>
-                          ))}
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  ))
-                ) : (
-                  <View style={styles.noResultsCard}>
-                    <Text style={styles.noResultsText}>
-                      {`No matching posts found for "${search}"`}
+                    </View>
+                    <ArrowUpRight size={16} color="rgba(255, 255, 255, 0.3)" />
+                  </Pressable>
+                ))
+              ) : (
+                <Pressable
+                  onPress={() => handleSuggestedSearch(search)}
+                  activeOpacity={0.7}
+                  style={styles.suggestionItemRow}
+                >
+                  <View style={styles.suggestionLeftGroup}>
+                    <Search size={16} color="#FFFFFF" />
+                    <Text style={[styles.suggestionItemText, styles.directSearchText]} numberOfLines={1}>
+                      Search for {`"${search}"`}
                     </Text>
                   </View>
-                )}
-              </View>
+                  <ArrowUpRight size={16} color="#FFFFFF" />
+                </Pressable>
+              )}
             </View>
           )}
         </ScrollView>
@@ -211,180 +248,70 @@ export function SearchPage({
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#09090B",
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
+  safeArea: { flex: 1, backgroundColor: "#000000" },
+  container: { flex: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 16,
     paddingTop: 12,
-    paddingBottom: 16,
-    gap: 12,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#16161D"
   },
-  backButton: {
-    padding: 4,
-    marginLeft: -4,
-  },
+  backButton: { marginRight: 12, paddingVertical: 4 },
   searchBarContainer: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#16161A",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 100,
     alignItems: "center",
-    paddingHorizontal: 14,
+    backgroundColor: "#1A1A1A",
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    height: 44,
+    borderWidth: 1,
+    borderColor: "transparent"
   },
   searchBarFocused: {
-    borderColor: "rgba(34, 211, 238, 0.3)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "#000000"
   },
-  searchIcon: {
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    color: "rgba(255, 255, 255, 0.9)",
-    fontSize: 16,
-    paddingVertical: 10,
-    letterSpacing: 0.2,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
+  searchIcon: { marginRight: 10 },
+  input: { flex: 1, color: "#FFFFFF", fontSize: 14, fontWeight: "400" },
+  scrollContent: { paddingBottom: 40 },
   sectionHeader: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 12,
-    marginBottom: 10,
-    paddingHorizontal: 4,
-  },
-  sectionTitleRow: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 10
   },
-  sectionTitleText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.3)",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  clearAllText: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.4)",
-  },
+  sectionTitleRow: { flexDirection: "row", alignItems: "center" },
+  sectionTitleText: { color: "#FFFFFF", fontSize: 16, fontWeight: "700", marginLeft: 8 },
+  clearAllButton: { padding: 4 },
+  clearAllText: { color: "#17CB49", fontSize: 14, fontWeight: "500" },
   recentItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 16,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.03)",
-  },
-  recentItemText: {
-    fontSize: 15,
-    color: "rgba(255, 255, 255, 0.8)",
-    fontWeight: "500",
-  },
-  emptyContainer: {
-    paddingTop: 32,
-    alignItems: "center",
-  },
-  emptyStateText: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.3)",
-    textAlign: "center",
-    lineHeight: 20,
-    paddingHorizontal: 20,
-  },
-  resultsWrapper: {
-    marginTop: 8,
-  },
-  resultsCountText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "rgba(255, 255, 255, 0.3)",
-    letterSpacing: 1.2,
-    paddingHorizontal: 4,
-    marginBottom: 12,
-  },
-  postsList: {
-    gap: 12,
-  },
-  postCard: {
-    backgroundColor: "#16161A",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 16,
-    padding: 16,
-  },
-  postCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  verseMetaContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  verseText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.5)",
-  },
-  capitalizeText: {
-    textTransform: "capitalize",
-  },
-  priceText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.95)",
-  },
-  postBodyText: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.75)",
-    lineHeight: 21,
-    fontWeight: "400",
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginTop: 12,
-  },
-  tagBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.02)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  tagText: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.4)",
-  },
-  noResultsCard: {
-    paddingVertical: 40,
     paddingHorizontal: 16,
+  },
+  recentItemText: { color: "rgba(255, 255, 255, 0.85)", fontSize: 14, fontWeight: "400", flex: 1, paddingRight: 16 },
+  emptyContainer: { alignItems: "center", marginTop: 80, paddingHorizontal: 40 },
+  emptyStateTitle: { color: "#FFFFFF", fontSize: 20, fontWeight: "700", marginBottom: 8, textAlign: "center" },
+  emptyStateText: { color: "rgba(255, 255, 255, 0.5)", fontSize: 14, textAlign: "center", lineHeight: 20 },
+  suggestionsWrapper: { paddingTop: 8 },
+  suggestionItemRow: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#16161D"
   },
-  noResultsText: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.3)",
-    textAlign: "center",
-  },
+  suggestionLeftGroup: { flexDirection: "row", alignItems: "center", flex: 1, paddingRight: 16 },
+  suggestionItemText: { color: "rgba(255, 255, 255, 0.85)", fontSize: 15, marginLeft: 14, flex: 1 },
+  directSearchText: { color: "#FFFFFF", fontWeight: "600" }
 });

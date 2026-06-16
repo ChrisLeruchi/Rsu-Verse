@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Pressable, StyleSheet, Modal, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 import {
   MoreHorizontal,
   ArrowBigDown,
@@ -8,10 +9,21 @@ import {
   Send,
   Repeat,
   Bookmark,
-  Repeat1,
-  ArrowUpRight
+  ArrowUpRight,
+  AlertCircle,
+  UserRoundX
 } from "lucide-react-native";
-import { formatRelativeTime } from "./formatRelativeTime";
+import { useRelativeTime } from "./useRelativeTime";
+
+
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming
+} from 'react-native-reanimated';
+
+import { HapticEngine } from '../../haptics';
 
 export function PostCard({
   post,
@@ -34,7 +46,139 @@ export function PostCard({
   const isUpvoted = post.userInteraction?.voteStatus === 'up';
   const isDownvoted = post.userInteraction?.voteStatus === 'down';
   const isSaved = post.userInteraction?.saved;
+  const [isDotOpen, setIsDotOpen] = useState(false);
   const isReposted = post.userInteraction?.reposts;
+
+  const upvoteScale = useSharedValue(1);
+  const downvoteScale = useSharedValue(1);
+
+  const repostScale = useSharedValue(1);
+  const repostRotate = useSharedValue(0);
+
+  const saveScale = useSharedValue(1);
+  const saveTranslateY = useSharedValue(0);
+
+  useEffect(() => {
+    if (isUpvoted) {
+      upvoteScale.value = withSequence(
+        withTiming(1.5, { duration: 450 }),
+        withTiming(1.2, { duration: 80 })
+      );
+    }
+  }, [isUpvoted]);
+
+  useEffect(() => {
+    if (isDownvoted) {
+      downvoteScale.value = withSequence(
+        withTiming(0.9, { duration: 80 }),
+        withTiming(1.2, { duration: 450 })
+      )
+    }
+  }, [isDownvoted])
+
+  useEffect(() => {
+    if (isReposted) {
+      repostRotate.value = withTiming(360, { duration: 400 });
+
+
+      repostScale.value = withSequence(
+        withTiming(1.2, { duration: 80 }),
+        withTiming(1, { duration: 80 })
+      );
+    } else {
+      repostRotate.value = withTiming(0, { duration: 200 });
+    }
+  }, [isReposted]);
+
+
+  useEffect(() => {
+    if (!isSaved) {
+      saveTranslateY.value = withSequence(
+        withTiming(6, { duration: 60 }),
+        withTiming(0, { duration: 80 })
+      );
+
+      saveScale.value = withSequence(
+        withTiming(1.15, { duration: 70 }),
+        withTiming(1, { duration: 70 })
+      );
+    }
+  }, [!isSaved]);
+
+
+  const animatedRepostStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { scale: repostScale.value },
+        { rotate: `${repostRotate.value}deg` }
+      ],
+    };
+  });
+
+  const animatedSaveStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { scale: saveScale.value },
+        { translateY: saveTranslateY.value }
+      ],
+    };
+  });
+
+  const animatedUpvoteStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: upvoteScale.value }],
+    };
+  });
+
+  const animatedDownvoteStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: downvoteScale.value }]
+    };
+  })
+
+  const handleRepostPress = () => {
+    HapticEngine.medium();
+
+    repostRotate.value = withTiming(isReposted ? 0 : 360, { duration: 200 });
+    repostScale.value = withSequence(
+      withTiming(1.2, { duration: 80 }),
+      withTiming(1, { duration: 80 })
+    );
+
+    handleRepost(post.id);
+  };
+
+
+  const handleSavePress = () => {
+    HapticEngine.light();
+
+
+    saveScale.value = withSequence(
+      withTiming(0.9, { duration: 40 }),
+      withTiming(1, { duration: 40 })
+    );
+
+    handleSave(post.id);
+  }
+
+  const handleUpvotePress = () => {
+    HapticEngine.medium();
+    upvoteScale.value = withSequence(
+      withTiming(0.9, { duration: 450 }),
+      withTiming(1, { duration: 40 })
+    );
+    handleUpvote(post.id);
+  };
+
+  const handleDownvotePress = () => {
+    HapticEngine.light();
+    downvoteScale.value = withSequence(
+      withTiming(0.9, { duration: 450 }),
+      withTiming(1, { duration: 40 })
+    )
+    handleDownvotes(post.id)
+  }
+
   const handleNavigateToDetail = () => {
     navigation.navigate("Comments", { postId: post.id });
   };
@@ -64,14 +208,19 @@ export function PostCard({
                     @{post.author?.department}
                   </Text>
                   <Text style={styles.handleText}>
-                    {" "}&bull; {formatRelativeTime(post.meta.createdAt)}
+                    {" "}&bull; {useRelativeTime(post.meta.createdAt)}
                   </Text>
                 </View>
               </View>
 
 
               <View style={styles.utilityActionBox}>
-                <Pressable style={styles.iconPadding}>
+                <Pressable
+                  style={styles.iconPadding}
+                  onPress={() => setIsDotOpen
+                    (true)
+                  }
+                >
                   <MoreHorizontal size={18} color="rgba(255,255,255,0.3)" />
                 </Pressable>
                 <View style={styles.badgeIconWrapper}>
@@ -112,11 +261,14 @@ export function PostCard({
           {post.content.images.map((imgUrl, index) => (
             <Image
               key={index}
-              source={{ uri: imgUrl }}
+              source={imgUrl}
               style={[
                 styles.gridImage,
                 post.content.images.length === 1 ? styles.singleImageSize : styles.multiImageSize
               ]}
+              contentFit="cover"
+              transition={200}
+              cachePolicy="disk"
             />
           ))}
         </View>
@@ -146,15 +298,17 @@ export function PostCard({
         <View style={styles.leftActionGroup}>
 
           <Pressable
-            onPress={() => handleUpvote(post.id)}
+            onPress={handleUpvotePress}
             style={styles.interactionButton}
           >
-            <ArrowBigUp
-              size={22}
-              fill={isUpvoted ? "#17CB49" : "transparent"}
-              color={isUpvoted ? "#17CB49" : "rgba(255,255,255,0.7)"}
-              strokeWidth={isUpvoted ? 2 : 1.5}
-            />
+            <Animated.View style={animatedUpvoteStyle}>
+              <ArrowBigUp
+                size={22}
+                fill={isUpvoted ? "#17CB49" : "transparent"}
+                color={isUpvoted ? "#17CB49" : "rgba(255,255,255,0.7)"}
+                strokeWidth={isUpvoted ? 2 : 1.5}
+              />
+            </Animated.View>
             <Text style={[styles.metricCounterText, isUpvoted && styles.textUpvotedGreen]}>
               {post.engagement?.upvotes}
             </Text>
@@ -162,15 +316,17 @@ export function PostCard({
 
 
           <Pressable
-            onPress={() => handleDownvotes(post.id)}
+            onPress={handleDownvotePress}
             style={styles.interactionButton}
           >
-            <ArrowBigDown
-              size={22}
-              fill={isDownvoted ? "#F59E0B" : "transparent"}
-              color={isDownvoted ? "#F59E0B" : "rgba(255,255,255,0.7)"}
-              strokeWidth={isDownvoted ? 2 : 1.5}
-            />
+            <Animated.View style={animatedDownvoteStyle}>
+              <ArrowBigDown
+                size={22}
+                fill={isDownvoted ? "#F59E0B" : "transparent"}
+                color={isDownvoted ? "#F59E0B" : "rgba(255,255,255,0.7)"}
+                strokeWidth={isDownvoted ? 2 : 1.5}
+              />
+            </Animated.View>
             <Text style={[styles.metricCounterText, isDownvoted && styles.textRose]}>
               {post.engagement?.downvotes}
             </Text>
@@ -186,15 +342,17 @@ export function PostCard({
 
 
           <Pressable
-            onPress={() => handleRepost(post.id)}
+            onPress={handleRepostPress}
             style={styles.interactionButton}
           >
-            {isReposted ? (
-              <Repeat1 size={22} color="#FFFFFF" />
-            ) : (
-              <Repeat size={22} color="rgba(255,255,255,0.7)" />
-            )}
-            <Text style={[styles.metricCounterText, isReposted && styles.textWhite]}>
+            <Animated.View style={animatedRepostStyle}>
+              {isReposted ? (
+                <Repeat size={22} color="#17CB49" />
+              ) : (
+                <Repeat size={22} color="rgba(255,255,255,0.7)" />
+              )}
+            </Animated.View>
+            <Text style={[styles.metricCounterText, isReposted && styles.textCyan]}>
               {post.engagement?.reposts === 0 ? '' : post.engagement?.reposts}
             </Text>
           </Pressable>
@@ -203,15 +361,17 @@ export function PostCard({
 
         <View style={styles.rightActionGroup}>
           <Pressable
-            onPress={() => handleSave(post.id)}
+            onPress={handleSavePress}
             style={styles.interactionButton}
           >
-            <Bookmark
-              size={22}
-              fill={isSaved ? "#F59E0B" : "transparent"}
-              color={isSaved ? "#F59E0B" : "rgba(255,255,255,0.7)"}
-              strokeWidth={isSaved ? 2 : 1.5}
-            />
+            <Animated.View style={animatedSaveStyle}>
+              <Bookmark
+                size={22}
+                fill={isSaved ? "#F59E0B" : "transparent"}
+                color={isSaved ? "#F59E0B" : "rgba(255,255,255,0.7)"}
+                strokeWidth={isSaved ? 2 : 1.5}
+              />
+            </Animated.View>
           </Pressable>
           <Pressable
             onPress={() => handleShare(post.id)}
@@ -221,6 +381,43 @@ export function PostCard({
           </Pressable>
         </View>
       </View>
+      <Modal
+        key={post.id}
+        visible={isDotOpen}
+        transparent={true}
+        animationType='slide'
+        onRequestClose={() => setIsDotOpen(false)}
+      >
+        <View
+          style={styles.modalOverlay}
+        >
+          <TouchableOpacity
+            onPress={() => setIsDotOpen(false)}
+            activeOpacity={1}
+            style={styles.backdropPressable}
+          />
+
+          <View style={styles.bottomSheetContainer}>
+            <View style={styles.sheetHandle} />
+
+            <View style={styles.metricsList}>
+              <Pressable style={styles.metricBox}>
+                <View style={styles.metricHeaderRow}>
+                  <AlertCircle size={16} color="rgba(245, 0, 0, 1)" />
+                  <Text style={[styles.metricLabel, { color: "rgba(245, 0, 0, 1)" }]}>Report Post</Text>
+                </View>
+              </Pressable>
+
+              <View style={styles.metricBox}>
+                <View style={styles.metricHeaderRow}>
+                  <UserRoundX size={16} color="rgba(255, 255, 255, 0.6)" />
+                  <Text style={styles.metricLabel}>Block User</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -233,10 +430,10 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   voidCardBg: {
-    backgroundColor: '#121212',
+    backgroundColor: '#000000',
   },
   confessionCardBg: {
-    backgroundColor: 'rgba(245, 158, 11, 0.04)',
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
   },
   headerLayer: {
     paddingHorizontal: 12,
@@ -418,7 +615,62 @@ const styles = StyleSheet.create({
   textUpvotedGreen: {
     color: '#17CB49',
   },
-  textWhite: {
-    color: '#FFFFFF',
-  }
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "flex-end",
+  },
+  bottomSheetContainer: {
+    backgroundColor: "#000000",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 100,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    borderWidth: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  backdropPressable: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  metricBox: {
+    width: "100%",
+    backgroundColor: "#1A1A1A",
+    padding: 16,
+    borderRadius: 16
+  },
+  metricsList: {
+    flexDirection: "column",
+    gap: 12,
+    width: "100%"
+  },
+  metricHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1A1A1A",
+    marginBottom: 6,
+    gap: 4,
+    justifyContent: 'center'
+  },
+  metricLabel: {
+    fontSize: 18,
+    textAlign: 'center',
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.4)",
+    letterSpacing: 0.5,
+  },
 });

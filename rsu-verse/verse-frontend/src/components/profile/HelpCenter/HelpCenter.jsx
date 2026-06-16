@@ -1,4 +1,4 @@
-import React, {useRef, useCallback, useState} from "react";
+import React, { useRef, useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
@@ -21,10 +21,11 @@ import {
 } from "lucide-react-native";
 
 const COLORS = {
-  void: "#0A0A0A",
+  void: "#000000",
   void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#161618",
-  cyan: "#00BA34",
+  ink: "#1A1A1A",
+  ink40: "rgba(22, 22, 24, 0.4)",
+  cyan: "#17CB49",
   white: "#FFFFFF",
   white5: "rgba(255, 255, 255, 0.05)",
   white10: "rgba(255, 255, 255, 0.1)",
@@ -35,7 +36,6 @@ const COLORS = {
   white60: "rgba(255, 255, 255, 0.6)",
   white90: "rgba(255, 255, 255, 0.9)",
 };
-
 export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
   const popularArticles = [
     {
@@ -80,8 +80,7 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation?.navigate("Profile")}
-          style={styles.headerAction}
+          onPress={() => navigation?.goBack()} style={styles.headerAction}
           activeOpacity={0.7}
         >
           <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
@@ -219,9 +218,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void80,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
+    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
@@ -230,7 +227,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.white,
-    letterSpacing: -0.4,
+  
   },
   headerSpacer: {
     width: 36,
@@ -255,8 +252,7 @@ const styles = StyleSheet.create({
   introTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: COLORS.white,
-    letterSpacing: -0.4,
+    color: COLORS.white
   },
   introSubtitle: {
     fontSize: 16,
@@ -276,8 +272,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     backgroundColor: COLORS.ink,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     borderRadius: 12,
     paddingLeft: 44,
     paddingRight: 16,
@@ -300,8 +294,6 @@ const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: COLORS.ink,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     overflow: "hidden",
   },
   rowItem: {
@@ -309,10 +301,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
-  },
-  rowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
   },
   rowLeft: {
     flexDirection: "row",
@@ -325,8 +313,7 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: COLORS.void,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
+  
   },
   metaWrapper: {
     flex: 1,
@@ -350,8 +337,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: COLORS.ink,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     borderRadius: 16,
     gap: 12,
   },
@@ -372,8 +357,6 @@ const styles = StyleSheet.create({
   ctaContainer: {
     backgroundColor: COLORS.ink,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     padding: 16,
     alignItems: "center",
     gap: 16,

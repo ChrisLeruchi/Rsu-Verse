@@ -21,10 +21,11 @@ import {
 } from "lucide-react-native";
 
 const COLORS = {
-  void: "#0A0A0A",
+  void: "#000000",
   void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#161618",
-  cyan: "#00BA34",
+  ink: "#1A1A1A",
+  ink40: "rgba(22, 22, 24, 0.4)",
+  cyan: "#17CB49",
   white: "#FFFFFF",
   white5: "rgba(255, 255, 255, 0.05)",
   white10: "rgba(255, 255, 255, 0.1)",
@@ -33,10 +34,8 @@ const COLORS = {
   white40: "rgba(255, 255, 255, 0.4)",
   white50: "rgba(255, 255, 255, 0.5)",
   white60: "rgba(255, 255, 255, 0.6)",
-  white80: "rgba(255, 255, 255, 0.8)",
   white90: "rgba(255, 255, 255, 0.9)",
 };
-
 export function ContactUs({
   isOpen,
   setIsOpen,
@@ -99,7 +98,7 @@ export function ContactUs({
         </Text>
 
         <TouchableOpacity
-          onPress={() => navigation?.navigate("Profile")}
+          onPress={() => navigation?.goBack()}
           activeOpacity={0.8}
           style={styles.successButton}
         >
@@ -115,7 +114,7 @@ export function ContactUs({
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation?.navigate("Profile")}
+          onPress={() => navigation?.goBack()}
           style={styles.headerAction}
           activeOpacity={0.7}
         >
@@ -250,9 +249,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void80,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
+    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
@@ -261,7 +258,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.white,
-    letterSpacing: -0.4,
   },
   headerSpacer: {
     width: 36,
@@ -279,8 +275,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: COLORS.ink,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     padding: 16,
     alignItems: "flex-start",
     gap: 12,
@@ -320,8 +314,6 @@ const styles = StyleSheet.create({
   dropdownSelectorButton: {
     width: "100%",
     backgroundColor: COLORS.ink,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -345,8 +337,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: COLORS.ink,
-    borderWidth: 1,
-    borderColor: COLORS.white10,
     borderRadius: 12,
     overflow: "hidden",
     elevation: 5,
@@ -361,10 +351,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: COLORS.ink,
   },
-  dropdownOptionBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
-  },
   dropdownOptionText: {
     fontSize: 14,
     color: COLORS.white80,
@@ -372,8 +358,6 @@ const styles = StyleSheet.create({
   textareaInput: {
     width: "100%",
     backgroundColor: COLORS.ink,
-    borderWidth: 1,
-    borderColor: COLORS.white5,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
