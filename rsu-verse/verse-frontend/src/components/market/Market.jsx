@@ -1,13 +1,16 @@
-
 import React, { useRef, useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { ShoppingBag, Search, Tag, ArrowUpRight } from "lucide-react-native";
 import { View, Text, TextInput, Pressable, Image, ScrollView, Linking, Alert, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemeTokens } from "../../theme";
 
-export function Market({ posts = [] }) {
+export function Market({ posts = [], selectedTheme }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
   const marketItems = posts.filter(post => {
     if (post.verse !== "market") return false;
@@ -43,7 +46,6 @@ export function Market({ posts = [] }) {
 
   useFocusEffect(
     useCallback(() => {
-
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
@@ -52,11 +54,9 @@ export function Market({ posts = [] }) {
   );
 
   return (
-    <View style={styles.screenWrapper}>
-
-
-      <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeAreaHeader}>
-        <View style={styles.headerContainer}>
+    <View style={[styles.screenWrapper, { backgroundColor: themeColor.background }]}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeAreaHeader, { backgroundColor: themeColor.background }]}>
+        <View style={[styles.headerContainer, { backgroundColor: themeColor.background }]}>
           <Text style={styles.headerText}>Shop</Text>
         </View>
       </SafeAreaView>
@@ -67,14 +67,14 @@ export function Market({ posts = [] }) {
         ref={scrollViewRef}
       >
         <View style={styles.controlsWrapper}>
-          <View style={styles.searchBarContainer}>
-            <Search size={18} color="rgba(255, 255, 255, 0.3)" style={styles.searchIcon} />
+          <View style={[styles.searchBarContainer, { backgroundColor: themeColor.surface }]}>
+            <Search size={18} color={themeColor.textMuted} style={styles.searchIcon} />
             <TextInput
               value={searchQuery}
               onChangeText={(text) => setSearchQuery(text)}
               placeholder="Search gadgets, books, bedspaces..."
-              placeholderTextColor="rgba(255, 255, 255, 0.3)"
-              style={styles.textInput}
+              placeholderTextColor={themeColor.textMuted}
+              style={[styles.textInput, { color: themeColor.textPrimary }]}
             />
           </View>
 
@@ -102,12 +102,12 @@ export function Market({ posts = [] }) {
                   onPress={() => setSelectedCategory(cat.id)}
                   style={[
                     styles.categoryButton,
-                    isSelected ? styles.categoryButtonActive : styles.categoryButtonInactive
+                    isSelected ? styles.categoryButtonActive : [styles.categoryButtonInactive, { backgroundColor: themeColor.surface }]
                   ]}
                 >
                   <Text style={[
                     styles.categoryText,
-                    isSelected ? styles.categoryTextActive : styles.categoryTextInactive
+                    isSelected ? styles.categoryTextActive : [styles.categoryTextInactive, { color: themeColor.textSecondary }]
                   ]}>
                     {cat.label}
                   </Text>
@@ -117,14 +117,12 @@ export function Market({ posts = [] }) {
           </ScrollView>
         </View>
 
-        <View 
-        style={styles.gridMatrix}
-        >
+        <View style={styles.gridMatrix}>
           {marketItems.map((item) => (
             <View key={item.id} style={styles.cardWrapper}>
-              <View style={styles.cardContainer}>
+              <View style={[styles.cardContainer, { backgroundColor: themeColor.surface }]}>
                 <View style={styles.cardTopSection}>
-                  <View style={styles.imageBox}>
+                  <View style={[styles.imageBox, { backgroundColor: themeColor.surface }]}>
                     {item.content?.images && item.content.images.length > 0 ? (
                       <Image
                         source={{ uri: item.content.images[0] }}
@@ -133,7 +131,7 @@ export function Market({ posts = [] }) {
                       />
                     ) : (
                       <View style={styles.imagePlaceholder}>
-                        <Tag size={16} color="rgba(255, 255, 255, 0.1)" />
+                        <Tag size={16} color={themeColor.border} />
                       </View>
                     )}
 
@@ -145,14 +143,14 @@ export function Market({ posts = [] }) {
                   </View>
 
                   <View style={styles.titleContainer}>
-                    <Text numberOfLines={2} style={styles.productTitle}>
+                    <Text numberOfLines={2} style={[styles.productTitle, { color: themeColor.textPrimary }]}>
                       {item.content?.text}
                     </Text>
                   </View>
                 </View>
 
                 <View style={styles.cardFooterPanel}>
-                  <Text style={styles.priceText}>
+                  <Text style={[styles.priceText, { color: themeColor.textPrimary }]}>
                     ₦{item.marketPlace?.price?.toLocaleString()}
                   </Text>
 
@@ -183,17 +181,13 @@ export function Market({ posts = [] }) {
 const styles = StyleSheet.create({
   screenWrapper: {
     flex: 1,
-    backgroundColor: "#000000",
   },
-  safeAreaHeader: {
-    backgroundColor: '#000000',
-  },
+  safeAreaHeader: {},
   headerContainer: {
     height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    backgroundColor: '#000000',
   },
   headerText: {
     fontSize: 26,
@@ -213,7 +207,6 @@ const styles = StyleSheet.create({
   },
   searchBarContainer: {
     flexDirection: "row",
-    backgroundColor: "#1A1A1A",
     borderRadius: 12,
     alignItems: "center",
     paddingHorizontal: 14,
@@ -222,7 +215,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   textInput: {
-    color: "rgba(255, 255, 255, 0.9)",
     fontSize: 14,
     paddingVertical: 10,
     flex: 1,
@@ -241,7 +233,6 @@ const styles = StyleSheet.create({
   },
   categoryButtonInactive: {
     borderColor: "transparent",
-    backgroundColor: "#1A1A1A",
   },
   categoryText: {
     fontSize: 14,
@@ -250,9 +241,7 @@ const styles = StyleSheet.create({
   categoryTextActive: {
     color: "#00BA34",
   },
-  categoryTextInactive: {
-    color: "rgba(255, 255, 255, 0.6)",
-  },
+  categoryTextInactive: {},
   gridMatrix: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -263,7 +252,6 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   cardContainer: {
-    backgroundColor: "#1A1A1A",
     flexGrow: 1,
     justifyContent: "space-between",
     padding: 8,
@@ -275,7 +263,6 @@ const styles = StyleSheet.create({
   imageBox: {
     width: "100%",
     aspectRatio: 1,
-    backgroundColor: "#1A1A1A",
     borderRadius: 6,
     overflow: "hidden",
     position: "relative",
@@ -288,7 +275,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     alignItems: "center",
-    justify: "center",
+    justifyContent: "center",
   },
   conditionBadge: {
     position: "absolute",
@@ -310,20 +297,17 @@ const styles = StyleSheet.create({
   productTitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.85)",
     lineHeight: 18,
     minHeight: 36,
   },
   cardFooterPanel: {
     paddingTop: 8,
-    
     gap: 8,
     marginTop: 8,
   },
   priceText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#FFFFFF",
   },
   ctaButton: {
     width: "100%",

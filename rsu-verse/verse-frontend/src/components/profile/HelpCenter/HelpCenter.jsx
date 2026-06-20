@@ -19,6 +19,7 @@ import {
   ChevronRight,
   MessageCircle,
 } from "lucide-react-native";
+import { ThemeTokens } from "../../../theme";
 
 const COLORS = {
   void: "#000000",
@@ -36,25 +37,29 @@ const COLORS = {
   white60: "rgba(255, 255, 255, 0.6)",
   white90: "rgba(255, 255, 255, 0.9)",
 };
-export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
+
+export function HelpCenter({ searchQuery, setSearchQuery, navigation, selectedTheme, setSelectedTheme }) {
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
   const popularArticles = [
     {
       id: "market-safety",
       title: "How to buy and sell safely on campus",
       category: "Marketplace",
-      icon: <Store size={16} color={COLORS.white40} />,
+      icon: <Store size={16} color={themeColor.textMuted} />,
     },
     {
       id: "anon-works",
       title: "How anonymous posts protect your identity",
       category: "Privacy",
-      icon: <MessageSquare size={16} color={COLORS.white40} />,
+      icon: <MessageSquare size={16} color={themeColor.textMuted} />,
     },
     {
       id: "verification",
       title: "Fixing student verification issues",
       category: "Account",
-      icon: <UserCheck size={16} color={COLORS.white40} />,
+      icon: <UserCheck size={16} color={themeColor.textMuted} />,
     },
   ];
 
@@ -63,7 +68,6 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
@@ -72,20 +76,22 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
     }, [])
   );
 
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+      <StatusBar 
+        barStyle={isDark ? "light-content" : "dark-content"} 
+        backgroundColor={themeColor.background} 
+      />
 
-
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: themeColor.background }]}>
         <TouchableOpacity
-          onPress={() => navigation?.goBack()} style={styles.headerAction}
+          onPress={() => navigation?.goBack()} 
+          style={styles.headerAction}
           activeOpacity={0.7}
         >
-          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+          <ArrowLeft size={20} color={isDark ? "#FFFFFF" : themeColor.textPrimary} strokeWidth={2.5} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Help Center</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Help Center</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -95,33 +101,40 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-
+        {/* Intro / Search Section */}
         <View style={styles.introSection}>
           <View style={styles.introHeadingWrapper}>
-            <Text style={styles.introTitle}>How can we help?</Text>
-            <Text style={styles.introSubtitle}>
+            <Text style={[styles.introTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>How can we help?</Text>
+            <Text style={[styles.introSubtitle, { color: themeColor.textMuted }]}>
               Search for guides or browse campus help topics.
             </Text>
           </View>
 
           <View style={styles.searchWrapper}>
-            <Search style={styles.searchIcon} size={20} color={COLORS.white30} />
+            <Search style={styles.searchIcon} size={20} color={themeColor.textMuted} />
             <TextInput
-              style={styles.searchInput}
+              style={[
+                styles.searchInput, 
+                { 
+                  backgroundColor: themeColor.surface, 
+                  borderColor: themeColor.border,
+                  color: isDark ? "#FFFFFF" : themeColor.textPrimary 
+                }
+              ]}
               placeholder="Search help articles..."
-              placeholderTextColor={COLORS.white30}
+              placeholderTextColor={themeColor.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              keyboardAppearance="dark"
+              keyboardAppearance={isDark ? "dark" : "light"}
             />
           </View>
         </View>
 
-
+        {/* Popular Articles Section */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeading}>Popular Articles</Text>
+          <Text style={[styles.sectionHeading, { color: themeColor.textMuted }]}>Popular Articles</Text>
 
-          <View style={styles.cardContainer}>
+          <View style={[styles.cardContainer, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
             {popularArticles.map((article, index) => {
               const isLastItem = index === popularArticles.length - 1;
               return (
@@ -129,66 +142,67 @@ export function HelpCenter({ searchQuery, setSearchQuery, navigation }) {
                   key={article.id}
                   onPress={() => navigation?.navigate("ArticleDetail", { id: article.id })}
                   activeOpacity={0.8}
-                  style={[styles.rowItem, !isLastItem && styles.rowBorder]}
+                  style={[
+                    styles.rowItem, 
+                    !isLastItem && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor.border }
+                  ]}
                 >
                   <View style={styles.rowLeft}>
-                    <View style={styles.iconBox}>
+                    <View style={[styles.iconBox, { backgroundColor: themeColor.background }]}>
                       {article.icon}
                     </View>
                     <View style={styles.metaWrapper}>
-                      <Text style={styles.articleTitle} numberOfLines={1}>
+                      <Text style={[styles.articleTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]} numberOfLines={1}>
                         {article.title}
                       </Text>
-                      <Text style={styles.articleCategory}>
+                      <Text style={[styles.articleCategory, { color: themeColor.textMuted }]}>
                         {article.category}
                       </Text>
                     </View>
                   </View>
-                  <ChevronRight size={16} color={COLORS.white20} />
+                  <ChevronRight size={16} color={themeColor.textMuted} />
                 </TouchableOpacity>
               );
             })}
           </View>
         </View>
 
-
+        {/* Browse Topics Grid */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeading}>Browse Topics</Text>
+          <Text style={[styles.sectionHeading, { color: themeColor.textMuted }]}>Browse Topics</Text>
 
           <View style={styles.gridRow}>
-
             <TouchableOpacity
               onPress={() => navigation?.navigate("TopicMarket")}
               activeOpacity={0.8}
-              style={styles.gridCard}
+              style={[styles.gridCard, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}
             >
-              <Store size={20} color={COLORS.white50} />
+              <Store size={20} color={themeColor.textMuted} />
               <View style={styles.gridCardMeta}>
-                <Text style={styles.gridCardTitle}>Marketplace</Text>
-                <Text style={styles.gridCardSubtitle}>Selling guidelines & tips</Text>
+                <Text style={[styles.gridCardTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Marketplace</Text>
+                <Text style={[styles.gridCardSubtitle, { color: themeColor.textMuted }]}>Selling guidelines & tips</Text>
               </View>
             </TouchableOpacity>
-
 
             <TouchableOpacity
               onPress={() => navigation?.navigate("TopicPrivacy")}
               activeOpacity={0.8}
-              style={styles.gridCard}
+              style={[styles.gridCard, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}
             >
-              <MessageSquare size={20} color={COLORS.white50} />
+              <MessageSquare size={20} color={themeColor.textMuted} />
               <View style={styles.gridCardMeta}>
-                <Text style={styles.gridCardTitle}>Anonymity</Text>
-                <Text style={styles.gridCardSubtitle}>How your data stays safe</Text>
+                <Text style={[styles.gridCardTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Anonymity</Text>
+                <Text style={[styles.gridCardSubtitle, { color: themeColor.textMuted }]}>How your data stays safe</Text>
               </View>
             </TouchableOpacity>
           </View>
         </View>
 
-
-        <View style={styles.ctaContainer}>
+        {/* Support CTA Callout */}
+        <View style={[styles.ctaContainer, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
           <View style={styles.ctaHeadingWrapper}>
-            <Text style={styles.ctaTitle}>Still need help?</Text>
-            <Text style={styles.ctaSubtitle}>
+            <Text style={[styles.ctaTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Still need help?</Text>
+            <Text style={[styles.ctaSubtitle, { color: themeColor.textMuted }]}>
               {`If you can't find an answer, chat directly with a student support representative.`}
             </Text>
           </View>
@@ -227,7 +241,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.white,
-  
   },
   headerSpacer: {
     width: 36,
@@ -252,12 +265,13 @@ const styles = StyleSheet.create({
   introTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: COLORS.white
+    color: COLORS.white,
   },
   introSubtitle: {
-    fontSize: 16,
-    fontWeight: "300",
+    fontSize: 14,
+    fontWeight: "400",
     color: COLORS.white40,
+    lineHeight: 20,
   },
   searchWrapper: {
     position: "relative",
@@ -273,11 +287,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.ink,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "transparent",
     paddingLeft: 44,
     paddingRight: 16,
     paddingVertical: 12,
     fontSize: 14,
-    fontWeight: "400",
+    fontWeight: "500",
     color: COLORS.white,
   },
   sectionContainer: {
@@ -285,15 +301,18 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   sectionHeading: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 12,
+    fontWeight: "700",
     color: COLORS.white30,
     textTransform: "uppercase",
     paddingHorizontal: 4,
+    letterSpacing: 0.5,
   },
   cardContainer: {
     backgroundColor: COLORS.ink,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "transparent",
     overflow: "hidden",
   },
   rowItem: {
@@ -313,7 +332,6 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: COLORS.void,
     borderRadius: 12,
-  
   },
   metaWrapper: {
     flex: 1,
@@ -321,12 +339,12 @@ const styles = StyleSheet.create({
   },
   articleTitle: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
     color: COLORS.white90,
   },
   articleCategory: {
     fontSize: 12,
-    fontWeight: "300",
+    fontWeight: "400",
     color: COLORS.white40,
   },
   gridRow: {
@@ -338,6 +356,8 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: COLORS.ink,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "transparent",
     gap: 12,
   },
   gridCardMeta: {
@@ -345,18 +365,20 @@ const styles = StyleSheet.create({
   },
   gridCardTitle: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
     color: COLORS.white90,
   },
   gridCardSubtitle: {
     fontSize: 12,
-    fontWeight: "300",
+    fontWeight: "400",
     color: COLORS.white40,
     lineHeight: 18,
   },
   ctaContainer: {
     backgroundColor: COLORS.ink,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "transparent",
     padding: 16,
     alignItems: "center",
     gap: 16,
@@ -368,12 +390,12 @@ const styles = StyleSheet.create({
   },
   ctaTitle: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
     color: COLORS.white90,
   },
   ctaSubtitle: {
     fontSize: 12,
-    fontWeight: "300",
+    fontWeight: "400",
     color: COLORS.white40,
     textAlign: "center",
     lineHeight: 20,

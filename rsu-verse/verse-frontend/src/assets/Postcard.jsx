@@ -15,7 +15,6 @@ import {
 } from "lucide-react-native";
 import { useRelativeTime } from "./useRelativeTime";
 
-
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -24,6 +23,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { HapticEngine } from '../../haptics';
+import { ThemeTokens } from '../theme';
 
 export function PostCard({
   post,
@@ -33,6 +33,8 @@ export function PostCard({
   handleSave,
   getVerseIcon,
   handleShare,
+  selectedTheme,
+  setSelectedTheme,
   navigation
 }) {
 
@@ -80,7 +82,6 @@ export function PostCard({
     if (isReposted) {
       repostRotate.value = withTiming(360, { duration: 400 });
 
-
       repostScale.value = withSequence(
         withTiming(1.2, { duration: 80 }),
         withTiming(1, { duration: 80 })
@@ -89,7 +90,6 @@ export function PostCard({
       repostRotate.value = withTiming(0, { duration: 200 });
     }
   }, [isReposted]);
-
 
   useEffect(() => {
     if (!isSaved) {
@@ -104,7 +104,6 @@ export function PostCard({
       );
     }
   }, [!isSaved]);
-
 
   const animatedRepostStyle = useAnimatedStyle(() => {
     return {
@@ -148,10 +147,8 @@ export function PostCard({
     handleRepost(post.id);
   };
 
-
   const handleSavePress = () => {
     HapticEngine.light();
-
 
     saveScale.value = withSequence(
       withTiming(0.9, { duration: 40 }),
@@ -183,45 +180,46 @@ export function PostCard({
     navigation.navigate("Comments", { postId: post.id });
   };
 
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
   return (
     <View
       style={[
         styles.cardContainer,
-        isConfession ? styles.confessionCardBg : styles.voidCardBg
+        { borderBottomColor: themeColor.border },
+        isConfession ? isDark ? styles.confessionCardBg : {backgroundColor: themeColor.background} : { backgroundColor: themeColor.background }
       ]}
     >
 
       <View style={styles.headerLayer}>
         <View style={styles.profileRow}>
 
-          <View style={styles.avatarPlaceholder} />
+          <View style={[styles.avatarPlaceholder, { backgroundColor: themeColor.surface }]} />
 
           <View style={styles.metaTextColumn}>
             <View style={styles.topInfoRow}>
               <View style={styles.identityBlock}>
-                <Text numberOfLines={1} style={styles.authorTitle}>
+                <Text numberOfLines={1} style={[styles.authorTitle, { color: themeColor.textPrimary }]}>
                   {isMarket ? post.author?.name : post.author?.faculty}
                 </Text>
 
                 <View style={styles.subMetaRow}>
-                  <Text numberOfLines={1} style={styles.handleText}>
+                  <Text numberOfLines={1} style={[styles.handleText, { color: themeColor.textMuted }]}>
                     @{post.author?.department}
                   </Text>
-                  <Text style={styles.handleText}>
+                  <Text style={[styles.handleText, { color: themeColor.textMuted }]}>
                     {" "}&bull; {useRelativeTime(post.meta.createdAt)}
                   </Text>
                 </View>
               </View>
 
-
               <View style={styles.utilityActionBox}>
                 <Pressable
                   style={styles.iconPadding}
-                  onPress={() => setIsDotOpen
-                    (true)
-                  }
+                  onPress={() => setIsDotOpen(true)}
                 >
-                  <MoreHorizontal size={18} color="rgba(255,255,255,0.3)" />
+                  <MoreHorizontal size={18} color={themeColor.textMuted} />
                 </Pressable>
                 <View style={styles.badgeIconWrapper}>
                   {getVerseIcon?.(post.verse)}
@@ -237,25 +235,23 @@ export function PostCard({
         style={styles.contentBodyWrapper}
       >
 
-        <View style={styles.badgeWrapper}>
+        <View style={[styles.badgeWrapper, { backgroundColor: themeColor.surface }]}>
           <Text style={[styles.badgeText, isConfession ? styles.textRose : styles.textCyan]}>
             {isConfession ? 'CONFESSION' : post.verse?.toUpperCase()}
           </Text>
         </View>
 
         {post.content?.text && (
-          <Text style={styles.bodyText}>
+          <Text style={[styles.bodyText, { color: themeColor.textPrimary }]}>
             {post.content?.text}
           </Text>
         )}
       </Pressable>
 
-
-
-
       {post.content?.images && post.content.images.length > 0 && (
         <View style={[
           styles.imagesGrid,
+          { borderColor: themeColor.border },
           post.content.images.length === 1 ? styles.gridSingle : styles.gridMulti
         ]}>
           {post.content.images.map((imgUrl, index) => (
@@ -264,6 +260,7 @@ export function PostCard({
               source={imgUrl}
               style={[
                 styles.gridImage,
+                { backgroundColor: themeColor.surface },
                 post.content.images.length === 1 ? styles.singleImageSize : styles.multiImageSize
               ]}
               contentFit="cover"
@@ -274,15 +271,14 @@ export function PostCard({
         </View>
       )}
 
-
       {isMarket && (
         <View style={styles.marketContainer}>
           <View style={styles.marketInfoRow}>
-            <Text numberOfLines={1} style={styles.marketPriceText}>
+            <Text numberOfLines={1} style={[styles.marketPriceText, { color: themeColor.textPrimary }]}>
               ₦{post.marketPlace?.price}
             </Text>
-            <Text style={styles.marketDivider}>-</Text>
-            <Text numberOfLines={1} style={styles.marketConditionText}>
+            <Text style={[styles.marketDivider, { color: themeColor.textMuted }]}>-</Text>
+            <Text numberOfLines={1} style={[styles.marketConditionText, { color: themeColor.textPrimary }]}>
               {post.marketPlace?.condition}
             </Text>
           </View>
@@ -292,7 +288,6 @@ export function PostCard({
           </Pressable>
         </View>
       )}
-
 
       <View style={styles.toolbarWrapper}>
         <View style={styles.leftActionGroup}>
@@ -305,15 +300,14 @@ export function PostCard({
               <ArrowBigUp
                 size={22}
                 fill={isUpvoted ? "#17CB49" : "transparent"}
-                color={isUpvoted ? "#17CB49" : "rgba(255,255,255,0.7)"}
+                color={isUpvoted ? "#17CB49" : themeColor.textSecondary}
                 strokeWidth={isUpvoted ? 2 : 1.5}
               />
             </Animated.View>
-            <Text style={[styles.metricCounterText, isUpvoted && styles.textUpvotedGreen]}>
+            <Text style={[styles.metricCounterText, { color: themeColor.textSecondary }, isUpvoted && styles.textUpvotedGreen]}>
               {post.engagement?.upvotes}
             </Text>
           </Pressable>
-
 
           <Pressable
             onPress={handleDownvotePress}
@@ -323,23 +317,21 @@ export function PostCard({
               <ArrowBigDown
                 size={22}
                 fill={isDownvoted ? "#F59E0B" : "transparent"}
-                color={isDownvoted ? "#F59E0B" : "rgba(255,255,255,0.7)"}
+                color={isDownvoted ? "#F59E0B" : themeColor.textSecondary}
                 strokeWidth={isDownvoted ? 2 : 1.5}
               />
             </Animated.View>
-            <Text style={[styles.metricCounterText, isDownvoted && styles.textRose]}>
+            <Text style={[styles.metricCounterText, { color: themeColor.textSecondary }, isDownvoted && styles.textRose]}>
               {post.engagement?.downvotes}
             </Text>
           </Pressable>
 
-
           <View style={styles.interactionButton}>
-            <MessageCircle size={22} color="rgba(255,255,255,0.7)" onPress={handleNavigateToDetail} />
-            <Text style={styles.metricCounterText}>
+            <MessageCircle size={22} color={themeColor.textSecondary} onPress={handleNavigateToDetail} />
+            <Text style={[styles.metricCounterText, { color: themeColor.textSecondary }]}>
               {totalCommentsAndReplies === 0 ? '' : totalCommentsAndReplies}
             </Text>
           </View>
-
 
           <Pressable
             onPress={handleRepostPress}
@@ -349,15 +341,14 @@ export function PostCard({
               {isReposted ? (
                 <Repeat size={22} color="#17CB49" />
               ) : (
-                <Repeat size={22} color="rgba(255,255,255,0.7)" />
+                <Repeat size={22} color={themeColor.textSecondary} />
               )}
             </Animated.View>
-            <Text style={[styles.metricCounterText, isReposted && styles.textCyan]}>
+            <Text style={[styles.metricCounterText, { color: themeColor.textSecondary }, isReposted && styles.textCyan]}>
               {post.engagement?.reposts === 0 ? '' : post.engagement?.reposts}
             </Text>
           </Pressable>
         </View>
-
 
         <View style={styles.rightActionGroup}>
           <Pressable
@@ -368,7 +359,7 @@ export function PostCard({
               <Bookmark
                 size={22}
                 fill={isSaved ? "#F59E0B" : "transparent"}
-                color={isSaved ? "#F59E0B" : "rgba(255,255,255,0.7)"}
+                color={isSaved ? "#F59E0B" : themeColor.textSecondary}
                 strokeWidth={isSaved ? 2 : 1.5}
               />
             </Animated.View>
@@ -377,7 +368,7 @@ export function PostCard({
             onPress={() => handleShare(post.id)}
             style={styles.interactionButton}
           >
-            <Send size={22} color="rgba(255,255,255,0.7)" />
+            <Send size={22} color={themeColor.textSecondary} />
           </Pressable>
         </View>
       </View>
@@ -397,21 +388,21 @@ export function PostCard({
             style={styles.backdropPressable}
           />
 
-          <View style={styles.bottomSheetContainer}>
-            <View style={styles.sheetHandle} />
+          <View style={[styles.bottomSheetContainer, { backgroundColor: themeColor.background, borderColor: themeColor.border }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: themeColor.border }]} />
 
             <View style={styles.metricsList}>
-              <Pressable style={styles.metricBox}>
-                <View style={styles.metricHeaderRow}>
+              <Pressable style={[styles.metricBox, { backgroundColor: themeColor.surface }]}>
+                <View style={[styles.metricHeaderRow, { backgroundColor: themeColor.surface }]}>
                   <AlertCircle size={16} color="rgba(245, 0, 0, 1)" />
                   <Text style={[styles.metricLabel, { color: "rgba(245, 0, 0, 1)" }]}>Report Post</Text>
                 </View>
               </Pressable>
 
-              <View style={styles.metricBox}>
-                <View style={styles.metricHeaderRow}>
-                  <UserRoundX size={16} color="rgba(255, 255, 255, 0.6)" />
-                  <Text style={styles.metricLabel}>Block User</Text>
+              <View style={[styles.metricBox, { backgroundColor: themeColor.surface }]}>
+                <View style={[styles.metricHeaderRow, { backgroundColor: themeColor.surface }]}>
+                  <UserRoundX size={16} color={themeColor.textSecondary} />
+                  <Text style={[styles.metricLabel, { color: themeColor.textSecondary }]}>Block User</Text>
                 </View>
               </View>
             </View>
@@ -519,7 +510,6 @@ const styles = StyleSheet.create({
   },
   imagesGrid: {
     marginTop: 12,
-    borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
     overflow: 'hidden',
     gap: 6,
@@ -598,7 +588,6 @@ const styles = StyleSheet.create({
   rightActionGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-
   },
   interactionButton: {
     flexDirection: 'row',
@@ -617,7 +606,6 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "flex-end",
   },
   bottomSheetContainer: {

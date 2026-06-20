@@ -1,29 +1,33 @@
-import React, {useRef, useCallback, useState} from "react";
+import React, { useRef, useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, Modal } from "react-native";
-import { Bell, UserCircle2, LockKeyhole, ArrowRight, NotebookText, SunMoon, EyeOff, HelpCircle, Mail, ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X } from "lucide-react-native";
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, Modal, Pressable } from "react-native";
+import { ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X, Pencil } from "lucide-react-native";
+import { ThemeTokens } from "../../theme";
 
-export function ProfilePage({ navigation, selectedTheme, bio, setBio, displayName, setDisplayName, username, setUsername }) {
+export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
   const [isStatsOpen, setIsStatsOpen] = useState(false);
-
   const scrollViewRef = useRef(null);
-  const [localInput, setLocalInput] = useState("");
+
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
   useFocusEffect(
     useCallback(() => {
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-        setLocalInput("");
       };
     }, [])
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+      <StatusBar 
+        barStyle={isDark ? "light-content" : "dark-content"} 
+        backgroundColor={themeColor.background} 
+      />
 
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Profile</Text>
+      <View style={[styles.header, { backgroundColor: themeColor.background }]}>
+        <Text style={[styles.headerTitle, { color: themeColor.textPrimary }]}>Your Profile</Text>
 
         <View style={styles.verifiedBadge}>
           <ShieldCheck size={14} color="#17CB49" />
@@ -38,143 +42,42 @@ export function ProfilePage({ navigation, selectedTheme, bio, setBio, displayNam
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.heroRow}>
-          <View style={styles.avatarPlaceholder} />
+          <View style={[styles.avatarPlaceholder, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]} />
+          
           <View style={styles.identityMeta}>
             <View style={styles.profileNameRow}>
-              <Text style={styles.profileName}>{displayName}</Text>
+              <Text style={[styles.profileName, { color: themeColor.textPrimary }]}>{displayName}</Text>
+              
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => setIsStatsOpen(true)}
                 style={styles.statsToggleBtn}
               >
-                <ChevronDown size={18} color="rgba(255, 255, 255, 0.4)" />
+                <ChevronDown size={18} color={themeColor.textPrimary} />
               </TouchableOpacity>
+
+              <Pressable
+                onPress={() => navigation.navigate("Manage_Profile")}
+                style={({ pressed }) => [
+                  styles.editButton,
+                  { opacity: pressed ? 0.7 : 1 }
+                ]}
+              >
+                <Pencil size={16} color={themeColor.textSecondary} />
+              </Pressable>
             </View>
-            <Text style={styles.bio}>{bio}</Text>
+            
+            <Text style={[styles.bio, { color: themeColor.textSecondary }]}>{bio}</Text>
 
             <View style={styles.tagRow}>
-              <View style={styles.deptTag}>
-                <GraduationCap size={12} color="rgba(255, 255, 255, 0.7)" />
-                <Text style={styles.tagText}>Computer Engineering</Text>
+              <View style={[styles.deptTag, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
+                <GraduationCap size={12} color={themeColor.textMuted} />
+                <Text style={[styles.tagText, { color: themeColor.textPrimary }]}>Computer Engineering</Text>
               </View>
               <View style={styles.levelTag}>
                 <Text style={styles.levelTagText}>500 Level</Text>
               </View>
             </View>
-          </View>
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeader}>Account</Text>
-          <View style={styles.cardGroup}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("Manage_Profile")}
-              style={styles.rowItemBordered}
-            >
-              <View style={styles.rowLeftGroup}>
-                <UserCircle2 size={18} color="rgba(255, 255, 255, 0.8)" strokeWidth={1.8} />
-                <Text style={styles.rowText}>Manage Profile</Text>
-              </View>
-              <ArrowRight size={18} color="rgba(255, 255, 255, 0.4)" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("Manage_Security")}
-              style={styles.rowItemBordered}
-            >
-              <View style={styles.rowLeftGroup}>
-                <LockKeyhole size={18} color="rgba(255, 255, 255, 0.8)" strokeWidth={1.8} />
-                <Text style={styles.rowText}>Password & Security</Text>
-              </View>
-              <ArrowRight size={18} color="rgba(255, 255, 255, 0.4)" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("Notification")}
-              style={styles.rowItemClean}
-            >
-              <View style={styles.rowLeftGroup}>
-                <Bell size={18} color="rgba(255, 255, 255, 0.8)" strokeWidth={1.8} />
-                <Text style={styles.rowText}>Notifications</Text>
-              </View>
-              <ArrowRight size={18} color="rgba(255, 255, 255, 0.4)" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeader}>Preferences</Text>
-          <View style={styles.cardGroup}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("Theme_Management")}
-              style={styles.rowItemBordered}
-            >
-              <View style={styles.rowLeftGroup}>
-                <SunMoon size={18} color="rgba(255, 255, 255, 0.8)" strokeWidth={1.8} />
-                <Text style={styles.rowTextSubsequent}>Theme</Text>
-              </View>
-              <View style={styles.rowRightBadgeGroup}>
-                <Text style={styles.badgeLabelText}>{selectedTheme}</Text>
-                <ArrowRight size={18} color="rgba(255, 255, 255, 0.4)" />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("Privacy_Management")}
-              style={styles.rowItemClean}
-            >
-              <View style={styles.rowLeftGroup}>
-                <EyeOff size={18} color="rgba(255, 255, 255, 0.8)" strokeWidth={1.8} />
-                <Text style={styles.rowTextSubsequent}>Privacy & Safety</Text>
-              </View>
-              <ArrowRight size={18} color="rgba(255, 255, 255, 0.4)" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionHeader}>Support</Text>
-          <View style={styles.cardGroup}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("About_Verse")}
-              style={styles.rowItemBordered}
-            >
-              <View style={styles.rowLeftGroup}>
-                <NotebookText size={18} color="rgba(255, 255, 255, 0.8)" strokeWidth={1.8} />
-                <Text style={styles.rowTextSubsequent}>About Verse</Text>
-              </View>
-              <ArrowRight size={18} color="rgba(255, 255, 255, 0.4)" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("Help_Center")}
-              style={styles.rowItemBordered}
-            >
-              <View style={styles.rowLeftGroup}>
-                <HelpCircle size={18} color="rgba(255, 255, 255, 0.8)" strokeWidth={1.8} />
-                <Text style={styles.rowTextSubsequent}>Help Center</Text>
-              </View>
-              <ArrowRight size={18} color="rgba(255, 255, 255, 0.4)" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("Contact_Us")}
-              style={styles.rowItemClean}
-            >
-              <View style={styles.rowLeftGroup}>
-                <Mail size={18} color="rgba(255, 255, 255, 0.8)" strokeWidth={1.8} />
-                <Text style={styles.rowTextSubsequent}>Contact Us</Text>
-              </View>
-              <ArrowRight size={18} color="rgba(255, 255, 255, 0.4)" />
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -192,39 +95,39 @@ export function ProfilePage({ navigation, selectedTheme, bio, setBio, displayNam
             onPress={() => setIsStatsOpen(false)}
           />
 
-          <View style={styles.bottomSheetContainer}>
-            <View style={styles.sheetHandle} />
+          <View style={[styles.bottomSheetContainer, { backgroundColor: themeColor.background, borderColor: themeColor.border }]}>
+            <View style={[styles.sheetHandle, { backgroundColor: themeColor.border }]} />
 
             <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>Your Stats</Text>
+              <Text style={[styles.sheetTitle, { color: themeColor.textPrimary }]}>Your Stats</Text>
               <TouchableOpacity onPress={() => setIsStatsOpen(false)}>
-                <X size={20} color="rgba(255, 255, 255, 0.4)" />
+                <X size={20} color={themeColor.textMuted} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.metricsList}>
-              <View style={styles.metricBox}>
+              <View style={[styles.metricBox, { backgroundColor: themeColor.surface }]}>
                 <View style={styles.metricHeaderRow}>
                   <UserCheck size={16} color="#17CB49" />
                   <Text style={[styles.metricLabel, { color: "#17CB49" }]}>Reputation</Text>
                 </View>
-                <Text style={styles.metricValue}>1,420</Text>
+                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>1,420</Text>
               </View>
 
-              <View style={styles.metricBox}>
+              <View style={[styles.metricBox, { backgroundColor: themeColor.surface }]}>
                 <View style={styles.metricHeaderRow}>
-                  <MessageSquare size={16} color="rgba(255, 255, 255, 0.6)" />
-                  <Text style={styles.metricLabel}>My Verses</Text>
+                  <MessageSquare size={16} color={themeColor.textMuted} />
+                  <Text style={[styles.metricLabel, { color: themeColor.textSecondary }]}>My Verses</Text>
                 </View>
-                <Text style={styles.metricValue}>48 posts</Text>
+                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>48 posts</Text>
               </View>
 
-              <View style={styles.metricBox}>
+              <View style={[styles.metricBox, { backgroundColor: themeColor.surface }]}>
                 <View style={styles.metricHeaderRow}>
                   <Flame size={16} color="#F59E0B" />
                   <Text style={[styles.metricLabel, { color: "#F59E0B" }]}>Confessions made</Text>
                 </View>
-                <Text style={styles.metricValue}>12</Text>
+                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>12</Text>
               </View>
             </View>
           </View>
@@ -237,7 +140,6 @@ export function ProfilePage({ navigation, selectedTheme, bio, setBio, displayNam
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#000000",
   },
   mainContainer: {
     flex: 1,
@@ -253,13 +155,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#FFFFFF",
-    textAlign: "center",
   },
   verifiedBadge: {
     flexDirection: "row",
@@ -286,9 +185,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#16181C",
     borderWidth: 1,
-    borderColor: "#2F3336",
   },
   identityMeta: {
     flexDirection: "column",
@@ -302,54 +199,51 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
   },
   statsToggleBtn: {
     padding: 4,
     justifyContent: "center",
     alignItems: "center",
   },
-  bio: {
-    fontSize: 12,
-    color: "rgba(255, 255, 255, 0.5)",
-    fontWeight: "300",
-    marginTop: 2,
+  editButton: {
+    padding: 4,
+    marginLeft: "auto",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  sectionContainer: {
-    flexDirection: "column",
-    marginBottom: 24,
-    gap: 12,
+  bio: {
+    fontSize: 13,
+    fontWeight: "400",
+    marginTop: 4,
+    lineHeight: 18,
   },
   tagRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 8,
+    marginTop: 10,
   },
   deptTag: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#16181C",
-    paddingVertical: 3,
+    paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#2F3336",
   },
   tagText: {
-    color: "rgba(255, 255, 255, 0.8)",
     fontSize: 12,
     fontWeight: "500",
   },
   levelTag: {
     backgroundColor: "rgba(245, 158, 11, 0.1)",
-    paddingVertical: 3,
+    paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 6,
   },
   levelTagText: {
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#F59E0B",
     fontSize: 11,
     fontWeight: "600",
   },
@@ -366,17 +260,15 @@ const styles = StyleSheet.create({
     right: 0,
   },
   bottomSheetContainer: {
-    backgroundColor: "#000000",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 40,
     paddingTop: 10,
-    borderWidth: 1,
+    borderTopWidth: 1,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 16,
@@ -386,14 +278,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
-    paddingHorizontal: 16
+    paddingHorizontal: 16,
   },
   sheetTitle: {
     fontSize: 16,
     flex: 1,
     textAlign: "center",
     fontWeight: "600",
-    color: "#FFFFFF",
   },
   metricsList: {
     flexDirection: "column",
@@ -401,7 +292,6 @@ const styles = StyleSheet.create({
   },
   metricBox: {
     width: "100%",
-    backgroundColor: "#1A1A1A",
     padding: 16,
   },
   metricHeaderRow: {
@@ -413,59 +303,12 @@ const styles = StyleSheet.create({
   metricLabel: {
     fontSize: 11,
     fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.4)",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   metricValue: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#FFFFFF",
     letterSpacing: -0.5,
-  },
-  sectionHeader: {
-    fontSize: 16,
-    fontWeight: "600",
-    paddingHorizontal: 16,
-    color: "rgba(255, 255, 255, 0.9)",
-  },
-  cardGroup: {
-    backgroundColor: "#1A1A1A",
-    overflow: "hidden",
-  },
-  rowItemBordered: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  rowItemClean: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  rowLeftGroup: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  rowText: {
-    fontSize: 16,
-    color: "rgba(255, 255, 255, 0.8)",
-  },
-  rowTextSubsequent: {
-    fontSize: 16,
-    color: "rgba(255, 255, 255, 0.8)",
-  },
-  rowRightBadgeGroup: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  badgeLabelText: {
-    fontSize: 14,
-    fontWeight: "300",
-    color: "rgba(255, 255, 255, 0.4)",
   },
 });

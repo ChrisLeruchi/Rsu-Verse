@@ -21,6 +21,7 @@ import {
   MessageCircle,
 } from "lucide-react-native";
 import { formatRelativeTime } from "../../assets/formatRelativeTime";
+import { ThemeTokens } from "../../theme";
 
 export function SearchFeed({
   route,
@@ -30,10 +31,14 @@ export function SearchFeed({
   handleUpvote,
   handleDownvotes,
   getVerseIcon,
-  matchingPosts
+  matchingPosts,
+  selectedTheme,
+  setSelectedTheme
 }) {
   const { query, clickedPostId } = route.params || { query: "", clickedPostId: null };
 
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
   const filteredPosts = React.useMemo(() => {
     return (matchingPosts || []).filter(post => post && post.verse !== "market");
@@ -48,10 +53,10 @@ export function SearchFeed({
   }, [filteredPosts, clickedPostId]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={themeColor.background} />
 
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: themeColor.border }]}>
         <TouchableOpacity
           onPress={() => {
             if (navigation.canGoBack()) {
@@ -63,11 +68,11 @@ export function SearchFeed({
           activeOpacity={0.7}
           style={styles.backButton}
         >
-          <ChevronLeft size={24} color="#FFFFFF" />
+          <ChevronLeft size={24} color={themeColor.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Search Results</Text>
-          <Text style={styles.headerSubtitle} numberOfLines={1}>
+          <Text style={[styles.headerTitle, { color: themeColor.textPrimary }]}>Search Results</Text>
+          <Text style={[styles.headerSubtitle, { color: themeColor.textMuted }]} numberOfLines={1}>
             Filtered records for {`"${query || "..."}"`}
           </Text>
         </View>
@@ -86,23 +91,24 @@ export function SearchFeed({
                 key={post.id}
                 style={[
                   styles.postContainer,
-                  isConfession ? styles.postConfessionBg : styles.postVoidBg,
+                  { borderBottomColor: themeColor.border, backgroundColor: themeColor.background },
+                  isConfession ? { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.05)' : themeColor.surface } : {}
                 ]}
               >
                 <View style={styles.postMetaRow}>
                   <View style={styles.profileLayout}>
-                    <View style={styles.avatarPlaceholder} />
+                    <View style={[styles.avatarPlaceholder, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]} />
                     <View style={styles.authorMeta}>
                       <View style={styles.metaTextGroup}>
-                        <Text style={styles.facultyText} numberOfLines={1}>
+                        <Text style={[styles.facultyText, { color: themeColor.textPrimary }]} numberOfLines={1}>
                           {post.author?.faculty || "Anonymous Faculty"}
                         </Text>
                         <View style={styles.subMetaRow}>
-                          <Text style={styles.departmentText} numberOfLines={1}>
+                          <Text style={[styles.departmentText, { color: themeColor.textMuted }]} numberOfLines={1}>
                             @{post.author?.department || "anonymous"}
                           </Text>
-                          <Text style={styles.dotSeparator}>·</Text>
-                          <Text style={styles.timeText} numberOfLines={1}>
+                          <Text style={[styles.dotSeparator, { color: themeColor.textMuted }]}>·</Text>
+                          <Text style={[styles.timeText, { color: themeColor.textMuted }]} numberOfLines={1}>
                             {post.meta?.createdAt ? formatRelativeTime(post.meta.createdAt) : "now"}
                           </Text>
                         </View>
@@ -112,7 +118,7 @@ export function SearchFeed({
 
                   <View style={styles.metaRightActions}>
                     <TouchableOpacity activeOpacity={0.6} style={styles.iconActionPadding}>
-                      <MoreHorizontal size={18} color="rgba(255, 255, 255, 0.4)" />
+                      <MoreHorizontal size={18} color={themeColor.textMuted} />
                     </TouchableOpacity>
                     <View style={styles.verseIconWrapper}>
                       {getVerseIcon && getVerseIcon(post.verse)}
@@ -125,14 +131,14 @@ export function SearchFeed({
                   onPress={() => navigation.navigate("Comments", { postId: post.id })}
                   style={styles.postBodyTouchable}
                 >
-                  <View style={[styles.badge, isConfession ? styles.badgeRose : styles.badgeCyan]}>
+                  <View style={[styles.badge, { backgroundColor: themeColor.surface }]}>
                     <Text style={[styles.badgeText, isConfession ? styles.textRose : styles.textCyan]}>
                       {post.verse}
                     </Text>
                   </View>
 
                   <View style={styles.bodyTextContainer}>
-                    <Text style={styles.bodyText}>{post.content?.text}</Text>
+                    <Text style={[styles.bodyText, { color: themeColor.textPrimary }]}>{post.content?.text}</Text>
                   </View>
                 </TouchableOpacity>
 
@@ -141,6 +147,7 @@ export function SearchFeed({
                     <View
                       style={[
                         styles.imageGrid,
+                        { borderColor: themeColor.border },
                         post.content.images.length === 1 ? styles.gridSingle : styles.gridDouble,
                       ]}
                     >
@@ -150,6 +157,7 @@ export function SearchFeed({
                           source={{ uri: imgUrl }}
                           style={[
                             styles.attachedImage,
+                            { backgroundColor: themeColor.surface },
                             post.content.images.length === 1 ? styles.imageFullHeight : styles.imageSquareHeight,
                           ]}
                           resizeMode="cover"
@@ -169,15 +177,10 @@ export function SearchFeed({
                       <ArrowBigUp
                         size={20}
                         fill={post.userInteraction?.voteStatus === "up" ? "#17CB49" : "transparent"}
-                        color={post.userInteraction?.voteStatus === "up" ? "#17CB49" : "rgba(255, 255, 255, 0.5)"}
+                        color={post.userInteraction?.voteStatus === "up" ? "#17CB49" : themeColor.textSecondary}
                         strokeWidth={post.userInteraction?.voteStatus === "up" ? 2 : 1.5}
                       />
-                      <Text
-                        style={[
-                          styles.toolbarMetric,
-                          post.userInteraction?.voteStatus === "up" && styles.textUpvoted,
-                        ]}
-                      >
+                      <Text style={[styles.toolbarMetric, { color: themeColor.textSecondary }, post.userInteraction?.voteStatus === "up" && styles.textUpvoted]}>
                         {post.engagement?.upvotes || 0}
                       </Text>
                     </TouchableOpacity>
@@ -190,15 +193,10 @@ export function SearchFeed({
                       <ArrowBigDown
                         size={20}
                         fill={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : "transparent"}
-                        color={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : "rgba(255, 255, 255, 0.5)"}
+                        color={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : themeColor.textSecondary}
                         strokeWidth={post.userInteraction?.voteStatus === "down" ? 2 : 1.5}
                       />
-                      <Text
-                        style={[
-                          styles.toolbarMetric,
-                          post.userInteraction?.voteStatus === "down" && styles.textDownvoted,
-                        ]}
-                      >
+                      <Text style={[styles.toolbarMetric, { color: themeColor.textSecondary }, post.userInteraction?.voteStatus === "down" && styles.textDownvoted]}>
                         {post.engagement?.downvotes || 0}
                       </Text>
                     </TouchableOpacity>
@@ -208,11 +206,9 @@ export function SearchFeed({
                       style={styles.toolbarButton}
                       onPress={() => navigation.navigate("Comments", { postId: post.id })}
                     >
-                      <MessageCircle size={19} color="rgba(255, 255, 255, 0.5)" />
-                      <Text style={styles.toolbarMetric}>
-                        {Array.isArray(post.engagement?.comments)
-                          ? post.engagement.comments.length
-                          : post.engagement?.comments || 0}
+                      <MessageCircle size={19} color={themeColor.textSecondary} />
+                      <Text style={[styles.toolbarMetric, { color: themeColor.textSecondary }]}>
+                        {Array.isArray(post.engagement?.comments) ? post.engagement.comments.length : post.engagement?.comments || 0}
                       </Text>
                     </TouchableOpacity>
 
@@ -224,9 +220,9 @@ export function SearchFeed({
                       {post.userInteraction?.reposts ? (
                         <Repeat1 size={19} color="#17CB49" />
                       ) : (
-                        <Repeat size={19} color="rgba(255, 255, 255, 0.5)" />
+                        <Repeat size={19} color={themeColor.textSecondary} />
                       )}
-                      <Text style={[styles.toolbarMetric, post.userInteraction?.reposts && styles.textReposted]}>
+                      <Text style={[styles.toolbarMetric, { color: themeColor.textSecondary }, post.userInteraction?.reposts && styles.textReposted]}>
                         {post.engagement?.reposts || ""}
                       </Text>
                     </TouchableOpacity>
@@ -241,13 +237,13 @@ export function SearchFeed({
                       <Bookmark
                         size={19}
                         fill={post.userInteraction?.saved ? "#F59E0B" : "transparent"}
-                        color={post.userInteraction?.saved ? "#F59E0B" : "rgba(255, 255, 255, 0.5)"}
+                        color={post.userInteraction?.saved ? "#F59E0B" : themeColor.textSecondary}
                         strokeWidth={post.userInteraction?.saved ? 2 : 1.5}
                       />
                     </TouchableOpacity>
 
                     <TouchableOpacity activeOpacity={0.6} style={styles.toolbarIconButton}>
-                      <Share size={19} color="rgba(255, 255, 255, 0.5)" />
+                      <Share size={19} color={themeColor.textSecondary} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -255,9 +251,9 @@ export function SearchFeed({
             );
           })
         ) : (
-          <View style={styles.noResultsCard}>
-            <Text style={styles.noResultsText}>
-              No matching records found for{`"${query}"`}
+          <View style={[styles.noResultsCard, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
+            <Text style={[styles.noResultsText, { color: themeColor.textMuted }]}>
+              No matching records found for {`"${query}"`}
             </Text>
           </View>
         )}
@@ -267,7 +263,7 @@ export function SearchFeed({
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#000000" },
+  safeArea: { flex: 1 },
   scrollContainer: { paddingBottom: 40 },
   header: {
     flexDirection: "row",
@@ -276,87 +272,72 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#16161D",
     gap: 14,
   },
   backButton: { padding: 4, marginLeft: -4 },
   headerTitleContainer: { flex: 1, flexDirection: "column" },
-  headerTitle: { fontSize: 17, fontWeight: "700", color: "#FFFFFF", letterSpacing: -0.4 },
-  headerSubtitle: { fontSize: 13, color: "rgba(255, 255, 255, 0.5)", marginTop: 2 },
+  headerTitle: { fontSize: 17, fontWeight: "700", letterSpacing: -0.4 },
+  headerSubtitle: { fontSize: 13, marginTop: 2 },
   postContainer: {
     borderBottomWidth: 1,
-    borderBottomColor: "#16161D",
     paddingVertical: 16,
     gap: 12,
   },
-  postConfessionBg: { backgroundColor: "rgba(245, 158, 11, 0.01)" },
-  postVoidBg: { backgroundColor: "#000000" },
   postMetaRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16 },
   profileLayout: { flexDirection: "row", alignItems: "center", flex: 1, gap: 10 },
   avatarPlaceholder: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#16161F",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
   },
   authorMeta: { flex: 1 },
   metaTextGroup: { flexDirection: "column" },
-  facultyText: { fontSize: 15, fontWeight: "600", color: "#FFFFFF", letterSpacing: -0.2 },
+  facultyText: { fontSize: 15, fontWeight: "600", letterSpacing: -0.2 },
   subMetaRow: { flexDirection: "row", alignItems: "center", marginTop: 1 },
-  departmentText: { fontSize: 13, fontWeight: "400", color: "rgba(255, 255, 255, 0.55)" },
-  dotSeparator: { fontSize: 13, color: "rgba(255, 255, 255, 0.4)", marginHorizontal: 6 },
-  timeText: { fontSize: 13, fontWeight: "400", color: "rgba(255, 255, 255, 0.55)" },
+  departmentText: { fontSize: 13, fontWeight: "400" },
+  dotSeparator: { fontSize: 13, marginHorizontal: 6 },
+  timeText: { fontSize: 13, fontWeight: "400" },
   metaRightActions: { flexDirection: "row", alignItems: "center", gap: 6 },
   iconActionPadding: { padding: 4 },
   verseIconWrapper: { padding: 4 },
   postBodyTouchable: { flexDirection: "column", gap: 8, paddingHorizontal: 16 },
   badge: { alignSelf: "flex-start", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  badgeRose: { backgroundColor: "rgba(245, 158, 11, 0.1)" },
-  badgeCyan: { backgroundColor: "rgba(23, 203, 73, 0.1)" },
   badgeText: { fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 },
   textRose: { color: "#F59E0B" },
   textCyan: { color: "#17CB49" },
   bodyTextContainer: { marginTop: 1 },
-  bodyText: { fontSize: 15, color: "#EFF1F5", lineHeight: 22, fontWeight: "400" },
-  mediaContainerWrapper: { paddingHorizontal: 16, marginTop: 4 },
+  bodyText: { fontSize: 15, lineHeight: 22, fontWeight: "400" },
+
   imageGrid: {
-    borderRadius: 12,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#16161D",
     gap: 4,
   },
-  gridSingle: { flexDirection: "column" },
+  gridSingle: { height: 240 },
   gridDouble: { flexDirection: "row" },
-  attachedImage: { flex: 1, backgroundColor: "#16161F" },
+  attachedImage: { flex: 1 },
   imageFullHeight: { height: 210, width: "100%" },
   imageSquareHeight: { height: 160 },
   engagementToolbar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
     marginTop: 8,
   },
   leftToolbarActions: { flexDirection: "row", alignItems: "center", gap: 24 },
   rightToolbarActions: { flexDirection: "row", alignItems: "center", gap: 16 },
   toolbarButton: { flexDirection: "row", alignItems: "center", gap: 6, height: 32 },
   toolbarIconButton: { height: 32, justifyContent: "center" },
-  toolbarMetric: { fontSize: 12, color: "rgba(255, 255, 255, 0.5)", fontWeight: "400" },
+  toolbarMetric: { fontSize: 12, fontWeight: "400" },
   textUpvoted: { color: "#17CB49" },
   textDownvoted: { color: "#F59E0B" },
   textReposted: { color: "#17CB49" },
   noResultsCard: {
     margin: 24,
     paddingVertical: 64,
-    paddingHorizontal: 24,
-    backgroundColor: "#0B0B0F",
     borderWidth: 1,
-    borderColor: "#16161D",
     borderRadius: 16,
     alignItems: "center",
   },
-  noResultsText: { fontSize: 15, color: "rgba(255, 255, 255, 0.4)", textAlign: "center", lineHeight: 22 },
+  noResultsText: { fontSize: 15, textAlign: "center", lineHeight: 22 },
 });

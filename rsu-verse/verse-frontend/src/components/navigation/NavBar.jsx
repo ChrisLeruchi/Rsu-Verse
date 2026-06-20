@@ -1,7 +1,7 @@
 import { View,} from "react-native";
 import { NavBarIcons } from "./NavBarIcons";
 
-export function NavBar({activeTab, setActiveTab, handlePlusClick, setActiveFilter}) {
+export function NavBar({activeTab, setActiveTab, handlePlusClick, setActiveFilter, selectedTheme, setSelectedTheme}) {
   return (
     <View>
       <NavBarIcons
@@ -9,6 +9,8 @@ export function NavBar({activeTab, setActiveTab, handlePlusClick, setActiveFilte
         setActiveTab={setActiveTab}
         setActiveFilter={setActiveFilter}
         onPlusClick={handlePlusClick}
+        selectedTheme={selectedTheme}
+        setSelectedTheme={setSelectedTheme}
       />
     </View>
   )

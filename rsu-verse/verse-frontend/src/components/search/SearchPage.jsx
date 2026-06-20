@@ -11,6 +11,7 @@ import {
   Keyboard,
 } from "react-native";
 import { ChevronLeft, Search, Clock, ArrowUpRight, X } from "lucide-react-native";
+import { ThemeTokens } from "../../theme";
 
 export function SearchPage({
   setActiveFilter,
@@ -19,12 +20,15 @@ export function SearchPage({
   search,
   setSearch,
   posts,
-  navigation
+  navigation,
+  selectedTheme,
 }) {
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
 
-  
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
   useEffect(() => {
     if (!search || search.trim().length < 2) {
       setSuggestions([]);
@@ -100,23 +104,22 @@ export function SearchPage({
       return [cleanedTerm, ...filtered].slice(0, 6);
     });
 
-
     navigation.navigate('Search_feed', { query: cleanedTerm });
   };
 
   const handleRecentSearch = (term) => {
-    setSearch(term)
-    handleSearchNavigation(term)
-  }
+    setSearch(term);
+    handleSearchNavigation(term);
+  };
 
- const handleSuggestedSearch = (term) => {
+  const handleSuggestedSearch = (term) => {
     const cleanedTerm = term ? term.trim() : "";
     if (!cleanedTerm) return;
 
     setSearch(cleanedTerm);
-    
     handleSearchNavigation(cleanedTerm);
   };
+
   const handleClearAll = () => {
     setRecents([]);
   };
@@ -130,36 +133,35 @@ export function SearchPage({
   const isSearching = search.trim().length > 0;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={themeColor.background} />
 
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { borderBottomColor: themeColor.border }]}>
           <Pressable onPress={handleBackPress} activeOpacity={0.7} style={styles.backButton}>
-            <ChevronLeft size={24} color="#FFFFFF" />
+            <ChevronLeft size={24} color={themeColor.textPrimary} />
           </Pressable>
 
-          <View style={[styles.searchBarContainer, isFocused && styles.searchBarFocused]}>
-            <Search size={18} color={isFocused ? "#FFFFFF" : "rgba(255, 255, 255, 0.4)"} style={styles.searchIcon} />
+          <View style={[styles.searchBarContainer, { backgroundColor: themeColor.surface }, isFocused && styles.searchBarFocused]}>
+            <Search size={18} color={isFocused ? themeColor.textPrimary : themeColor.textMuted} style={styles.searchIcon} />
             <TextInput
               value={search}
               onChangeText={setSearch}
               placeholder="Search"
-              placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              style={styles.input}
+              placeholderTextColor={themeColor.textMuted}
+              style={[styles.input, { color: themeColor.textPrimary }]}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               autoCorrect={false}
-              keyboardAppearance="dark"
+              keyboardAppearance={isDark ? "dark" : "light"}
               returnKeyType="search"
               onSubmitEditing={() => handleSearchNavigation(search)}
             />
-            {search.length > 0 ?
-              <Pressable
-                onPress={() => setSearch('')}
-              >
-                <X size={16} color="#FFFFFF" />
-              </Pressable> : ''}
+            {search.length > 0 ? (
+              <Pressable onPress={() => setSearch('')}>
+                <X size={16} color={themeColor.textPrimary} />
+              </Pressable>
+            ) : null}
           </View>
         </View>
 
@@ -173,8 +175,8 @@ export function SearchPage({
               {recents.length > 0 && (
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionTitleRow}>
-                    <Clock size={14} color="rgba(255, 255, 255, 0.6)" />
-                    <Text style={styles.sectionTitleText}>Recent searches</Text>
+                    <Clock size={14} color={themeColor.textMuted} />
+                    <Text style={[styles.sectionTitleText, { color: themeColor.textPrimary }]}>Recent searches</Text>
                   </View>
                   <Pressable onPress={handleClearAll} activeOpacity={0.6} style={styles.clearAllButton}>
                     <Text style={styles.clearAllText}>Clear all</Text>
@@ -190,16 +192,16 @@ export function SearchPage({
                     activeOpacity={0.7}
                     style={styles.recentItem}
                   >
-                    <Text style={styles.recentItemText} numberOfLines={1}>
+                    <Text style={[styles.recentItemText, { color: themeColor.textPrimary }]} numberOfLines={1}>
                       {item}
                     </Text>
-                    <ArrowUpRight size={16} color="rgba(255, 255, 255, 0.3)" />
+                    <ArrowUpRight size={16} color={themeColor.textMuted} />
                   </Pressable>
                 ))
               ) : (
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyStateTitle}>Search for anything</Text>
-                  <Text style={styles.emptyStateText}>
+                  <Text style={[styles.emptyStateTitle, { color: themeColor.textPrimary }]}>Search for anything</Text>
+                  <Text style={[styles.emptyStateText, { color: themeColor.textMuted }]}>
                     Find communities, department updates, campus confessions, or trending keywords instantly.
                   </Text>
                 </View>
@@ -213,30 +215,30 @@ export function SearchPage({
                     key={`suggest-${index}`}
                     onPress={() => handleSuggestedSearch(suggestion.value)}
                     activeOpacity={0.7}
-                    style={styles.suggestionItemRow}
+                    style={[styles.suggestionItemRow, { borderBottomColor: themeColor.border }]}
                   >
                     <View style={styles.suggestionLeftGroup}>
-                      <Search size={16} color="rgba(255, 255, 255, 0.4)" />
-                      <Text style={styles.suggestionItemText} numberOfLines={1}>
+                      <Search size={16} color={themeColor.textMuted} />
+                      <Text style={[styles.suggestionItemText, { color: themeColor.textPrimary }]} numberOfLines={1}>
                         {suggestion.display}
                       </Text>
                     </View>
-                    <ArrowUpRight size={16} color="rgba(255, 255, 255, 0.3)" />
+                    <ArrowUpRight size={16} color={themeColor.textMuted} />
                   </Pressable>
                 ))
               ) : (
                 <Pressable
                   onPress={() => handleSuggestedSearch(search)}
                   activeOpacity={0.7}
-                  style={styles.suggestionItemRow}
+                  style={[styles.suggestionItemRow, { borderBottomColor: themeColor.border }]}
                 >
                   <View style={styles.suggestionLeftGroup}>
-                    <Search size={16} color="#FFFFFF" />
-                    <Text style={[styles.suggestionItemText, styles.directSearchText]} numberOfLines={1}>
+                    <Search size={16} color={themeColor.textPrimary} />
+                    <Text style={[styles.suggestionItemText, styles.directSearchText, { color: themeColor.textPrimary }]} numberOfLines={1}>
                       Search for {`"${search}"`}
                     </Text>
                   </View>
-                  <ArrowUpRight size={16} color="#FFFFFF" />
+                  <ArrowUpRight size={16} color={themeColor.textPrimary} />
                 </Pressable>
               )}
             </View>
@@ -248,7 +250,7 @@ export function SearchPage({
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#000000" },
+  safeArea: { flex: 1 },
   container: { flex: 1 },
   header: {
     flexDirection: "row",
@@ -257,14 +259,12 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#16161D"
   },
   backButton: { marginRight: 12, paddingVertical: 4 },
   searchBarContainer: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1A1A1A",
     borderRadius: 24,
     paddingHorizontal: 16,
     height: 44,
@@ -272,11 +272,10 @@ const styles = StyleSheet.create({
     borderColor: "transparent"
   },
   searchBarFocused: {
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    backgroundColor: "#000000"
+    borderColor: "rgba(128, 128, 128, 0.2)",
   },
   searchIcon: { marginRight: 10 },
-  input: { flex: 1, color: "#FFFFFF", fontSize: 14, fontWeight: "400" },
+  input: { flex: 1, fontSize: 14, fontWeight: "400" },
   scrollContent: { paddingBottom: 40 },
   sectionHeader: {
     flexDirection: "row",
@@ -287,7 +286,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10
   },
   sectionTitleRow: { flexDirection: "row", alignItems: "center" },
-  sectionTitleText: { color: "#FFFFFF", fontSize: 16, fontWeight: "700", marginLeft: 8 },
+  sectionTitleText: { fontSize: 16, fontWeight: "700", marginLeft: 8 },
   clearAllButton: { padding: 4 },
   clearAllText: { color: "#17CB49", fontSize: 14, fontWeight: "500" },
   recentItem: {
@@ -297,10 +296,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
   },
-  recentItemText: { color: "rgba(255, 255, 255, 0.85)", fontSize: 14, fontWeight: "400", flex: 1, paddingRight: 16 },
+  recentItemText: { fontSize: 14, fontWeight: "400", flex: 1, paddingRight: 16 },
   emptyContainer: { alignItems: "center", marginTop: 80, paddingHorizontal: 40 },
-  emptyStateTitle: { color: "#FFFFFF", fontSize: 20, fontWeight: "700", marginBottom: 8, textAlign: "center" },
-  emptyStateText: { color: "rgba(255, 255, 255, 0.5)", fontSize: 14, textAlign: "center", lineHeight: 20 },
+  emptyStateTitle: { fontSize: 20, fontWeight: "700", marginBottom: 8, textAlign: "center" },
+  emptyStateText: { fontSize: 14, textAlign: "center", lineHeight: 20 },
   suggestionsWrapper: { paddingTop: 8 },
   suggestionItemRow: {
     flexDirection: "row",
@@ -309,9 +308,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#16161D"
   },
   suggestionLeftGroup: { flexDirection: "row", alignItems: "center", flex: 1, paddingRight: 16 },
-  suggestionItemText: { color: "rgba(255, 255, 255, 0.85)", fontSize: 15, marginLeft: 14, flex: 1 },
-  directSearchText: { color: "#FFFFFF", fontWeight: "600" }
+  suggestionItemText: { fontSize: 15, marginLeft: 14, flex: 1 },
+  directSearchText: { fontWeight: "600" }
 });

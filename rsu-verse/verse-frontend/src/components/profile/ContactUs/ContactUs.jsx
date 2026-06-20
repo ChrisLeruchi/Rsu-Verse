@@ -19,23 +19,14 @@ import {
   ChevronDown,
   ChevronUp
 } from "lucide-react-native";
+import { ThemeTokens } from "../../../theme";
 
 const COLORS = {
   void: "#000000",
-  void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#1A1A1A",
-  ink40: "rgba(22, 22, 24, 0.4)",
   cyan: "#17CB49",
   white: "#FFFFFF",
-  white5: "rgba(255, 255, 255, 0.05)",
-  white10: "rgba(255, 255, 255, 0.1)",
-  white20: "rgba(255, 255, 255, 0.2)",
-  white30: "rgba(255, 255, 255, 0.3)",
-  white40: "rgba(255, 255, 255, 0.4)",
-  white50: "rgba(255, 255, 255, 0.5)",
-  white60: "rgba(255, 255, 255, 0.6)",
-  white90: "rgba(255, 255, 255, 0.9)",
 };
+
 export function ContactUs({
   isOpen,
   setIsOpen,
@@ -49,24 +40,25 @@ export function ContactUs({
   topics,
   handleSubmit,
   navigation,
+  selectedTheme,
 }) {
   const scrollViewRef = useRef(null);
   const [localInput, setLocalInput] = useState("");
 
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
   useFocusEffect(
     useCallback(() => {
-
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
-        setSelectedTopic("")
+        setSelectedTopic("");
       };
     }, [])
   );
 
-
   const handleNativeAttachmentPress = () => {
-
     if (attachment) {
       setAttachment(null);
     } else {
@@ -74,25 +66,26 @@ export function ContactUs({
     }
   };
 
-
   const handleFormSubmit = () => {
     if (selectedTopic && message) {
       handleSubmit?.();
     }
   };
 
-
   if (isSubmitted) {
     return (
-      <View style={styles.successContainer}>
-        <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+      <View style={[styles.successContainer, { backgroundColor: themeColor.background }]}>
+        <StatusBar 
+          barStyle={isDark ? "light-content" : "dark-content"} 
+          backgroundColor={themeColor.background} 
+        />
 
-        <View style={styles.successIconWrapper}>
-          <CheckCircle2 size={32} color={COLORS.white} />
+        <View style={[styles.successIconWrapper, { backgroundColor: themeColor.surface }]}>
+          <CheckCircle2 size={32} color={COLORS.cyan} />
         </View>
 
-        <Text style={styles.successTitle}>Message sent</Text>
-        <Text style={styles.successSubtitle}>
+        <Text style={[styles.successTitle, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>Message sent</Text>
+        <Text style={[styles.successSubtitle, { color: themeColor.textMuted }]}>
           Thanks for reaching out. A student support representative will review
           your message and reply to your campus email shortly.
         </Text>
@@ -100,27 +93,33 @@ export function ContactUs({
         <TouchableOpacity
           onPress={() => navigation?.goBack()}
           activeOpacity={0.8}
-          style={styles.successButton}
+          style={[styles.successButton, { backgroundColor: isDark ? COLORS.white : themeColor.textPrimary }]}
         >
-          <Text style={styles.successButtonText}>Back to Profile</Text>
+          <Text style={[styles.successButtonText, { color: isDark ? COLORS.void : themeColor.background }]}>
+            Back to Profile
+          </Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+      <StatusBar 
+        barStyle={isDark ? "light-content" : "dark-content"} 
+        backgroundColor={themeColor.background} 
+      />
 
-      <View style={styles.header}>
+      {/* Header Layout */}
+      <View style={[styles.header, { backgroundColor: themeColor.background }]}>
         <TouchableOpacity
           onPress={() => navigation?.goBack()}
           style={styles.headerAction}
           activeOpacity={0.7}
         >
-          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+          <ArrowLeft size={20} color={isDark ? COLORS.white : themeColor.textPrimary} strokeWidth={2.5} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Contact Support</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>Contact Support</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -131,42 +130,37 @@ export function ContactUs({
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-
-        <View style={styles.noticeSection}>
-          <AlertCircle size={18} color={COLORS.white40} style={styles.noticeIcon} />
+        {/* Support Context Callout */}
+        <View style={[styles.noticeSection, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
+          <AlertCircle size={18} color={themeColor.textMuted} style={styles.noticeIcon} />
           <View style={styles.noticeMeta}>
-            <Text style={styles.noticeTitle}>Typical response time</Text>
-            <Text style={styles.noticeSubtitle}>
+            <Text style={[styles.noticeTitle, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>Typical response time</Text>
+            <Text style={[styles.noticeSubtitle, { color: themeColor.textMuted }]}>
               We are online from 8:00 AM to 6:00 PM on school days and usually respond within a couple of hours.
             </Text>
           </View>
         </View>
 
-
+        {/* Form Container */}
         <View style={styles.formContainer}>
-
-
+          
+          {/* Dropdown Input Group */}
           <View style={[styles.inputGroup, { zIndex: 50 }]}>
-            <Text style={styles.inputLabel}>What do you need help with?</Text>
+            <Text style={[styles.inputLabel, { color: themeColor.textMuted }]}>What do you need help with?</Text>
 
             <TouchableOpacity
-              type="button"
               onPress={() => setIsOpen(!isOpen)}
               activeOpacity={0.8}
-              style={styles.dropdownSelectorButton}
+              style={[styles.dropdownSelectorButton, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}
             >
-              <Text style={selectedTopic ? styles.dropdownTextActive : styles.dropdownTextPlaceholder}>
+              <Text style={selectedTopic ? [styles.dropdownTextActive, { color: isDark ? COLORS.white : themeColor.textPrimary }] : [styles.dropdownTextPlaceholder, { color: themeColor.textMuted }]}>
                 {selectedTopic ? selectedTopic.label : "Select a topic"}
               </Text>
-              {isOpen ? <ChevronUp size={16} color={COLORS.white40} /> : <ChevronDown
-                size={16}
-                color={COLORS.white40}
-              />}
+              {isOpen ? <ChevronUp size={16} color={themeColor.textMuted} /> : <ChevronDown size={16} color={themeColor.textMuted} />}
             </TouchableOpacity>
 
-
             {isOpen && (
-              <View style={styles.dropdownMenuOverlay}>
+              <View style={[styles.dropdownMenuOverlay, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
                 {topics.map((topic, idx) => {
                   const isLastItem = idx === topics.length - 1;
                   return (
@@ -177,9 +171,15 @@ export function ContactUs({
                         setIsOpen(false);
                       }}
                       activeOpacity={0.7}
-                      style={[styles.dropdownOptionRow, !isLastItem && styles.dropdownOptionBorder]}
+                      style={[
+                        styles.dropdownOptionRow, 
+                        { backgroundColor: themeColor.surface },
+                        !isLastItem && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor.border }
+                      ]}
                     >
-                      <Text style={styles.dropdownOptionText}>{topic.label}</Text>
+                      <Text style={[styles.dropdownOptionText, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>
+                        {topic.label}
+                      </Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -187,38 +187,38 @@ export function ContactUs({
             )}
           </View>
 
-
+          {/* Text Area Input Group */}
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Your message</Text>
+            <Text style={[styles.inputLabel, { color: themeColor.textMuted }]}>Your message</Text>
             <TextInput
               value={message}
               onChangeText={setMessage}
               placeholder="Describe your issue or question in detail..."
-              placeholderTextColor={COLORS.white20}
+              placeholderTextColor={themeColor.textMuted}
               multiline={true}
               numberOfLines={5}
-              keyboardAppearance="dark"
+              keyboardAppearance={isDark ? "dark" : "light"}
               textAlignVertical="top"
-              style={styles.textareaInput}
+              style={[styles.textareaInput, { backgroundColor: themeColor.surface, borderColor: themeColor.border, color: isDark ? COLORS.white : themeColor.textPrimary }]}
             />
           </View>
 
-
+          {/* File Attachment Input Group */}
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Attachment (Optional)</Text>
+            <Text style={[styles.inputLabel, { color: themeColor.textMuted }]}>Attachment (Optional)</Text>
             <TouchableOpacity
               onPress={handleNativeAttachmentPress}
               activeOpacity={0.8}
-              style={styles.attachmentButtonContainer}
+              style={[styles.attachmentButtonContainer, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}
             >
-              <Paperclip size={18} color={COLORS.white30} />
-              <Text style={styles.attachmentButtonText}>
+              <Paperclip size={18} color={themeColor.textMuted} />
+              <Text style={[styles.attachmentButtonText, { color: themeColor.textMuted }]}>
                 {attachment ? attachment : "Attach a screenshot or image"}
               </Text>
             </TouchableOpacity>
           </View>
 
-
+          {/* Submit Action Button */}
           <TouchableOpacity
             onPress={handleFormSubmit}
             activeOpacity={0.85}
@@ -228,7 +228,7 @@ export function ContactUs({
               (!selectedTopic || !message) && styles.submitButtonDisabled,
             ]}
           >
-            <Send size={15} color={COLORS.white} />
+            <Send size={14} color={COLORS.white} />
             <Text style={styles.submitButtonText}>Send Message</Text>
           </TouchableOpacity>
 
@@ -241,7 +241,6 @@ export function ContactUs({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.void,
   },
   header: {
     flexDirection: "row",
@@ -249,15 +248,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.white,
+    fontWeight: "800",
   },
   headerSpacer: {
     width: 36,
@@ -273,8 +270,8 @@ const styles = StyleSheet.create({
   },
   noticeSection: {
     flexDirection: "row",
-    backgroundColor: COLORS.ink,
     borderRadius: 16,
+    borderWidth: 1,
     padding: 16,
     alignItems: "flex-start",
     gap: 12,
@@ -289,13 +286,11 @@ const styles = StyleSheet.create({
   },
   noticeTitle: {
     fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.white90,
+    fontWeight: "600",
   },
   noticeSubtitle: {
-    fontSize: 12,
-    fontWeight: "300",
-    color: COLORS.white40,
+    fontSize: 13,
+    fontWeight: "400",
     lineHeight: 20,
   },
   formContainer: {
@@ -306,15 +301,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   inputLabel: {
-    fontSize: 14,
-    fontWeight: "300",
-    color: COLORS.white50,
+    fontSize: 13,
+    fontWeight: "600",
     paddingHorizontal: 2,
   },
   dropdownSelectorButton: {
     width: "100%",
-    backgroundColor: COLORS.ink,
     borderRadius: 12,
+    borderWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 14,
     flexDirection: "row",
@@ -324,67 +318,61 @@ const styles = StyleSheet.create({
   dropdownTextPlaceholder: {
     fontSize: 14,
     fontWeight: "400",
-    color: COLORS.white30,
   },
   dropdownTextActive: {
     fontSize: 14,
-    fontWeight: "400",
-    color: COLORS.white,
+    fontWeight: "500",
   },
   dropdownMenuOverlay: {
     position: "absolute",
-    top: 84,
+    top: 80,
     left: 0,
     right: 0,
-    backgroundColor: COLORS.ink,
     borderRadius: 12,
+    borderWidth: 1,
     overflow: "hidden",
+    zIndex: 999,
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
   dropdownOptionRow: {
     width: "100%",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: COLORS.ink,
   },
   dropdownOptionText: {
     fontSize: 14,
-    color: COLORS.white80,
+    fontWeight: "400",
   },
   textareaInput: {
     width: "100%",
-    backgroundColor: COLORS.ink,
     borderRadius: 12,
+    borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
     fontWeight: "400",
-    color: COLORS.white,
     letterSpacing: 0.2,
     minHeight: 120,
     lineHeight: 22,
   },
   attachmentButtonContainer: {
     width: "100%",
-    backgroundColor: COLORS.ink,
     borderWidth: 1,
-    borderColor: COLORS.white10,
     borderStyle: "dashed",
     borderRadius: 12,
     padding: 16,
-    flexDirection: "col",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
   attachmentButtonText: {
     fontSize: 14,
-    fontWeight: "300",
-    color: COLORS.white40,
+    fontWeight: "400",
     textAlign: "center",
   },
   submitButton: {
@@ -399,7 +387,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   submitButtonDisabled: {
-    opacity: 0.4,
+    opacity: 0.3,
   },
   submitButtonText: {
     color: COLORS.white,
@@ -408,41 +396,35 @@ const styles = StyleSheet.create({
   },
   successContainer: {
     flex: 1,
-    backgroundColor: COLORS.void,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
   },
   successIconWrapper: {
     padding: 16,
-    backgroundColor: COLORS.white5,
     borderRadius: 99,
     marginBottom: 16,
   },
   successTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: COLORS.white,
     letterSpacing: -0.4,
   },
   successSubtitle: {
     fontSize: 14,
-    fontWeight: "300",
-    color: COLORS.white40,
+    fontWeight: "400",
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: 22,
     maxWidth: 280,
     marginTop: 8,
   },
   successButton: {
     marginTop: 24,
-    backgroundColor: COLORS.white,
     borderRadius: 12,
     paddingHorizontal: 24,
     paddingVertical: 12,
   },
   successButtonText: {
-    color: COLORS.void,
     fontSize: 14,
     fontWeight: "600",
   },

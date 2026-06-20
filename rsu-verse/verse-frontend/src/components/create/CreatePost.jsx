@@ -30,10 +30,14 @@ import {
 } from "react-native";
 import * as Crypto from 'expo-crypto';
 import * as ImagePicker from "expo-image-picker";
+import { ThemeTokens } from "../../theme";
 
-export function CreatePost({ setPosts, setActiveFilter }) {
+export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
   const [verse, setVerse] = useState("gist");
   const [text, setText] = useState("");
@@ -203,13 +207,23 @@ export function CreatePost({ setPosts, setActiveFilter }) {
     setIsOpen(false);
   }
 
+  // Dynamic context color assignments matching your theme token values
+  const textWhiteColor = themeColor.text; 
+  const textMutedColor = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
+  const textInactiveColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
+  const iconInactiveColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)";
+  
+  const cyanPrimary = "#00BA34";
+  const rosePrimary = "#F59E0B";
+  const activeBrandColor = verse === "confession" ? rosePrimary : cyanPrimary;
+
   const channels = [
-    { id: "gist", label: "Gist", icon: <MessagesSquare size={14} color={verse === "gist" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
-    { id: "market", label: "Market", icon: <ShoppingBag size={14} color={verse === "market" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
-    { id: "confession", label: "Confession", icon: <Flame size={14} color={verse === "confession" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
-    { id: "music", label: "Music", icon: <Music size={14} color={verse === "music" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
-    { id: "politics", label: "Politics", icon: <Landmark size={14} color={verse === "politics" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
-    { id: "relationship", label: "Relationship", icon: <HeartHandshake size={14} color={verse === "relationship" ? "#FFFFFF" : "rgba(255,255,255,0.5)"} /> },
+    { id: "gist", label: "Gist", icon: <MessagesSquare size={14} color={verse === "gist" ? textWhiteColor : iconInactiveColor} /> },
+    { id: "market", label: "Market", icon: <ShoppingBag size={14} color={verse === "market" ? textWhiteColor : iconInactiveColor} /> },
+    { id: "confession", label: "Confession", icon: <Flame size={14} color={verse === "confession" ? textWhiteColor : iconInactiveColor} /> },
+    { id: "music", label: "Music", icon: <Music size={14} color={verse === "music" ? textWhiteColor : iconInactiveColor} /> },
+    { id: "politics", label: "Politics", icon: <Landmark size={14} color={verse === "politics" ? textWhiteColor : iconInactiveColor} /> },
+    { id: "relationship", label: "Relationship", icon: <HeartHandshake size={14} color={verse === "relationship" ? textWhiteColor : iconInactiveColor} /> },
   ];
 
   const isShareDisabled = verse === "market"
@@ -217,15 +231,15 @@ export function CreatePost({ setPosts, setActiveFilter }) {
     : (!text.trim() && images.length === 0);
 
   return (
-    <View style={styles.screenWrapper}>
-      <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeHeader}>
-        <View style={styles.headerRow}>
+    <View style={[styles.screenWrapper, { backgroundColor: themeColor.background }]}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeHeader, { backgroundColor: themeColor.background }]}>
+        <View style={[styles.headerRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
           <Pressable
             onPress={handleCancel}
             disabled={isSubmitting}
             style={styles.backBtn}
           >
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={[styles.cancelText, { color: themeColor.text }]}>Cancel</Text>
           </Pressable>
 
           <Pressable
@@ -234,10 +248,11 @@ export function CreatePost({ setPosts, setActiveFilter }) {
             style={[
               styles.shareBtn,
               verse === "confession" ? styles.bgRose ? styles.bgRose : styles.bgCyan : styles.bgCyan,
+              { backgroundColor: activeBrandColor },
               isShareDisabled && styles.disabledBtn
             ]}
           >
-            <Text style={styles.shareBtnText}>
+            <Text style={[styles.shareBtnText, { color: '#FFFFFF' }]}>
               {isSubmitting ? "Posting" : "Post"}
             </Text>
           </Pressable>
@@ -259,7 +274,7 @@ export function CreatePost({ setPosts, setActiveFilter }) {
           keyboardShouldPersistTaps={verse === "market" ? "handled" : "always"}
         >
 
-          <View style={styles.sectionContainer}>
+          <View style={[styles.sectionContainer, { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -274,11 +289,15 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                     onPress={() => setVerse(channel.id)}
                     style={[
                       styles.channelButton,
+                      { borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)" },
                       isSelected ? (channel.id === "confession" ? styles.bgRoseTab : styles.bgCyanTab) : styles.inactiveChannel
                     ]}
                   >
                     {channel.icon}
-                    <Text style={[styles.channelButtonText, isSelected ? styles.textWhite : styles.textInactive]}>
+                    <Text style={[
+                      styles.channelButtonText, 
+                      isSelected ? { color: themeColor.text } : { color: textInactiveColor }
+                    ]}>
                       {channel.label}
                     </Text>
                   </Pressable>
@@ -290,7 +309,7 @@ export function CreatePost({ setPosts, setActiveFilter }) {
 
           <View style={styles.composeFlowContainer}>
             <View style={styles.avatarColumn}>
-              <View style={styles.avatarMock} />
+              <View style={[styles.avatarMock, { backgroundColor: isDark ? "#262626" : "#E5E5E5" }]} />
             </View>
 
             <View style={styles.editorColumn}>
@@ -301,8 +320,8 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                 onChangeText={setText}
                 multiline
                 placeholder={verse === "market" ? "What are you selling? Describe it here..." : "What's happening?..."}
-                placeholderTextColor="rgba(255, 255, 255, 0.4)"
-                style={styles.textAreaInput}
+                placeholderTextColor={textMutedColor}
+                style={[styles.textAreaInput, { color: themeColor.text }]}
                 textAlignVertical="top"
               />
 
@@ -311,7 +330,8 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                   {images.map((url, index) => (
                     <View key={index} style={[
                       styles.imagePreviewWrapper,
-                      images.length === 1 ? styles.singleImageWidth : styles.multiImageWidth
+                      images.length === 1 ? styles.singleImageWidth : styles.multiImageWidth,
+                      { backgroundColor: isDark ? "#161616" : "#F5F5F5" }
                     ]}>
                       <Image source={{ uri: url }} style={styles.previewImage} />
                       <Pressable
@@ -332,28 +352,28 @@ export function CreatePost({ setPosts, setActiveFilter }) {
           {/* Optional Sub-spec Blocks Formats */}
           {verse === "market" && (
             <View style={styles.specSectionWrapper}>
-              <View style={styles.editorToolbar}>
+              <View style={[styles.editorToolbar, { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
                 <Pressable onPress={handlePickImage} style={styles.mediaPickerBtn}>
                   <ImageIcon size={20} color={verse === "confession" ? "#F59E0B" : "#00BA34"} />
                 </Pressable>
 
                 <View style={styles.metaCounters}>
-                  <Text style={[styles.counterText, text.length >= 480 && styles.counterAlert]}>
+                  <Text style={[styles.counterText, { color: textMutedColor }, text.length >= 480 && styles.counterAlert]}>
                     {text.length}/500
                   </Text>
                   {images.length > 0 && (
                     <>
-                      <Text style={styles.counterDot}>•</Text>
-                      <Text style={styles.counterText}>{images.length}/4</Text>
+                      <Text style={[styles.counterDot, { color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)" }]}>•</Text>
+                      <Text style={[styles.counterText, { color: textMutedColor }]}>{images.length}/4</Text>
                     </>
                   )}
                 </View>
               </View>
-              <View style={styles.specCard}>
-                <Text style={styles.specTitle}>Item Specifications</Text>
+              <View style={[styles.specCard, { backgroundColor: themeColor.surface, borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
+                <Text style={[styles.specTitle, { color: cyanPrimary }]}>Item Specifications</Text>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>PRICE (₦)</Text>
+                  <Text style={[styles.inputLabel, { color: textMutedColor }]}>PRICE (₦)</Text>
                   <TextInput
                     keyboardType="number-pad"
                     value={price}
@@ -361,14 +381,14 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                       if (val === "" || Number(val) >= 0) setPrice(val);
                     }}
                     placeholder="Set your price"
-                    placeholderTextColor="rgba(255,255,255,0.3)"
-                    style={styles.numericInput}
+                    placeholderTextColor={textMutedColor}
+                    style={[styles.numericInput, { color: themeColor.text, backgroundColor: themeColor.background, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }]}
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>CONDITION</Text>
-                  <View style={styles.segmentedControl}>
+                  <Text style={[styles.inputLabel, { color: textMutedColor }]}>CONDITION</Text>
+                  <View style={[styles.segmentedControl, { backgroundColor: themeColor.background, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }]}>
                     {["Brand New", "Used", "Fixable"].map((cond) => {
                       const isSelected = condition === cond;
                       return (
@@ -376,9 +396,9 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                           key={cond}
                           disabled={isSubmitting}
                           onPress={() => setCondition(cond)}
-                          style={[styles.segmentButton, isSelected && styles.activeSegment]}
+                          style={[styles.segmentButton, isSelected && [styles.activeSegment, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]]}
                         >
-                          <Text style={[styles.segmentText, isSelected ? styles.textWhite : styles.textInactive]}>
+                          <Text style={[styles.segmentText, isSelected ? { color: themeColor.text } : { color: textInactiveColor }]}>
                             {cond === "Fixable" ? "Needs Repair" : cond}
                           </Text>
                         </Pressable>
@@ -388,13 +408,13 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>CATEGORY</Text>
+                  <Text style={[styles.inputLabel, { color: textMutedColor }]}>CATEGORY</Text>
                   <View style={styles.dropdownContainer}>
                     <Pressable
                       onPress={() => setIsOpen(!isOpen)}
-                      style={[styles.dropdownTrigger, isOpen && styles.dropdownTriggerActive]}
+                      style={[styles.dropdownTrigger, { backgroundColor: themeColor.background, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }, isOpen && styles.dropdownTriggerActive]}
                     >
-                      <Text style={[styles.triggerText, category ? styles.textWhite : styles.textMuted]}>
+                      <Text style={[styles.triggerText, category ? { color: themeColor.text } : { color: textMutedColor }]}>
                         {[
                           { id: "all", label: "All" },
                           { id: "gadgets", label: "Gadgets" },
@@ -406,11 +426,11 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                           { id: "food", label: "Provisions" }
                         ].find(c => c.id === category)?.label || "Select Category"}
                       </Text>
-                      <ChevronDown size={16} color="rgba(255,255,255,0.4)" />
+                      <ChevronDown size={16} color={textMutedColor} />
                     </Pressable>
 
                     {isOpen && (
-                      <View style={styles.dropdownMenuPlate}>
+                      <View style={[styles.dropdownMenuPlate, { backgroundColor: isDark ? "#161616" : "#F5F5F5", borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)" }]}>
                         <ScrollView
                           nestedScrollEnabled={true}
                           style={styles.dropdownScroll}
@@ -438,11 +458,11 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                                 }}
                                 style={({ pressed }) => [
                                   styles.dropdownItem,
-                                  isSelected && styles.dropdownItemActive,
-                                  pressed && { backgroundColor: "rgba(255,255,255,0.03)" }
+                                  isSelected && [styles.dropdownItemActive, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" }],
+                                  pressed && { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }
                                 ]}
                               >
-                                <Text style={[styles.itemText, isSelected ? styles.textCyan : styles.textWhite]}>
+                                <Text style={[styles.itemText, isSelected ? styles.textCyan : { color: themeColor.text }]}>
                                   {cat.label}
                                 </Text>
                                 {isSelected && <Check size={14} color="#00BA34" strokeWidth={3} />}
@@ -460,12 +480,12 @@ export function CreatePost({ setPosts, setActiveFilter }) {
 
           {verse !== "market" && (
             <View style={styles.specSectionWrapper}>
-              <View style={styles.anonymousBanner}>
+              <View style={[styles.anonymousBanner, { backgroundColor: themeColor.background }]}>
                 <View style={styles.anonBannerLeft}>
-                  <ShieldAlert size={18} color="rgba(255,255,255,0.4)" />
+                  <ShieldAlert size={18} color={textMutedColor} />
                   <View style={styles.anonMetadata}>
-                    <Text style={styles.anonTitleText}>Post Anonymously</Text>
-                    <Text style={styles.anonDescText} numberOfLines={1}>
+                    <Text style={[styles.anonTitleText, { color: themeColor.text }]}>Post Anonymously</Text>
+                    <Text style={[styles.anonDescText, { color: textMutedColor }]} numberOfLines={1}>
                       {isAnonymous ? 'Only your faculty will be visible' : 'Both your faculty and department will be visible'}
                     </Text>
                   </View>
@@ -483,19 +503,19 @@ export function CreatePost({ setPosts, setActiveFilter }) {
                   <View style={[styles.switchThumb, isAnonymous ? styles.thumbRight : styles.thumbLeft]} />
                 </Pressable>
               </View>
-              <View style={styles.editorToolbar}>
+              <View style={[styles.editorToolbar, { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
                 <Pressable onPress={handlePickImage} style={styles.mediaPickerBtn}>
                   <ImageIcon size={20} color={verse === "confession" ? "#F59E0B" : "#00BA34"} />
                 </Pressable>
 
                 <View style={styles.metaCounters}>
-                  <Text style={[styles.counterText, text.length >= 480 && styles.counterAlert]}>
+                  <Text style={[styles.counterText, { color: textMutedColor }, text.length >= 480 && styles.counterAlert]}>
                     {text.length}/500
                   </Text>
                   {images.length > 0 && (
                     <>
-                      <Text style={styles.counterDot}>•</Text>
-                      <Text style={styles.counterText}>{images.length}/4</Text>
+                      <Text style={[styles.counterDot, { color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)" }]}>•</Text>
+                      <Text style={[styles.counterText, { color: textMutedColor }]}>{images.length}/4</Text>
                     </>
                   )}
                 </View>

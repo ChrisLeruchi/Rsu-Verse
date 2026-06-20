@@ -2,22 +2,27 @@ import React from 'react'
 import { View, Pressable, StyleSheet } from 'react-native'
 import { useNavigation, useNavigationState } from '@react-navigation/native'
 import { Home, Search, ShoppingBag, UserCircle2 } from 'lucide-react-native'
+import { ThemeTokens } from '../../theme'
 
-export function NavBarIcons({ setActiveFilter }) {
-  const navigation  = useNavigation();
+export function NavBarIcons({ setActiveFilter, selectedTheme, setSelectedTheme }) {
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
+  const navigation = useNavigation();
 
   const activeRouteName = useNavigationState((state) => {
-    if(!state) return 'HomeIndex';
+    if (!state) return 'HomeIndex';
     return state.routes[state.index].name;
   })
+
   const handleFilter = () => {
     setActiveFilter("all")
     navigation.navigate("HomeIndex")
   }
 
   const getIconStyles = (isActive, hasFill = false) => {
-    const activeColor = '#FFFFFF';
-    const inactiveColor = 'rgba(255, 255, 255, 0.4)';
+    const activeColor = themeColor.textPrimary;
+    const inactiveColor = themeColor.textSecondary;
     if (hasFill) {
       return {
         fill: isActive ? activeColor : 'transparent',
@@ -29,70 +34,66 @@ export function NavBarIcons({ setActiveFilter }) {
     }
   }
 
-return (
-    <View style={styles.navBarContainer}>
-      
-    
+  return (
+    <View style={[styles.navBarContainer, { backgroundColor: themeColor.background, borderTopColor: themeColor.border }]}>
+
       <Pressable onPress={handleFilter} style={styles.navButton}>
         {() => {
           const isActive = activeRouteName === 'HomeIndex';
-          const styles = getIconStyles(isActive, true);
+          const iconStyles = getIconStyles(isActive, true);
           return (
             <Home
               size={24}
               strokeWidth={2.5}
-              color={styles.color}
-              fill={styles.fill}
+              color={iconStyles.color}
+              fill={iconStyles.fill}
             />
           );
         }}
       </Pressable>
 
-  
       <Pressable onPress={() => navigation.navigate("Search")} style={styles.navButton}>
         {() => {
           const isActive = activeRouteName === 'Search';
-          const styles = getIconStyles(isActive);
+          const iconStyles = getIconStyles(isActive);
           return (
             <Search
               size={24}
               strokeWidth={2.5}
-              color={styles.color}
+              color={iconStyles.color}
             />
           );
         }}
       </Pressable>
 
-      
-      <Pressable 
+      <Pressable
         onPress={() => {
           navigation.navigate("Market");
-        }} 
+        }}
         style={styles.navButton}
       >
         {() => {
           const isActive = activeRouteName === 'Market';
-          const styles = getIconStyles(isActive);
+          const iconStyles = getIconStyles(isActive);
           return (
             <ShoppingBag
               size={24}
               strokeWidth={2.5}
-              color={styles.color}
+              color={iconStyles.color}
             />
           );
         }}
       </Pressable>
 
-    
       <Pressable onPress={() => navigation.navigate("Profile")} style={styles.navButton}>
         {() => {
           const isActive = activeRouteName === 'Profile';
-          const styles = getIconStyles(isActive);
+          const iconStyles = getIconStyles(isActive);
           return (
             <UserCircle2
               size={24}
               strokeWidth={2.5}
-              color={styles.color}
+              color={iconStyles.color}
             />
           );
         }}
@@ -103,7 +104,6 @@ return (
 }
 
 const styles = StyleSheet.create({
-
   navBarContainer: {
     position: 'absolute',
     bottom: 0,
@@ -112,16 +112,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#000000', 
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)', 
-    paddingVertical: 18, 
- 
+    paddingVertical: 18,
   },
   navButton: {
     alignItems: 'center',
     justifyContent: 'start',
-    flex: 1, 
-    minHeight: 44, 
+    flex: 1,
+    minHeight: 44,
   },
 });

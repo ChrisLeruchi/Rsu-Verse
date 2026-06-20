@@ -6,6 +6,7 @@ import { PostCard } from "../../assets/Postcard";
 import { FeedFilter } from "./FeedFilter";
 import { FeedPostSkeleton } from "./FeedPostSkeleton";
 import { HapticEngine } from "../../../haptics";
+import { ThemeTokens } from "../../theme";
 
 export function Feed({
   posts,
@@ -19,6 +20,8 @@ export function Feed({
   onPlusClick,
   getVerseIcon,
   handleShare,
+  selectedTheme,
+  setSelectedTheme,
   navigation
 }) {
 
@@ -40,17 +43,25 @@ export function Feed({
         handleShare={handleShare}
         handleSave={handleSave}
         getVerseIcon={getVerseIcon}
+        setSelectedTheme={setSelectedTheme}
+        selectedTheme={selectedTheme}
         navigation={navigation}
       />
     );
-  }, [isLoading, handleUpvote, handleDownvotes, handleRepost, handleShare, handleSave, getVerseIcon, navigation]);
+  }, [isLoading, handleUpvote, handleDownvotes, handleRepost, handleShare, handleSave, getVerseIcon, navigation, selectedTheme, setSelectedTheme]);
+
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
 
   return (
-    <View style={styles.feedLayoutWrapper}>
+    <View style={[styles.feedLayoutWrapper, { backgroundColor: themeColor.background }]}>
 
       <FeedFilter
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
+        selectedTheme={selectedTheme}
+        setSelectedTheme={setSelectedTheme}
       />
 
 
@@ -103,7 +114,6 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 448,
     alignSelf: "center",
-    backgroundColor: '#000000',
     position: "relative",
   },
 
@@ -147,7 +157,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#00BA34",
     padding: 12,
     borderRadius: 9999,
-
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,

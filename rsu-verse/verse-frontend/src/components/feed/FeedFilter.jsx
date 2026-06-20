@@ -1,11 +1,10 @@
 import { View, ScrollView, StyleSheet, Pressable, Text } from "react-native";
-import React, {useState, useRef, useCallback,} from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, Clock } from "lucide-react-native";
 import { HapticEngine } from "../../../haptics";
+import { ThemeTokens } from "../../theme";
 
 
-export function FeedFilter({ activeFilter, setActiveFilter }) {
+export function FeedFilter({ activeFilter, setActiveFilter, selectedTheme, setSelectedTheme }) {
 
   const filters = [
     { id: "all", label: "Versn'", icon: null, isRose: false },
@@ -17,32 +16,23 @@ export function FeedFilter({ activeFilter, setActiveFilter }) {
     { id: "relationship", label: "Relationship", icon: HeartHandshake, isRose: false },
   ]
 
-   const scrollViewRef = useRef(null);
-    const [localInput, setLocalInput] = useState("");
-  
-    useFocusEffect(
-      useCallback(() => {
-  
-        return () => {
-          scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-          setLocalInput("");
-        };
-      }, [])
-    );
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
+
   return (
     <View style={styles.stickyContainer}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        ref={scrollViewRef}
+        contentContainerStyle={[styles.scrollContent, {backgroundColor: themeColor.background, borderBottomColor: themeColor.surface}]}
       >
         {filters.map((verse) => {
           const Icon = verse.icon
           const isActive = activeFilter === verse.id
 
           let activeBorderColor = "#00BA34"
-          let activeTextColor = "#FFFFFF";
+          let activeTextColor = themeColor.textPrimary;
           const inactiveColor = "rgba(255, 255, 255, 0.3)"
 
           if (verse.isRose) {
@@ -55,7 +45,8 @@ export function FeedFilter({ activeFilter, setActiveFilter }) {
               key={verse.id}
               onPress={() => {
                 HapticEngine.selection();
-                setActiveFilter(verse.id)}}
+                setActiveFilter(verse.id)
+              }}
               style={[
                 styles.tabButton,
                 isActive ? {
@@ -67,13 +58,13 @@ export function FeedFilter({ activeFilter, setActiveFilter }) {
                 <Icon
                   size={16}
                   strokeWidth={2.5}
-                  color={isActive ? activeBorderColor : inactiveColor}
+                  color={isActive ? activeBorderColor : themeColor.textSecondary}
                 />
               )}
               <Text
                 style={[
-                  styles.tabText,
-                  isActive ? { color: activeTextColor } : styles.textInactive
+                  styles.tabText, 
+                  {color: isActive ? activeTextColor : themeColor.textSecondary}
                 ]}
               >
                 {verse.label}
@@ -87,36 +78,31 @@ export function FeedFilter({ activeFilter, setActiveFilter }) {
 }
 
 const styles = StyleSheet.create({
-  
+
   stickyContainer: {
     width: "100%",
-    backgroundColor: "#000000",  
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
- 
+
   scrollContent: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: '#000000'
   },
 
   tabButton: {
-    minHeight: 32,
-    minWidth: 140,
+    width: 150,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    paddingVertical: 6, 
-    borderBottomWidth: 4, 
+    paddingVertical: 6,
+    borderBottomWidth: 4,
   },
   borderTransparent: {
-
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)'
   },
- 
   tabText: {
     fontSize: 14,
     fontWeight: "500",

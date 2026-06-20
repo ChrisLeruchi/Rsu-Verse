@@ -1,4 +1,4 @@
-import React, {useRef, useCallback, useState, } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   StyleSheet,
@@ -12,44 +12,53 @@ import {
   Pressable,
 } from "react-native";
 import { ArrowLeft, Camera, Store, GraduationCap, Globe } from "lucide-react-native";
+import { ThemeTokens } from "../../../theme";
 
 const COLORS = {
   void: "#000000",
-  void80: "rgba(10, 10, 10, 0.8)",
-  ink: "#1A1A1A", 
-  ink40: "rgba(22, 22, 24, 0.4)",
-  cyan:"#17CB49", 
+  cyan: "#17CB49",
   white: "#FFFFFF",
-  white5: "rgba(255, 255, 255, 0.05)",
-  white10: "rgba(255, 255, 255, 0.1)",
-  white20: "rgba(255, 255, 255, 0.2)",
-  white30: "rgba(255, 255, 255, 0.3)",
-  white40: "rgba(255, 255, 255, 0.4)",
-  white50: "rgba(255, 255, 255, 0.5)",
-  white60: "rgba(255, 255, 255, 0.6)",
-  white90: "rgba(255, 255, 255, 0.9)",
 };
 
-export function ManageProfile({ isSellerActive, setIsSellerActive, navigation, bio, setBio, displayName, setDisplayName, username, setUsername }) {
+export function ManageProfile({ 
+  isSellerActive, 
+  setIsSellerActive, 
+  navigation, 
+  bio, 
+  setBio, 
+  displayName, 
+  setDisplayName, 
+  username, 
+  setUsername,
+  selectedTheme,
+  shopName = "",
+  setShopName,
+  contactLink = "",
+  setContactLink
+}) {
+  const [localBio, setLocalBio] = useState(bio || "");
+  const [localDisplayName, setLocalDisplayName] = useState(displayName || "");
+  const [localUsername, setLocalUsername] = useState(username || "");
+  const [localShopName, setLocalShopName] = useState(shopName);
+  const [localContactLink, setLocalContactLink] = useState(contactLink);
 
-  const [localBio, setLocalBio] = useState(bio || "")
-  const [localDisplayName, setLocalDisplayName] = useState(displayName || "")
-  const [localUsername, setLocalUsername] = useState(username || "")
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
-
-  const handleSave = ()=>{
-    setBio(localBio)
-    setDisplayName(localDisplayName)
-    setUsername(localUsername)
+  const handleSave = () => {
+    setDisplayName?.(localDisplayName);
+    setUsername?.(localUsername);
+    setBio?.(localBio);
+    setShopName?.(localShopName);
+    setContactLink?.(localContactLink);
     navigation?.goBack();
-  }
+  };
 
   const scrollViewRef = useRef(null);
   const [localInput, setLocalInput] = useState("");
 
   useFocusEffect(
     useCallback(() => {
-
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput(""); 
@@ -57,30 +66,40 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation, b
     }, [])
   );
   
-  const isDisabled = localDisplayName === '' || localUsername === ''
+  const isDisabled = localDisplayName.trim() === '' || localUsername.trim() === '';
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+      <StatusBar 
+        barStyle={isDark ? "light-content" : "dark-content"} 
+        backgroundColor={themeColor.background} 
+      />
       
-      
-      <View style={styles.header}>
+      {/* Structural Header */}
+      <View style={[styles.header, { backgroundColor: themeColor.background }]}>
         <TouchableOpacity
           onPress={() => navigation?.goBack()}
           style={styles.headerAction}
           activeOpacity={0.7}
         >
-          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+          <ArrowLeft size={20} color={themeColor.textPrimary} strokeWidth={2.5} />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>Edit Profile</Text>
 
-        <TouchableOpacity style={styles.headerAction} activeOpacity={0.7}
-        disabled={isDisabled} 
-        onPress={handleSave}>
-          <Text style= {isDisabled ? styles.disabledSaveButtonText : styles.saveButtonText
-            
-          }>Save</Text>
+        <TouchableOpacity 
+          style={styles.headerAction} 
+          activeOpacity={0.7}
+          disabled={isDisabled} 
+          onPress={handleSave}
+        >
+          <Text style={[
+            styles.saveButtonText, 
+            { color: isDisabled ? themeColor.textMuted : COLORS.cyan },
+            isDisabled && { opacity: 0.4 }
+          ]}>
+            Save
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -89,155 +108,170 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation, b
         ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
       
+        {/* Avatar Setup Image Canvas */}
         <View style={styles.avatarSection}>
           <TouchableOpacity activeOpacity={0.9} style={styles.avatarWrapper}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarInitials}>CI</Text>
+            <View style={[styles.avatarCircle, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
+              <Text style={[styles.avatarInitials, { color: themeColor.textMuted }]}>CI</Text>
             </View>
 
-            <View style={styles.cameraBadge}>
-              <Camera size={14} color="white" fill="white" strokeWidth={2.5} />
+            <View style={[styles.cameraBadge, { backgroundColor: isDark ? themeColor.surface : COLORS.white, borderColor: themeColor.border }]}>
+              <Camera size={13} color={isDark ? COLORS.white : COLORS.void} strokeWidth={2.5} />
             </View>
           </TouchableOpacity>
-          <Text style={styles.avatarTapText}>Tap</Text>
+          <Text style={[styles.avatarTapText, { color: themeColor.textMuted }]}>Change Photo</Text>
         </View>
 
-     
+        {/* Public Identifiers Meta Block */}
         <View style={styles.sectionGap}>
- 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Display Name</Text>
+            <Text style={[styles.label, { color: themeColor.textMuted }]}>Display Name</Text>
             <TextInput
               value={localDisplayName}
               onChangeText={setLocalDisplayName}
-              style={styles.input}
+              style={[styles.input, { backgroundColor: themeColor.surface, borderColor: themeColor.border, color: isDark ? COLORS.white : themeColor.textPrimary }]}
               placeholder="Name seen on public actions"
-              placeholderTextColor={COLORS.white30}
-              keyboardAppearance="dark"
+              placeholderTextColor={themeColor.textMuted}
+              keyboardAppearance={isDark ? "dark" : "light"}
             />
           </View>
 
-   
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username</Text>
+            <Text style={[styles.label, { color: themeColor.textMuted }]}>Username</Text>
             <View style={styles.usernameContainer}>
-              <Text style={styles.usernamePrefix}>@</Text>
+              <Text style={[styles.usernamePrefix, { color: themeColor.textMuted }]}>@</Text>
               <TextInput
                 value={localUsername}
                 onChangeText={setLocalUsername}
-                style={[styles.input, styles.usernameInput]}
+                style={[
+                  styles.input, 
+                  styles.usernameInput, 
+                  { backgroundColor: themeColor.surface, borderColor: themeColor.border, color: isDark ? COLORS.white : themeColor.textPrimary }
+                ]}
                 placeholder="your_handle"
-                placeholderTextColor={COLORS.white30}
+                placeholderTextColor={themeColor.textMuted}
                 autoCapitalize="none"
-                keyboardAppearance="dark"
+                keyboardAppearance={isDark ? "dark" : "light"}
               />
             </View>
           </View>
 
-
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Bio</Text>
+            <Text style={[styles.label, { color: themeColor.textMuted }]}>Bio</Text>
             <TextInput
               value={localBio}
               onChangeText={setLocalBio}
-              style={[styles.input, styles.textarea]}
+              style={[
+                styles.input, 
+                styles.textarea, 
+                { backgroundColor: themeColor.surface, borderColor: themeColor.border, color: isDark ? COLORS.white : themeColor.textPrimary }
+              ]}
               placeholder="Tell the campus who you are..."
-              placeholderTextColor={COLORS.white30}
+              placeholderTextColor={themeColor.textMuted}
               multiline={true}
               numberOfLines={3}
               textAlignVertical="top"
-              keyboardAppearance="dark"
+              keyboardAppearance={isDark ? "dark" : "light"}
             />
           </View>
         </View>
 
-    
+        {/* Read-Only Academic Block */}
         <View style={styles.sectionGap}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>Student Profile</Text>
-            <View style={styles.verifiedBadge}>
-              <GraduationCap size={14} color={COLORS.white40} />
-              <Text style={styles.verifiedText}>Verified</Text>
+            <Text style={[styles.sectionHeading, { color: themeColor.textMuted }]}>Student Profile</Text>
+            <View style={[styles.verifiedBadge, { backgroundColor: themeColor.surface }]}>
+              <GraduationCap size={13} color={COLORS.cyan} />
+              <Text style={[styles.verifiedText, { color: COLORS.cyan }]}>Verified</Text>
             </View>
           </View>
 
-          <View style={styles.credentialsCard}>
-            <View style={styles.cardRow}>
-              <Text style={styles.cardRowLabel}>Faculty</Text>
-              <Text style={styles.cardRowValue}>Engineering</Text>
+          <View style={[styles.credentialsCard, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
+            <View style={[styles.cardRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor.border }]}>
+              <Text style={[styles.cardRowLabel, { color: themeColor.textMuted }]}>Faculty</Text>
+              <Text style={[styles.cardRowValue, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>Engineering</Text>
+            </View>
+            <View style={[styles.cardRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor.border }]}>
+              <Text style={[styles.cardRowLabel, { color: themeColor.textMuted }]}>Department</Text>
+              <Text style={[styles.cardRowValue, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>Computer Engineering</Text>
             </View>
             <View style={styles.cardRow}>
-              <Text style={styles.cardRowLabel}>Department</Text>
-              <Text style={styles.cardRowValue}>Computer Engineering</Text>
-            </View>
-            <View style={[styles.cardRow, { borderBottomWidth: 0 }]}>
-              <Text style={styles.cardRowLabel}>Level</Text>
-              <Text style={styles.cardRowValue}>500 Level</Text>
+              <Text style={[styles.cardRowLabel, { color: themeColor.textMuted }]}>Level</Text>
+              <Text style={[styles.cardRowValue, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>500 Level</Text>
             </View>
           </View>
-          <Text style={styles.infoFooterText}>
+          <Text style={[styles.infoFooterText, { color: themeColor.textMuted }]}>
             Academic verification details are extracted from portal registration data and cannot be modified manually.
           </Text>
         </View>
 
+        {/* Marketplace Merchant Section */}
         <View style={styles.sectionGap}>
-          <Text style={styles.sectionHeading}>Marketplace Settings</Text>
+          <Text style={[styles.sectionHeading, { color: themeColor.textMuted }]}>Marketplace Settings</Text>
           
-          <View style={styles.marketplaceCard}>
+          <View style={[styles.marketplaceCard, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
             <View style={styles.toggleRow}>
               <View style={styles.toggleRowLeft}>
-                <Store color={COLORS.white60} size={20} style={styles.storeIcon} />
+                <Store color={themeColor.textMuted} size={18} style={styles.storeIcon} />
                 <View style={styles.toggleTextContent}>
-                  <Text style={styles.toggleTitle}>Activate Campus Storefront</Text>
-                  <Text style={styles.toggleDescription}>
+                  <Text style={[styles.toggleTitle, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>Activate Campus Storefront</Text>
+                  <Text style={[styles.toggleDescription, { color: themeColor.textMuted }]}>
                     Enables verification options to list gadgets, books, or fashion in the RSU Marketplace.
                   </Text>
                 </View>
               </View>
 
-         
               <Pressable
-                onPress={() => setIsSellerActive(!isSellerActive)}
+                onPress={() => setIsSellerActive?.(!isSellerActive)}
                 style={[
                   styles.switchTrack,
-                  isSellerActive ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                  isSellerActive ? { backgroundColor: COLORS.cyan } : { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)" },
                 ]}
               >
                 <View
                   style={[
                     styles.switchThumb,
-                    isSellerActive ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                    isSellerActive ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: isDark ? COLORS.white : themeColor.textMuted },
                   ]}
                 />
               </Pressable>
             </View>
 
-    
             {isSellerActive && (
-              <View style={styles.sellerFieldsContainer}>
+              <View style={[styles.sellerFieldsContainer, { borderTopColor: themeColor.border }]}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Shop / Brand Name</Text>
+                  <Text style={[styles.label, { color: themeColor.textMuted }]}>Shop / Brand Name</Text>
                   <TextInput
+                    value={localShopName}
+                    onChangeText={setLocalShopName}
                     placeholder="e.g., Chris Logistics or Threads Hub"
-                    placeholderTextColor={COLORS.white30}
-                    style={[styles.input, styles.nestedInput]}
-                    keyboardAppearance="dark"
+                    placeholderTextColor={themeColor.textMuted}
+                    style={[styles.input, styles.nestedInput, { backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.03)", borderColor: themeColor.border, color: isDark ? COLORS.white : themeColor.textPrimary }]}
+                    keyboardAppearance={isDark ? "dark" : "light"}
                   />
                 </View>
                 
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Contact Link (WhatsApp / Telegram)</Text>
+                <View style={[styles.inputGroup, { marginBottom: 0 }]}>
+                  <Text style={[styles.label, { color: themeColor.textMuted }]}>Contact Link (WhatsApp / Telegram)</Text>
                   <View style={styles.usernameContainer}>
-                    <Globe size={16} color={COLORS.white30} style={styles.globeIcon} />
+                    <Globe size={16} color={themeColor.textMuted} style={styles.globeIcon} />
                     <TextInput
+                      value={localContactLink}
+                      onChangeText={setLocalContactLink}
                       placeholder="https://wa.me/..."
-                      placeholderTextColor={COLORS.white30}
-                      style={[styles.input, styles.nestedInput, styles.globeInput]}
+                      placeholderTextColor={themeColor.textMuted}
+                      style={[
+                        styles.input, 
+                        styles.nestedInput, 
+                        styles.globeInput, 
+                        { backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.03)", borderColor: themeColor.border, color: isDark ? COLORS.white : themeColor.textPrimary }
+                      ]}
                       autoCapitalize="none"
                       keyboardType="url"
-                      keyboardAppearance="dark"
+                      keyboardAppearance={isDark ? "dark" : "light"}
                     />
                   </View>
                 </View>
@@ -253,37 +287,27 @@ export function ManageProfile({ isSellerActive, setIsSellerActive, navigation, b
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.void,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "between",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
-    minWidth: 40,
+    minWidth: 48,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.white,
+    fontWeight: "700",
     textAlign: "center",
     flex: 1,
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: "400",
-    color: COLORS.white,
-    textAlign: "right",
-  },
-  disabledSaveButtonText: {
-    fontSize: 16,
-    fontWeight: "400",
-    color: COLORS.white40,
+    fontWeight: "600",
     textAlign: "right",
   },
   scrollView: {
@@ -291,13 +315,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingBottom: 112, 
   },
   avatarSection: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 8,
+    paddingVertical: 16,
   },
   avatarWrapper: {
     position: "relative",
@@ -306,65 +330,53 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: "#1A1A1A", 
-    borderWidth: 2,
-    borderColor: COLORS.white10,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarInitials: {
-    fontSize: 28,
-    fontWeight: "300",
-    color: COLORS.white40,
+    fontSize: 26,
+    fontWeight: "500",
     letterSpacing: -0.5,
   },
   cameraBadge: {
     position: "absolute",
     bottom: 0,
     right: 0,
-    padding: 8,
-    backgroundColor: COLORS.ink,
+    padding: 6,
     borderRadius: 99,
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.2)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   avatarTapText: {
-    fontSize: 14,
-    color: COLORS.white40,
-    marginTop: 12,
-    letterSpacing: 0.5,
+    fontSize: 13,
+    fontWeight: "500",
+    marginTop: 10,
   },
   sectionGap: {
-    marginTop: 28,
-    gap: 12,
+    marginTop: 24,
   },
   inputGroup: {
     marginBottom: 16,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "300",
-    color: COLORS.white50,
+    fontSize: 13,
+    fontWeight: "600",
     paddingHorizontal: 2,
     marginBottom: 6,
   },
   input: {
     width: "100%",
-    backgroundColor: COLORS.ink,
     borderWidth: 1,
-    borderColor: COLORS.white5,
     borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
     fontSize: 14,
     fontWeight: "400",
-    color: COLORS.white,
-    
   },
   usernameContainer: {
     position: "relative",
@@ -375,48 +387,45 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 14,
     fontSize: 14,
-    color: COLORS.white30,
-    fontWeight: "300",
+    fontWeight: "500",
     zIndex: 1,
   },
   usernameInput: {
     paddingLeft: 32,
   },
   textarea: {
-    minHeight: 80,
-    paddingTop: 10,
+    minHeight: 88,
+    paddingTop: 12,
   },
   sectionHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
+    marginBottom: 8,
   },
   sectionHeading: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.white30,
+    fontSize: 12,
+    fontWeight: "700",
     textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 8,
   },
   verifiedBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.white5,
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 4,
     borderRadius: 99,
     gap: 4,
   },
   verifiedText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.white40,
+    fontSize: 12,
+    fontWeight: "600",
   },
   credentialsCard: {
-    backgroundColor: COLORS.ink,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: COLORS.white5,
     overflow: "hidden",
   },
   cardRow: {
@@ -424,30 +433,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.01)",
   },
   cardRowLabel: {
     fontSize: 14,
-    fontWeight: "300",
-    color: COLORS.white60,
+    fontWeight: "400",
   },
   cardRowValue: {
     fontSize: 14,
     fontWeight: "500",
-    color: COLORS.white90,
   },
   infoFooterText: {
     fontSize: 12,
-    color: COLORS.white30,
+    fontWeight: "400",
     paddingHorizontal: 4,
-    marginTop: 12,
-    lineHeight: 16,
+    marginTop: 8,
+    lineHeight: 18,
   },
   marketplaceCard: {
-    backgroundColor: COLORS.ink,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: COLORS.white5,
     padding: 16,
   },
   toggleRow: {
@@ -469,14 +473,12 @@ const styles = StyleSheet.create({
   },
   toggleTitle: {
     fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.white90,
+    fontWeight: "600",
     marginBottom: 2,
   },
   toggleDescription: {
     fontSize: 12,
-    fontWeight: "300",
-    color: COLORS.white40,
+    fontWeight: "400",
     lineHeight: 18,
   },
   switchTrack: {
@@ -492,18 +494,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
     elevation: 2,
   },
   sellerFieldsContainer: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.white5,
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
   nestedInput: {
-    backgroundColor: "rgba(10, 10, 10, 0.4)", 
+    borderWidth: 1,
   },
   globeIcon: {
     position: "absolute",
@@ -511,6 +512,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   globeInput: {
-    paddingLeft: 40,
+    paddingLeft: 38,
   },
 });

@@ -756,7 +756,7 @@ export function AppProvider({ children }) {
   const [search, setSearch] = useState("");
 
   // Profile management sub-system states
-  const [selectedTheme, setSelectedTheme] = useState("Dark");
+  const [selectedTheme, setSelectedTheme] = useState("dark");
   const [isSellerActive, setIsSellerActive] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -779,8 +779,8 @@ export function AppProvider({ children }) {
   // App Utilities / Identity states
   const [searchQuery, setSearchQuery] = useState("");
   const [bio, setBio] = useState("Coffee addict...");
-  const [username, setUsername] = useState("@chris_igwe");
-  const [displayName, setDisplayName] = useState("Christopher Igwe");
+  const [username, setUsername] = useState("@comp_eng");
+  const [displayName, setDisplayName] = useState("Computer Eng");
 
   // Support / Customer Relations Desk
   const [isOpen, setIsOpen] = useState(false);

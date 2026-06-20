@@ -26,6 +26,7 @@ import {
 } from "lucide-react-native";
 import { formatRelativeTime } from "./formatRelativeTime";
 import * as Crypto from 'expo-crypto';
+import { ThemeTokens } from '../theme';
 
 export function PostDetail({
   posts,
@@ -36,11 +37,15 @@ export function PostDetail({
   handleDownvotes,
   handleUpvote,
   handleCommentUpvote,
-  getVerseIcon
+  getVerseIcon,
+  selectedTheme
 }) {
   const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
   const { postId: routePostId } = route.params || {};
   const postId = directPostId || routePostId;
@@ -57,7 +62,6 @@ export function PostDetail({
 
   useFocusEffect(
     useCallback(() => {
-
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
@@ -65,11 +69,10 @@ export function PostDetail({
     }, [])
   );
 
-
   if (!post) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Post not found or has been removed.</Text>
+      <View style={[styles.errorContainer, { backgroundColor: themeColor.background }]}>
+        <Text style={[styles.errorText, { color: themeColor.textSecondary }]}>Post not found or has been removed.</Text>
         <Pressable onPress={() => navigation.goBack()} style={styles.backButtonInline}>
           <ArrowLeft size={16} color="#00BA34" />
           <Text style={styles.backButtonInlineText}>Back to Feed</Text>
@@ -146,17 +149,16 @@ export function PostDetail({
 
   const isConfession = post.verse === "confession";
 
-
   return (
-    <View style={styles.screenWrapper}>
-      <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeAreaHeader}>
+    <View style={[styles.screenWrapper, { backgroundColor: themeColor.background }]}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeAreaHeader, { backgroundColor: themeColor.background, borderBottomColor: themeColor.border }]}>
         <View style={styles.headerContainer}>
           <Pressable onPress={() => navigation.goBack()} style={styles.iconHitbox}>
-            <ArrowLeft size={22} color="rgba(255, 255, 255, 0.8)" />
+            <ArrowLeft size={22} color={isDark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)"} />
           </Pressable>
-          <Text style={styles.headerTitle}>{post.verse}</Text>
+          <Text style={[styles.headerTitle, { color: themeColor.text }]}>{post.verse}</Text>
           <Pressable style={styles.iconHitbox}>
-            <MoreHorizontal size={22} color="rgba(255, 255, 255, 0.4)" />
+            <MoreHorizontal size={22} color={isDark ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.4)"} />
           </Pressable>
         </View>
       </SafeAreaView>
@@ -171,14 +173,21 @@ export function PostDetail({
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.mainPostCard, isConfession ? styles.cardConfession : styles.cardDefault]}>
+          <View style={[
+            styles.mainPostCard, 
+            isConfession ? styles.cardConfession : styles.cardDefault,
+            { 
+              backgroundColor: isConfession ? (isDark ? "rgba(245, 158, 11, 0.1)" : "rgba(245, 158, 11, 0.05)") : themeColor.background,
+              borderBottomColor: themeColor.border 
+            }
+          ]}>
             <View style={styles.authorRow}>
               <View style={styles.avatarPlaceholder} />
               <View style={styles.metaColumn}>
-                <Text style={styles.authorName}>
+                <Text style={[styles.authorName, { color: themeColor.text }]}>
                   {post.verse === "market" ? post.author?.name : post.author?.faculty}
                 </Text>
-                <Text style={styles.authorHandle}>
+                <Text style={[styles.authorHandle, { color: themeColor.textSecondary }]}>
                   @{post.author?.department} • {formatRelativeTime(post.meta?.createdAt || post.createdAt)}
                 </Text>
               </View>
@@ -195,7 +204,7 @@ export function PostDetail({
               </Text>
             </View>
 
-            <Text style={styles.bodyText}>{post.content?.text}</Text>
+            <Text style={[styles.bodyText, { color: themeColor.text }]}>{post.content?.text}</Text>
 
             {post.content?.images && post.content.images.length > 0 && (
               <View style={[styles.imageGrid, post.content.images.length === 1 ? styles.gridSingle : styles.gridMulti]}>
@@ -206,10 +215,10 @@ export function PostDetail({
             )}
 
             {post.verse === "market" && (
-              <View style={styles.marketBar}>
-                <Text style={styles.marketPrice}>₦{post.marketPlace?.price?.toLocaleString()}</Text>
+              <View style={[styles.marketBar, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
+                <Text style={[styles.marketPrice, { color: themeColor.text }]}>₦{post.marketPlace?.price?.toLocaleString()}</Text>
                 <Text style={styles.marketDivider}>-</Text>
-                <Text style={styles.marketCondition}>{post.marketPlace?.condition}</Text>
+                <Text style={[styles.marketCondition, { color: themeColor.textSecondary }]}>{post.marketPlace?.condition}</Text>
                 <Pressable style={styles.marketBuyBtn}>
                   <Text style={styles.marketBuyBtnText}>Buy Now</Text>
                   <ArrowUpRight size={16} color="#FFFFFF" />
@@ -217,27 +226,26 @@ export function PostDetail({
               </View>
             )}
 
-            <View style={styles.interactionFooter}>
+            <View style={[styles.interactionFooter, { borderTopColor: themeColor.border }]}>
               <View style={styles.leftMetrics}>
                 <Pressable onPress={() => handleUpvote?.(post.id)} style={styles.metricBtn}>
-                  <ArrowBigUp size={22} fill={post.userInteraction?.voteStatus === "up" ? "#00BA34" : ''} color={post.userInteraction?.voteStatus === "up" ? "#00BA34" : "rgba(255,255,255,0.6)"} />
+                  <ArrowBigUp size={22} fill={post.userInteraction?.voteStatus === "up" ? "#00BA34" : 'none'} color={post.userInteraction?.voteStatus === "up" ? "#00BA34" : (isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)")} />
                   <Text
                     style={[
                       styles.metricText,
-                      { color: post.userInteraction?.voteStatus === "up" ? "rgba(0, 186, 52, 1)" : "rgba(255, 255, 255, 0.6)" }
+                      { color: post.userInteraction?.voteStatus === "up" ? "rgba(0, 186, 52, 1)" : (isDark ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.6)") }
                     ]}
                   >
                     {post.engagement?.upvotes || 0}
                   </Text>
                 </Pressable>
 
-
                 <Pressable onPress={() => handleDownvotes?.(post.id)} style={styles.metricBtn}>
-                  <ArrowBigDown size={22} fill={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : ''} color={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : "rgba(255,255,255,0.6)"} />
+                  <ArrowBigDown size={22} fill={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : 'none'} color={post.userInteraction?.voteStatus === "down" ? "#F59E0B" : (isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)")} />
                   <Text
                     style={[
                       styles.metricText,
-                      { color: post.userInteraction?.voteStatus === "down" ? "rgba(245, 158, 11, 1)" : "rgba(255, 255, 255, 0.6)" }
+                      { color: post.userInteraction?.voteStatus === "down" ? "rgba(245, 158, 11, 1)" : (isDark ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.6)") }
                     ]}
                   >
                     {post.engagement?.downvotes || 0}
@@ -245,11 +253,11 @@ export function PostDetail({
                 </Pressable>
 
                 <Pressable onPress={() => handleRepost?.(post.id)} style={styles.metricBtn}>
-                  {post.userInteraction?.reposts ? <Repeat1 size={22} color="#FFFFFF" /> : <Repeat size={22} color="rgba(255,255,255,0.6)" />}
+                  {post.userInteraction?.reposts ? <Repeat1 size={22} color={themeColor.text} /> : <Repeat size={22} color={isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)"} />}
                   <Text
                     style={[
                       styles.metricText,
-                      { color: post.userInteraction?.reposts ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.6)" }
+                      { color: isDark ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.6)" }
                     ]}
                   >
                     {post.engagement?.reposts || ''}
@@ -258,7 +266,7 @@ export function PostDetail({
               </View>
 
               <Pressable onPress={() => handleSave?.(post.id)} style={styles.metricBtn}>
-                <Bookmark size={20} fill={post.userInteraction?.saved ? "#FFCC00" : ""} color={post.userInteraction?.saved ? "#FFCC00" : "rgba(255,255,255,0.6)"} />
+                <Bookmark size={20} fill={post.userInteraction?.saved ? "#FFCC00" : "none"} color={post.userInteraction?.saved ? "#FFCC00" : (isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)")} />
               </Pressable>
             </View>
           </View>
@@ -266,8 +274,8 @@ export function PostDetail({
           <View style={styles.commentsSection}>
             {!post.engagement?.comments || post.engagement.comments.length === 0 ? (
               <View style={styles.emptyCommentsBox}>
-                <MessageSquare size={22} color="rgba(255,255,255,0.15)" />
-                <Text style={styles.emptyCommentsText}>Be the first to comment</Text>
+                <MessageSquare size={22} color={isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.2)"} />
+                <Text style={[styles.emptyCommentsText, { color: themeColor.textSecondary }]}>Be the first to comment</Text>
               </View>
             ) : (
               post.engagement.comments.map((comment) => {
@@ -280,20 +288,20 @@ export function PostDetail({
                       <View style={styles.leftTimelineColumn}>
                         <View style={styles.commentAvatar} />
                         {viewReply === comment.id && replyCount > 0 && (
-                          <View style={styles.verticalThreadLine} />
+                          <View style={[styles.verticalThreadLine, { backgroundColor: themeColor.border }]} />
                         )}
                       </View>
 
-                      <View style={styles.commentRightContent}>
+                      <View style={[styles.commentRightContent, { borderBottomColor: themeColor.border }]}>
                         <View style={styles.commentHeaderRow}>
-                          <Text style={styles.commentAuthorName}>{comment.author?.department}</Text>
-                          <Text style={styles.commentTimestamp}>• {formatRelativeTime(comment.createdAt)}</Text>
+                          <Text style={[styles.commentAuthorName, { color: themeColor.text }]}>{comment.author?.department}</Text>
+                          <Text style={[styles.commentTimestamp, { color: themeColor.textSecondary }]}>• {formatRelativeTime(comment.createdAt)}</Text>
                           <Pressable style={styles.commentMoreBtn}>
-                            <MoreHorizontal size={16} color="rgba(255,255,255,0.3)" />
+                            <MoreHorizontal size={16} color={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} />
                           </Pressable>
                         </View>
 
-                        <Text style={styles.commentBodyText}>{comment.text}</Text>
+                        <Text style={[styles.commentBodyText, { color: themeColor.text }]}>{comment.text}</Text>
 
                         <View style={styles.commentControlsRow}>
                           <View style={styles.commentActionGroup}>
@@ -325,12 +333,12 @@ export function PostDetail({
 
                           <View style={styles.commentVoteMetrics}>
                             <Pressable onPress={() => handleCommentUpvote?.(post.id, comment.id)} style={styles.voteActionBtn}>
-                              <ArrowBigUp size={20} color="rgba(255,255,255,0.5)" />
-                              <Text style={styles.voteMetricText}>{comment.engagement?.upvotes || ""}</Text>
+                              <ArrowBigUp size={20} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"} />
+                              <Text style={[styles.voteMetricText, { color: themeColor.textSecondary }]}>{comment.engagement?.upvotes || ""}</Text>
                             </Pressable>
                             <Pressable style={styles.voteActionBtn}>
-                              <ArrowBigDown size={20} color="rgba(255,255,255,0.5)" />
-                              <Text style={styles.voteMetricText}>{comment.engagement?.downvotes || ""}</Text>
+                              <ArrowBigDown size={20} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"} />
+                              <Text style={[styles.voteMetricText, { color: themeColor.textSecondary }]}>{comment.engagement?.downvotes || ""}</Text>
                             </Pressable>
                           </View>
                         </View>
@@ -344,19 +352,19 @@ export function PostDetail({
                               </View>
                               <View style={styles.replyRightContent}>
                                 <View style={styles.replyHeaderRow}>
-                                  <Text style={styles.replyAuthorName}>{reply.author?.department || "Comp Eng"}</Text>
-                                  <Text style={styles.replyTimestamp}>• {formatRelativeTime(reply.createdAt || new Date().toISOString())}</Text>
+                                  <Text style={[styles.replyAuthorName, { color: themeColor.text }]}>{reply.author?.department || "Comp Eng"}</Text>
+                                  <Text style={[styles.replyTimestamp, { color: themeColor.textSecondary }]}>• {formatRelativeTime(reply.createdAt || new Date().toISOString())}</Text>
                                 </View>
 
                                 {reply.replyingToText && (
-                                  <View style={styles.contextQuoteBadge}>
-                                    <Text style={styles.contextQuoteText} numberOfLines={1}>
+                                  <View style={[styles.contextQuoteBadge, { backgroundColor: themeColor.surface, borderLeftColor: themeColor.border }]}>
+                                    <Text style={[styles.contextQuoteText, { color: themeColor.textSecondary }]}>
                                       → {reply.replyingToText}...
                                     </Text>
                                   </View>
                                 )}
 
-                                <Text style={styles.replyBodyText}>{reply.text || reply}</Text>
+                                <Text style={[styles.replyBodyText, { color: themeColor.text }]}>{reply.text || reply}</Text>
 
                                 <View style={styles.replyControlsRow}>
                                   <View style={styles.commentActionGroup}>
@@ -380,12 +388,12 @@ export function PostDetail({
 
                                   <View style={styles.commentVoteMetrics}>
                                     <Pressable style={styles.voteActionBtn}>
-                                      <ArrowBigUp size={18} color="rgba(255,255,255,0.4)" />
-                                      <Text style={styles.voteMetricText}>{reply.engagement?.upvotes || ""}</Text>
+                                      <ArrowBigUp size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />
+                                      <Text style={[styles.voteMetricText, { color: themeColor.textSecondary }]}>{reply.engagement?.upvotes || ""}</Text>
                                     </Pressable>
                                     <Pressable style={styles.voteActionBtn}>
-                                      <ArrowBigDown size={18} color="rgba(255,255,255,0.4)" />
-                                      <Text style={styles.voteMetricText}>{reply.engagement?.downvotes || ""}</Text>
+                                      <ArrowBigDown size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />
+                                      <Text style={[styles.voteMetricText, { color: themeColor.textSecondary }]}>{reply.engagement?.downvotes || ""}</Text>
                                     </Pressable>
                                   </View>
                                 </View>
@@ -404,13 +412,14 @@ export function PostDetail({
 
         <View style={[
           styles.fixedFooterInputArea,
+          { backgroundColor: themeColor.background, borderTopColor: themeColor.border },
           { paddingBottom: insets.bottom > 0 ? insets.bottom : 12 }
         ]}>
           {replyingTo && (
-            <View style={styles.replyContextNotificationBar}>
+            <View style={[styles.replyContextNotificationBar, { backgroundColor: isDark ? "rgba(0, 186, 52, 0.04)" : "rgba(0, 186, 52, 0.08)" }]}>
               <View style={styles.replyContextFlex}>
                 <Text style={styles.replyContextLabel}>Replying </Text>
-                <Text style={styles.replyContextQuote} numberOfLines={1}>
+                <Text style={[styles.replyContextQuote, { color: themeColor.textSecondary }]} numberOfLines={1}>
                   {secReplyingTo ? `"${secReplyingTo.text}"` : `"${post.engagement.comments.find(c => c.id === replyingTo)?.text}"`}
                 </Text>
               </View>
@@ -421,11 +430,11 @@ export function PostDetail({
           )}
           <View style={styles.inputActionWrapper}>
             <TextInput
-              style={styles.nativeCommentInput}
+              style={[styles.nativeCommentInput, { backgroundColor: themeColor.surface, borderColor: themeColor.border, color: themeColor.text }]}
               value={commentText}
               onChangeText={setCommentText}
               placeholder={secReplyingTo ? `Replying to "${secReplyingTo.text?.substring(0, 15)}..."` : replyingTo ? 'Send reply...' : 'Post a comment...'}
-              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              placeholderTextColor={themeColor.textSecondary}
               multiline={false}
             />
             <Pressable
@@ -547,7 +556,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#0D0F14",
     padding: 10,
     borderRadius: 8,
-    borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.05)",
   },
   marketPrice: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {StyleSheet, StatusBar, Share, Alert, View, } from 'react-native';
+import { StyleSheet, StatusBar, Share, Alert, View, } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderLayout } from './src/components/navigation/HeaderLayout';
 import { Feed } from './src/components/feed/Feed';
@@ -26,6 +26,8 @@ import { ContactUs } from './src/components/profile/ContactUs/ContactUs';
 
 import { AppProvider, useAppContext } from './src/context/AppContext';
 import { ThemeTokens } from './src/theme/index';
+import { BookMarks } from './src/components/navigation/sideMenu/BookMarks';
+import { Settings } from './src/components/navigation/sideMenu/Settings';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -68,13 +70,58 @@ function HomeStackNavigator() {
     handleDownvotes,
     handleRepost,
     handleSave,
-    handleShare
+    handleShare,
+    selectedTheme,
+    setSelectedTheme,
+    searchQuery,
+    setSearchQuery,
+    isOpen,
+    setIsOpen,
+    selectedTopic,
+    setSelectedTopic,
+    message,
+    setMessage,
+    attachment,
+    setAttachment,
+    topics,
+    handleSubmit,
+    currentYear,
+    showCurrentPassword,
+    setShowCurrentPassword,
+    showNewPassword,
+    setShowNewPassword,
+    twoFactorActive,
+    setTwoFactorActive,
+    biometricsActive,
+    setBiometricsActive,
+    anonymousDefault,
+    setAnonymousDefault,
+    hideDetails,
+    setHideDetails,
+    allowDirectMessages,
+    setAllowDirectMessages,
+    pushMaster,
+    setPushMaster,
+    emailDigest,
+    setEmailDigest,
+    socialAlerts,
+    setSocialAlerts,
+    confessionAlerts,
+    setConfessionAlerts,
+    marketAlerts,
+    setMarketAlerts,
+    verseAlerts,
+    setVerseAlerts,
   } = useAppContext();
 
   const handlePlusClick = (navigation) => {
     setActiveFilter("plus");
     if (navigation) navigation.navigate("CreatePost");
   }
+
+  const isDark = selectedTheme === 'dark';
+
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light
   return (
     <Stack.Navigator
       screenOptions={{
@@ -89,8 +136,10 @@ function HomeStackNavigator() {
       <Stack.Screen name='HomeFeed'>
         {(props) => (
           <View style={styles.appContainer}>
-            <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeAreaHeader}>
+            <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeAreaHeader, { backgroundColor: themeColor.background }]}>
               <HeaderLayout
+                selectedTheme={selectedTheme}
+                setSelectedTheme={setSelectedTheme}
                 activeFilter={activeFilter === "all" ? "home" : activeFilter}
                 setActiveFilter={(tab) => {
                   if (tab === "home") setActiveFilter("all");
@@ -98,20 +147,23 @@ function HomeStackNavigator() {
                 }}
               />
             </SafeAreaView>
-
-            <Feed
-              {...props}
-              posts={filteredPosts}
-              activeFilter={activeFilter}
-              setActiveFilter={setActiveFilter}
-              handleUpvote={handleUpvote}
-              handleDownvotes={handleDownvotes}
-              handleRepost={handleRepost}
-              handleSave={handleSave}
-              handleShare={handleShare}
-              onPlusClick={() => handlePlusClick(props.navigation)}
-              getVerseIcon={getVerseIcon}
-            />
+            <View style={{ flex: 1, paddingTop: 64 }}>
+              <Feed
+                {...props}
+                posts={filteredPosts}
+                activeFilter={activeFilter}
+                setActiveFilter={setActiveFilter}
+                handleUpvote={handleUpvote}
+                handleDownvotes={handleDownvotes}
+                handleRepost={handleRepost}
+                handleSave={handleSave}
+                handleShare={handleShare}
+                onPlusClick={() => handlePlusClick(props.navigation)}
+                getVerseIcon={getVerseIcon}
+                selectedTheme={selectedTheme}
+                setSelectedTheme={setSelectedTheme}
+              />
+            </View>
           </View>
         )}
       </Stack.Screen>
@@ -131,6 +183,120 @@ function HomeStackNavigator() {
           />
         )}
       </Stack.Screen>
+
+
+      <Stack.Screen name="Settings">
+        {(props) => <Settings
+          {...props}
+          selectedTheme={selectedTheme}
+          setSelectedTheme={setSelectedTheme}
+        />}
+      </Stack.Screen>
+
+
+      <Stack.Screen name="Bookmarks">
+        {(props) => <BookMarks
+          {...props}
+          posts={posts}
+          handleUpvote={handleUpvote}
+          handleDownvotes={handleDownvotes}
+          handleRepost={handleRepost}
+          handleShare={handleShare}
+          handleSave={handleSave}
+          getVerseIcon={getVerseIcon}
+          selectedTheme={selectedTheme}
+          setSelectedTheme={setSelectedTheme}
+        />}
+      </Stack.Screen>
+
+      <Stack.Screen name="HelpCenter">
+        {(props) => (
+          <HelpCenter
+            {...props}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen name="AboutVerse">
+        {(props) => <AboutVerse {...props} currentYear={currentYear} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="ContactUs">
+        {(props) => (
+          <ContactUs
+            {...props}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            selectedTopic={selectedTopic}
+            setSelectedTopic={setSelectedTopic}
+            message={message}
+            setMessage={setMessage}
+            attachment={attachment}
+            setAttachment={setAttachment}
+            topics={topics}
+            handleSubmit={handleSubmit}
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen name="Manage_Security">
+        {(props) => (
+          <PasswordSecurity
+            {...props}
+            showCurrentPassword={showCurrentPassword}
+            setShowCurrentPassword={setShowCurrentPassword}
+            showNewPassword={showNewPassword}
+            setShowNewPassword={setShowNewPassword}
+            twoFactorActive={twoFactorActive}
+            setTwoFactorActive={setTwoFactorActive}
+            biometricsActive={biometricsActive}
+            setBiometricsActive={setBiometricsActive}
+            setSelectedTheme={setSelectedTheme}
+            selectedTheme={selectedTheme}
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen name="Privacy_Management">
+        {(props) => (
+          <PrivacySafety
+            {...props}
+            anonymousDefault={anonymousDefault}
+            setAnonymousDefault={setAnonymousDefault}
+            hideDetails={hideDetails}
+            setHideDetails={setHideDetails}
+            allowDirectMessages={allowDirectMessages}
+            setAllowDirectMessages={setAllowDirectMessages}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen name="Notification">
+        {(props) => (
+          <Notification
+            {...props}
+            pushMaster={pushMaster}
+            setPushMaster={setPushMaster}
+            emailDigest={emailDigest}
+            setEmailDigest={setEmailDigest}
+            setSocialAlerts={setSocialAlerts}
+            socialAlerts={socialAlerts}
+            marketAlerts={marketAlerts}
+            setMarketAlerts={setMarketAlerts}
+            verseAlerts={verseAlerts}
+            setVerseAlerts={setVerseAlerts}
+            setConfessionAlerts={setConfessionAlerts}
+            confessionAlerts={confessionAlerts}
+            setSelectedTheme={setSelectedTheme}
+            selectedTheme={selectedTheme}
+          />
+        )}
+      </Stack.Screen>
+
     </Stack.Navigator>
   );
 }
@@ -148,7 +314,9 @@ function SearchStackNavigator() {
     handleSave,
     handleRepost,
     handleDownvotes,
-    handleUpvote
+    handleUpvote,
+    selectedTheme,
+    setSelectedTheme
   } = useAppContext();
 
   return (
@@ -175,6 +343,8 @@ function SearchStackNavigator() {
             matchingPosts={matchingPosts}
             getVerseIcon={getVerseIcon}
             posts={posts}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
           />
         )}
       </Stack.Screen>
@@ -191,6 +361,8 @@ function SearchStackNavigator() {
             handleUpvote={handleUpvote}
             getVerseIcon={getVerseIcon}
             matchingPosts={matchingPosts}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
           />
         )}
       </Stack.Screen>
@@ -216,7 +388,7 @@ function SearchStackNavigator() {
 
 
 function MarketPlace() {
-  const { posts } = useAppContext();
+  const { posts, selectedTheme, setSelectedTheme } = useAppContext();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name='MarketPlace'>
@@ -224,6 +396,8 @@ function MarketPlace() {
           <Market
             {...props}
             posts={posts}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
           />
         )}
       </Stack.Screen>
@@ -234,7 +408,7 @@ function MarketPlace() {
 
 
 function PostCreation() {
-  const { setPosts, setActiveFilter } = useAppContext();
+  const { setPosts, setActiveFilter, selectedTheme, setSelectedTheme } = useAppContext();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name='CreatePage'>
@@ -243,6 +417,8 @@ function PostCreation() {
             {...props}
             setPosts={setPosts}
             setActiveFilter={setActiveFilter}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
           />
         )}
       </Stack.Screen>
@@ -258,20 +434,6 @@ function ProfileManagement() {
     setIsSellerActive,
     selectedTheme,
     setSelectedTheme,
-    showCurrentPassword,
-    setShowCurrentPassword,
-    showNewPassword,
-    setShowNewPassword,
-    twoFactorActive,
-    setTwoFactorActive,
-    biometricsActive,
-    setBiometricsActive,
-    anonymousDefault,
-    setAnonymousDefault,
-    hideDetails,
-    setHideDetails,
-    allowDirectMessages,
-    setAllowDirectMessages,
     searchQuery,
     setSearchQuery,
     isOpen,
@@ -283,18 +445,6 @@ function ProfileManagement() {
     attachment,
     setAttachment,
     handleSubmit,
-    pushMaster,
-    setPushMaster,
-    emailDigest,
-    setEmailDigest,
-    socialAlerts,
-    setSocialAlerts,
-    confessionAlerts,
-    setConfessionAlerts,
-    marketAlerts,
-    setMarketAlerts,
-    verseAlerts,
-    setVerseAlerts,
     bio,
     setBio,
     displayName,
@@ -351,23 +501,8 @@ function ProfileManagement() {
             setDisplayName={setDisplayName}
             username={username}
             setUsername={setUsername}
-          />
-        )}
-      </Stack.Screen>
-
-
-      <Stack.Screen name="Manage_Security">
-        {(props) => (
-          <PasswordSecurity
-            {...props}
-            showCurrentPassword={showCurrentPassword}
-            setShowCurrentPassword={setShowCurrentPassword}
-            showNewPassword={showNewPassword}
-            setShowNewPassword={setShowNewPassword}
-            twoFactorActive={twoFactorActive}
-            setTwoFactorActive={setTwoFactorActive}
-            biometricsActive={biometricsActive}
-            setBiometricsActive={setBiometricsActive}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
           />
         )}
       </Stack.Screen>
@@ -384,23 +519,12 @@ function ProfileManagement() {
         )}
       </Stack.Screen>
 
-      <Stack.Screen name="Privacy_Management">
-        {(props) => (
-          <PrivacySafety
-            {...props}
-            anonymousDefault={anonymousDefault}
-            setAnonymousDefault={setAnonymousDefault}
-            hideDetails={hideDetails}
-            setHideDetails={setHideDetails}
-            allowDirectMessages={allowDirectMessages}
-            setAllowDirectMessages={setAllowDirectMessages}
-          />
-        )}
-      </Stack.Screen>
-
 
       <Stack.Screen name="About_Verse">
-        {(props) => <AboutVerse {...props} currentYear={currentYear} />}
+        {(props) => <AboutVerse {...props} currentYear={currentYear}
+          selectedTheme={selectedTheme}
+          setSelectedTheme={setSelectedTheme}
+        />}
       </Stack.Screen>
 
 
@@ -410,6 +534,8 @@ function ProfileManagement() {
             {...props}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
           />
         )}
       </Stack.Screen>
@@ -429,26 +555,8 @@ function ProfileManagement() {
             setAttachment={setAttachment}
             topics={topics}
             handleSubmit={handleSubmit}
-          />
-        )}
-      </Stack.Screen>
-
-      <Stack.Screen name="Notification">
-        {(props) => (
-          <Notification
-            {...props}
-            pushMaster={pushMaster}
-            setPushMaster={setPushMaster}
-            emailDigest={emailDigest}
-            setEmailDigest={setEmailDigest}
-            setSocialAlerts={setSocialAlerts}
-            socialAlerts={socialAlerts}
-            marketAlerts={marketAlerts}
-            setMarketAlerts={setMarketAlerts}
-            verseAlerts={verseAlerts}
-            setVerseAlerts={setVerseAlerts}
-            setConfessionAlerts={setConfessionAlerts}
-            confessionAlerts={confessionAlerts}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
           />
         )}
       </Stack.Screen>
@@ -457,7 +565,7 @@ function ProfileManagement() {
 }
 
 function BottomTabNavigatorComponent() {
-  const { activeTab, setActiveTab, setActiveFilter } = useAppContext();
+  const { activeTab, setActiveTab, setActiveFilter, selectedTheme, setSelectedTheme } = useAppContext();
 
   const handlePlusClick = (navigation) => {
     setActiveFilter("plus");
@@ -468,17 +576,24 @@ function BottomTabNavigatorComponent() {
     <Tab.Navigator
       tabBar={(props) => {
         const { routes, index } = props.state;
+        const topLevelRouteName = routes[index].name;
         const nestedRouteName = getFocusedRouteNameFromRoute(routes[index]);
 
         if (nestedRouteName === 'Comments' ||
-          nestedRouteName === 'CreatePost' ||
+          topLevelRouteName === 'CreatePost' ||
           nestedRouteName === 'Contact_Us' ||
           nestedRouteName === 'Help_Center' ||
+          nestedRouteName === 'HelpCenter' ||
           nestedRouteName === 'Privacy_Management' ||
           nestedRouteName === 'Theme_Management' ||
           nestedRouteName === 'Notification' ||
           nestedRouteName === 'Manage_Security' ||
-          nestedRouteName === 'Manage_Profile'
+          nestedRouteName === 'Manage_Profile' ||
+          nestedRouteName === 'AboutVerse' ||
+          nestedRouteName === 'About_Verse' ||
+          nestedRouteName === 'ContactUs' ||
+          nestedRouteName === 'Contact_Us' ||
+          nestedRouteName === 'Settings'
         ) {
           return null;
         }
@@ -489,6 +604,8 @@ function BottomTabNavigatorComponent() {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             setActiveFilter={setActiveFilter}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
             handlePlusClick={() => handlePlusClick(props.navigation)}
           />
         );
@@ -529,8 +646,7 @@ const styles = StyleSheet.create({
   },
   appContainer: {
     flex: 1,
-    backgroundColor: '#000000',
-    gap:60
+    flexDirection: 'column',
   },
   viewLayoutWrapper: {
     flex: 1,

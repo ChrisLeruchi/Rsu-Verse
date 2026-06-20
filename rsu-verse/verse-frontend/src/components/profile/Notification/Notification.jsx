@@ -19,6 +19,7 @@ import {
   Megaphone,
   Mail,
 } from "lucide-react-native";
+import { ThemeTokens } from "../../../theme";
 
 const COLORS = {
   void: "#000000",
@@ -51,13 +52,17 @@ export function Notification({
   verseAlerts,
   setVerseAlerts,
   navigation,
+  selectedTheme,
+  setSelectedTheme,
 }) {
   const scrollViewRef = useRef(null);
   const [localInput, setLocalInput] = useState("");
 
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
   useFocusEffect(
     useCallback(() => {
-
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
@@ -66,22 +71,26 @@ export function Notification({
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+      <StatusBar 
+        barStyle={isDark ? "light-content" : "dark-content"} 
+        backgroundColor={themeColor.background} 
+      />
 
-
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: themeColor.background }]}>
         <TouchableOpacity
-          onPress={() => navigation?.goBack()} style={styles.headerAction}
+          onPress={() => navigation?.goBack()} 
+          style={styles.headerAction}
           activeOpacity={0.7}
         >
-          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+          <ArrowLeft size={20} color={isDark ? "#FFFFFF" : themeColor.textPrimary} strokeWidth={2.5} />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Notifications</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>
+          Notifications
+        </Text>
         <View style={styles.headerSpacer} />
       </View>
-
 
       <ScrollView
         style={styles.scrollView}
@@ -90,13 +99,13 @@ export function Notification({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.sectionGap}>
-          <View style={styles.cardContainer}>
+          <View style={[styles.cardContainer, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
             <View style={styles.row}>
               <View style={styles.rowLeft}>
-                <Bell className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <Bell color={themeColor.textMuted} size={20} style={styles.rowIcon} />
                 <View style={styles.textContent}>
-                  <Text style={styles.rowTitle}>Push Notifications</Text>
-                  <Text style={styles.rowDescription}>
+                  <Text style={[styles.rowTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Push Notifications</Text>
+                  <Text style={[styles.rowDescription, { color: themeColor.textMuted }]}>
                     Get notified about important activity
                   </Text>
                 </View>
@@ -105,26 +114,28 @@ export function Notification({
                 onPress={() => setPushMaster(!pushMaster)}
                 style={[
                   styles.switchTrack,
-                  pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                  pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: themeColor.background, borderWidth: 1, borderColor: themeColor.border },
                 ]}
               >
                 <View
                   style={[
                     styles.switchThumb,
-                    pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                    pushMaster 
+                      ? { transform: [{ translateX: 16 }], backgroundColor: "#FFFFFF" } 
+                      : { transform: [{ translateX: 0 }], backgroundColor: themeColor.textMuted },
                   ]}
                 />
               </Pressable>
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: themeColor.border }]} />
 
             <View style={styles.row}>
               <View style={styles.rowLeft}>
-                <Mail className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <Mail color={themeColor.textMuted} size={20} style={styles.rowIcon} />
                 <View style={styles.textContent}>
-                  <Text style={styles.rowTitle}>Weekly Recap</Text>
-                  <Text style={styles.rowDescription}>
+                  <Text style={[styles.rowTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Weekly Recap</Text>
+                  <Text style={[styles.rowDescription, { color: themeColor.textMuted }]}>
                     Catch up on trending posts and listings
                   </Text>
                 </View>
@@ -133,13 +144,15 @@ export function Notification({
                 onPress={() => setEmailDigest(!emailDigest)}
                 style={[
                   styles.switchTrack,
-                  emailDigest ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                  emailDigest ? { backgroundColor: COLORS.cyan } : { backgroundColor: themeColor.background, borderWidth: 1, borderColor: themeColor.border },
                 ]}
               >
                 <View
                   style={[
                     styles.switchThumb,
-                    emailDigest ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                    emailDigest 
+                      ? { transform: [{ translateX: 16 }], backgroundColor: "#FFFFFF" } 
+                      : { transform: [{ translateX: 0 }], backgroundColor: themeColor.textMuted },
                   ]}
                 />
               </Pressable>
@@ -147,16 +160,17 @@ export function Notification({
           </View>
         </View>
 
+        {/* Activity Section */}
         <View style={styles.sectionGap}>
-          <Text style={styles.sectionHeading}>Activity</Text>
+          <Text style={[styles.sectionHeading, { color: themeColor.textMuted }]}>Activity</Text>
 
-          <View style={styles.cardContainer}>
+          <View style={[styles.cardContainer, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
             <View style={[styles.row, !pushMaster && styles.disabledRow]}>
               <View style={styles.rowLeft}>
-                <MessageSquare className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <MessageSquare color={themeColor.textMuted} size={20} style={styles.rowIcon} />
                 <View style={styles.textContent}>
-                  <Text style={styles.rowTitle}>Replies & Mentions</Text>
-                  <Text style={styles.rowDescription}>
+                  <Text style={[styles.rowTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Replies & Mentions</Text>
+                  <Text style={[styles.rowDescription, { color: themeColor.textMuted }]}>
                     Get notified when someone replies to your post or mentions you.
                   </Text>
                 </View>
@@ -166,26 +180,28 @@ export function Notification({
                 onPress={() => setSocialAlerts(!socialAlerts)}
                 style={[
                   styles.switchTrack,
-                  socialAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                  socialAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: themeColor.background, borderWidth: 1, borderColor: themeColor.border },
                 ]}
               >
                 <View
                   style={[
                     styles.switchThumb,
-                    socialAlerts && pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                    socialAlerts && pushMaster 
+                      ? { transform: [{ translateX: 16 }], backgroundColor: "#FFFFFF" } 
+                      : { transform: [{ translateX: 0 }], backgroundColor: themeColor.textMuted },
                   ]}
                 />
               </Pressable>
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: themeColor.border }]} />
 
             <View style={[styles.row, !pushMaster && styles.disabledRow]}>
               <View style={styles.rowLeft}>
-                <Flame className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <Flame color={themeColor.textMuted} size={20} style={styles.rowIcon} />
                 <View style={styles.textContent}>
-                  <Text style={styles.rowTitle}>Anonymous Activity</Text>
-                  <Text style={styles.rowDescription}>
+                  <Text style={[styles.rowTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Anonymous Activity</Text>
+                  <Text style={[styles.rowDescription, { color: themeColor.textMuted }]}>
                     Replies and reactions on anonymous posts.
                   </Text>
                 </View>
@@ -195,13 +211,15 @@ export function Notification({
                 onPress={() => setConfessionAlerts(!confessionAlerts)}
                 style={[
                   styles.switchTrack,
-                  confessionAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                  confessionAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: themeColor.background, borderWidth: 1, borderColor: themeColor.border },
                 ]}
               >
                 <View
                   style={[
                     styles.switchThumb,
-                    confessionAlerts && pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                    confessionAlerts && pushMaster 
+                      ? { transform: [{ translateX: 16 }], backgroundColor: "#FFFFFF" } 
+                      : { transform: [{ translateX: 0 }], backgroundColor: themeColor.textMuted },
                   ]}
                 />
               </Pressable>
@@ -209,18 +227,16 @@ export function Notification({
           </View>
         </View>
 
-
+        {/* Marketplace Section */}
         <View style={styles.sectionGap}>
-          <Text style={styles.sectionHeading}>Marketplace Notifications</Text>
-
-          <View style={styles.cardContainer}>
-
+          <Text style={[styles.sectionHeading, { color: themeColor.textMuted }]}>Marketplace Notifications</Text>
+          <View style={[styles.cardContainer, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
             <View style={[styles.row, !pushMaster && styles.disabledRow]}>
               <View style={styles.rowLeft}>
-                <Store className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <Store color={themeColor.textMuted} size={20} style={styles.rowIcon} />
                 <View style={styles.textContent}>
-                  <Text style={styles.rowTitle}>Marketplace Messages</Text>
-                  <Text style={styles.rowDescription}>
+                  <Text style={[styles.rowTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Marketplace Messages</Text>
+                  <Text style={[styles.rowDescription, { color: themeColor.textMuted }]}>
                     Get notified when someone messages you about an item.
                   </Text>
                 </View>
@@ -230,13 +246,15 @@ export function Notification({
                 onPress={() => setMarketAlerts(!marketAlerts)}
                 style={[
                   styles.switchTrack,
-                  marketAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                  marketAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: themeColor.background, borderWidth: 1, borderColor: themeColor.border },
                 ]}
               >
                 <View
                   style={[
                     styles.switchThumb,
-                    marketAlerts && pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                    marketAlerts && pushMaster 
+                      ? { transform: [{ translateX: 16 }], backgroundColor: "#FFFFFF" } 
+                      : { transform: [{ translateX: 0 }], backgroundColor: themeColor.textMuted },
                   ]}
                 />
               </Pressable>
@@ -244,18 +262,16 @@ export function Notification({
           </View>
         </View>
 
-
+        {/* Verse Section */}
         <View style={styles.sectionGap}>
-          <Text style={styles.sectionHeading}>Verse</Text>
-
-          <View style={styles.cardContainer}>
-
+          <Text style={[styles.sectionHeading, { color: themeColor.textMuted }]}>Verse</Text>
+          <View style={[styles.cardContainer, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
             <View style={[styles.row, !pushMaster && styles.disabledRow]}>
               <View style={styles.rowLeft}>
-                <Megaphone className="shrink-0" color={COLORS.white60} size={20} style={styles.rowIcon} />
+                <Megaphone color={themeColor.textMuted} size={20} style={styles.rowIcon} />
                 <View style={styles.textContent}>
-                  <Text style={styles.rowTitle}>Verse Notifications</Text>
-                  <Text style={styles.rowDescription}>
+                  <Text style={[styles.rowTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>Verse Notifications</Text>
+                  <Text style={[styles.rowDescription, { color: themeColor.textMuted }]}>
                     Recieve notifications from Verse
                   </Text>
                 </View>
@@ -265,13 +281,15 @@ export function Notification({
                 onPress={() => setVerseAlerts(!verseAlerts)}
                 style={[
                   styles.switchTrack,
-                  verseAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: COLORS.white10 },
+                  verseAlerts && pushMaster ? { backgroundColor: COLORS.cyan } : { backgroundColor: themeColor.background, borderWidth: 1, borderColor: themeColor.border },
                 ]}
               >
                 <View
                   style={[
                     styles.switchThumb,
-                    verseAlerts && pushMaster ? { transform: [{ translateX: 16 }], backgroundColor: COLORS.white } : { transform: [{ translateX: 0 }], backgroundColor: COLORS.white60 },
+                    verseAlerts && pushMaster 
+                      ? { transform: [{ translateX: 16 }], backgroundColor: "#FFFFFF" } 
+                      : { transform: [{ translateX: 0 }], backgroundColor: themeColor.textMuted },
                   ]}
                 />
               </Pressable>
@@ -284,98 +302,24 @@ export function Notification({
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.void,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: COLORS.void,
-  },
-  headerAction: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.white,
-    letterSpacing: -0.2,
-  },
-  headerSpacer: {
-    width: 36,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 112,
-  },
-  sectionGap: {
-    marginTop: 28,
-  },
-  sectionHeading: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.white30,
-    textTransform: "uppercase",
-    paddingHorizontal: 4,
-    marginBottom: 12,
-  },
-  cardContainer: {
-    backgroundColor: COLORS.ink,
-    borderRadius: 16,
-    padding: 4,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    padding: 14,
-    gap: 16,
-  },
-  disabledRow: {
-    opacity: 0.3,
-  },
-  rowLeft: {
-    flexDirection: "row",
-    flex: 1,
-    gap: 12,
-  },
-  rowIcon: {
-    marginTop: 2,
-  },
-  textContent: {
-    flex: 1,
-  },
-  rowTitle: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.white90,
-  },
-  rowDescription: {
-    fontSize: 12,
-    fontWeight: "300",
-    color: COLORS.white40,
-    marginTop: 2,
-    lineHeight: 18,
-  },
-
-  switchTrack: {
-    width: 40,
-    height: 24,
-    borderRadius: 12,
-    padding: 2,
-    justifyContent: "center",
-  },
-  switchThumb: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-  },
+  safeArea: { flex: 1, backgroundColor: COLORS.void },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 16 },
+  headerAction: { padding: 4 },
+  headerTitle: { fontSize: 16, fontWeight: "600", color: COLORS.white, letterSpacing: -0.2 },
+  headerSpacer: { width: 36 },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 112 },
+  sectionGap: { marginTop: 28 },
+  sectionHeading: { fontSize: 12, fontWeight: "700", color: COLORS.white30, textTransform: "uppercase", paddingHorizontal: 4, marginBottom: 12, letterSpacing: 0.5 },
+  cardContainer: { backgroundColor: COLORS.ink, borderRadius: 16, padding: 4, borderWidth: 1, borderColor: 'transparent' },
+  row: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", padding: 14, gap: 16 },
+  disabledRow: { opacity: 0.4 },
+  rowLeft: { flexDirection: "row", flex: 1, gap: 12 },
+  rowIcon: { marginTop: 2 },
+  textContent: { flex: 1 },
+  rowTitle: { fontSize: 14, fontWeight: "600", color: COLORS.white90 },
+  rowDescription: { fontSize: 12, fontWeight: "400", color: COLORS.white40, marginTop: 2, lineHeight: 18 },
+  switchTrack: { width: 38, height: 22, borderRadius: 11, padding: 2, justifyContent: "center" },
+  switchThumb: { width: 18, height: 18, borderRadius: 9 },
+  divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 14 }
 });

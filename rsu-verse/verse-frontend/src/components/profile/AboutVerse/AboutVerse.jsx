@@ -17,32 +17,50 @@ import {
   FileText,
   Heart,
 } from "lucide-react-native";
+import { ThemeTokens } from "../../../theme";
 
-import VerseLogo from '../../../../public/favicon.png'
+import VerseLogo from '../../../../public/favicon.png';
 
 const COLORS = {
   void: "#000000",
-  void80: "rgba(10, 10, 10, 0.8)",
   ink: "#1A1A1A",
-  ink40: "rgba(22, 22, 24, 0.4)",
   cyan: "#17CB49",
   white: "#FFFFFF",
-  white5: "rgba(255, 255, 255, 0.05)",
-  white10: "rgba(255, 255, 255, 0.1)",
-  white20: "rgba(255, 255, 255, 0.2)",
-  white30: "rgba(255, 255, 255, 0.3)",
-  white40: "rgba(255, 255, 255, 0.4)",
-  white50: "rgba(255, 255, 255, 0.5)",
-  white60: "rgba(255, 255, 255, 0.6)",
-  white90: "rgba(255, 255, 255, 0.9)",
 };
-export function AboutVerse({ currentYear, navigation }) {
+
+export function AboutVerse({ currentYear, navigation, selectedTheme }) {
   const scrollViewRef = useRef(null);
   const [localInput, setLocalInput] = useState("");
 
+  const isDark = selectedTheme === 'dark';
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
+  const safetyLinks = [
+    {
+      id: "guidelines",
+      title: "Community Guidelines",
+      action: "Read",
+      target: "CommunityGuidelines",
+      Icon: BookOpen,
+    },
+    {
+      id: "terms",
+      title: "Terms of Service",
+      action: "View",
+      target: "TermsOfService",
+      Icon: FileText,
+    },
+    {
+      id: "privacy",
+      title: "Privacy Policy",
+      action: "View",
+      target: "PrivacyPolicy",
+      Icon: ShieldQuestion,
+    },
+  ];
+
   useFocusEffect(
     useCallback(() => {
-
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
@@ -51,30 +69,34 @@ export function AboutVerse({ currentYear, navigation }) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.void} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+      <StatusBar 
+        barStyle={isDark ? "light-content" : "dark-content"} 
+        backgroundColor={themeColor.background} 
+      />
 
-
-      <View style={styles.header}>
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: themeColor.background }]}>
         <TouchableOpacity
-          onPress={() => navigation?.goBack()} style={styles.headerAction}
+          onPress={() => navigation?.goBack()} 
+          style={styles.headerAction}
           activeOpacity={0.7}
         >
-          <ArrowLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
+          <ArrowLeft size={20} color={isDark ? COLORS.white : themeColor.textPrimary} strokeWidth={2.5} />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>About Verse</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>About Verse</Text>
         <View style={styles.headerSpacer} />
       </View>
 
-
+      {/* Main Content */}
       <ScrollView
         ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-
+        {/* Brand Hero */}
         <View style={styles.heroSection}>
           <View style={styles.logoWrapper}>
             <Image
@@ -83,69 +105,57 @@ export function AboutVerse({ currentYear, navigation }) {
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.heroTitle}>RSU Verse</Text>
-          <Text style={styles.heroVersion}>Version 1.0.0</Text>
+          <Text style={[styles.heroTitle, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>RSU Verse</Text>
+          <Text style={[styles.heroVersion, { color: themeColor.textMuted }]}>Version 1.0.0</Text>
         </View>
 
-
+        {/* Value Proposition Statement */}
         <View style={styles.descriptionSection}>
-          <Text style={styles.descriptionText}>
+          <Text style={[styles.descriptionText, { color: themeColor.textMuted }]}>
             A modern campus space for RSU students to share thoughts, connect
             anonymously, and discover what’s happening around school.
           </Text>
         </View>
 
+        {/* Document Links Section */}
         <View style={styles.linksSection}>
-          <Text style={styles.sectionHeading}>Safety & Terms</Text>
+          <Text style={[styles.sectionHeading, { color: themeColor.textMuted }]}>Safety & Terms</Text>
 
-          <View style={styles.cardContainer}>
-
-            <TouchableOpacity
-              onPress={() => navigation?.navigate("CommunityGuidelines")}
-              activeOpacity={0.8}
-              style={[styles.rowItem, styles.rowBorder]}
-            >
-              <View style={styles.rowLeft}>
-                <BookOpen size={18} color={COLORS.white50} />
-                <Text style={styles.rowTitle}>Community Guidelines</Text>
-              </View>
-              <Text style={styles.rowActionText}>Read</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => navigation?.navigate("TermsOfService")}
-              activeOpacity={0.8}
-              style={[styles.rowItem, styles.rowBorder]}
-            >
-              <View style={styles.rowLeft}>
-                <FileText size={18} color={COLORS.white50} />
-                <Text style={styles.rowTitle}>Terms of Service</Text>
-              </View>
-              <Text style={styles.rowActionText}>View</Text>
-            </TouchableOpacity>
-
-
-            <TouchableOpacity
-              onPress={() => navigation?.navigate("PrivacyPolicy")}
-              activeOpacity={0.8}
-              style={styles.rowItem}
-            >
-              <View style={styles.rowLeft}>
-                <ShieldQuestion size={18} color={COLORS.white50} />
-                <Text style={styles.rowTitle}>Privacy Policy</Text>
-              </View>
-              <Text style={styles.rowActionText}>View</Text>
-            </TouchableOpacity>
+          <View style={[styles.cardContainer, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
+            {safetyLinks.map((link, index) => {
+              const isLastItem = index === safetyLinks.length - 1;
+              const LinkIcon = link.Icon;
+              
+              return (
+                <TouchableOpacity
+                  key={link.id}
+                  onPress={() => navigation?.navigate(link.target)}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.rowItem,
+                    !isLastItem && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor.border }
+                  ]}
+                >
+                  <View style={styles.rowLeft}>
+                    <LinkIcon size={18} color={themeColor.textMuted} />
+                    <Text style={[styles.rowTitle, { color: isDark ? COLORS.white : themeColor.textPrimary }]}>
+                      {link.title}
+                    </Text>
+                  </View>
+                  <Text style={[styles.rowActionText, { color: themeColor.textMuted }]}>{link.action}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
-
+        {/* Clean Minimal Footer */}
         <View style={styles.footerSection}>
           <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Built for Students of RSU</Text>
-            <Heart size={12} color={COLORS.white} fill={COLORS.white} style={styles.heartIcon} />
+            <Text style={[styles.footerText, { color: themeColor.textMuted }]}>Built for Students of RSU</Text>
+            <Heart size={12} color={themeColor.textMuted} fill={themeColor.textMuted} style={styles.heartIcon} />
           </View>
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, { color: themeColor.textMuted }]}>
             © {currentYear} RSU Verse. All rights reserved.
           </Text>
         </View>
@@ -157,7 +167,6 @@ export function AboutVerse({ currentYear, navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.void,
   },
   header: {
     flexDirection: "row",
@@ -165,15 +174,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.void,
   },
   headerAction: {
     padding: 4,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.white,
+    fontWeight: "800",
     letterSpacing: -0.4,
   },
   headerSpacer: {
@@ -206,11 +213,9 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: COLORS.white,
   },
   heroVersion: {
     fontSize: 14,
-    color: COLORS.white40,
     marginTop: 4,
   },
   descriptionSection: {
@@ -222,7 +227,6 @@ const styles = StyleSheet.create({
   descriptionText: {
     fontSize: 16,
     fontWeight: "400",
-    color: COLORS.white60,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -231,15 +235,15 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionHeading: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.white30,
+    fontSize: 12,
+    fontWeight: "700",
     textTransform: "uppercase",
     paddingHorizontal: 4,
+    letterSpacing: 0.5,
   },
   cardContainer: {
-    backgroundColor: COLORS.ink,
     borderRadius: 16,
+    borderWidth: 1,
     overflow: "hidden",
   },
   rowItem: {
@@ -248,7 +252,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
   },
-
   rowLeft: {
     flexDirection: "row",
     alignItems: "center",
@@ -257,28 +260,25 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: COLORS.white90,
   },
   rowActionText: {
     fontSize: 14,
-    color: COLORS.white30,
   },
   footerSection: {
     marginTop: "auto",
     paddingTop: 24,
     alignItems: "center",
     gap: 6,
-    opacity: 0.3,
+    opacity: 0.5,
   },
   footerRow: {
     flexDirection: "row",
     alignItems: "center",
   },
   footerText: {
-    fontSize: 14,
-    fontWeight: "300",
-    color: COLORS.white,
-    letterSpacing: 0.5,
+    fontSize: 13,
+    fontWeight: "400",
+    letterSpacing: 0.2,
   },
   heartIcon: {
     marginLeft: 4,
