@@ -974,22 +974,24 @@ const handleUpvote = async (postId) => {
     return post.verse === activeFilter;
   });
 
-  if (activeFilter === "new") {
-    const ONE_DAY = 24 * 60 * 60 * 1000;
-    filteredPosts = filteredPosts
-      .filter((post) => {
-        const postTime = new Date(post.meta.createdAt).getTime();
-        return (Date.now() - postTime) < ONE_DAY;
-      })
-      .sort((a, b) => {
-        const timeA = new Date(a.meta.createdAt).getTime();
-        const timeB = new Date(b.meta.createdAt).getTime();
-        const scoreA = a.engagement.upvotes + (a.engagement.comments?.length || 0);
-        const scoreB = b.engagement.upvotes + (b.engagement.comments?.length || 0);
-        if (scoreA !== scoreB) return scoreB - scoreA;
-        return timeB - timeA;
-      });
-  }
+if (activeFilter === "new") {
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  filteredPosts = filteredPosts
+    .filter((post) => {
+      const postTime = new Date(post.meta.createdAt).getTime();
+      return (now - postTime) < ONE_DAY;
+    })
+    .sort((a, b) => {
+      const timeA = new Date(a.meta.createdAt).getTime();
+      const timeB = new Date(b.meta.createdAt).getTime();
+      if (timeA !== timeB) return timeB - timeA;
+      const scoreA = a.engagement.upvotes + (a.engagement.comments?.length || 0);
+      const scoreB = b.engagement.upvotes + (b.engagement.comments?.length || 0);
+      return scoreB - scoreA;
+    });
+}
 
   return (
     <AppContext.Provider

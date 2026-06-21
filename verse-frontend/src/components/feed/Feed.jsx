@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import React, { useCallback, useState, useRef, useEffect } from "react";
+import { View, Text, Pressable, StyleSheet, DeviceEventEmitter } from "react-native";
 import { FlashList } from "@shopify/flash-list"
 import { Plus } from "lucide-react-native";
 import { PostCard } from "../../assets/Postcard";
@@ -25,10 +25,36 @@ export function Feed({
   navigation
 }) {
 
+  const [trackedTabs, setTrackedTabs] = useState([activeFilter]);
+  const postsCache = useRef({});
+
+  const listRefs = useRef({});
+
+  useEffect(() => {
+    setTrackedTabs((prev) => {
+      if (prev.includes(activeFilter)) return prev;
+      return [...prev, activeFilter];
+    });
+  }, [activeFilter]);
+
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener("verse_reset_feed_scroll", () => {
+
+      setTimeout(() => {
+        listRefs.current[activeFilter]?.scrollToOffset({ offset: 0, animated: true });
+      }, 150);
+    });
+    return () => subscription.remove();
+  }, [activeFilter]);
+
+  if (!isLoading) {
+    postsCache.current[activeFilter] = posts;
+  }
+
   const getItemType = useCallback((item) => {
-    if (isLoading) return 'skeleton';
+    if (typeof item === 'number') return 'skeleton';
     return item?.verse || 'standard'
-  }, [isLoading]);
+  }, []);
 
   const renderItem = useCallback(({ item }) => {
     if (isLoading) {
@@ -53,7 +79,6 @@ export function Feed({
   const isDark = selectedTheme === 'dark';
   const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
-
   return (
     <View style={[styles.feedLayoutWrapper, { backgroundColor: themeColor.background }]}>
 
@@ -64,30 +89,51 @@ export function Feed({
         setSelectedTheme={setSelectedTheme}
       />
 
+      {trackedTabs.map((filterKey) => {
+        const isCurrentTab = activeFilter === filterKey;
+        const currentListData = isCurrentTab
+          ? (isLoading ? [1, 2, 3] : posts)
+          : (postsCache.current[filterKey] || []);
 
-      <FlashList
-        data={isLoading ? [1, 2, 3] : posts}
-        renderItem={renderItem}
-        getItemType={getItemType}
-        keyExtractor={(item, index) => isLoading ? `skeleton-${index}` : item.id.toString()}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        estimatedItemSize={260}
+        return (
+          <View
+            key={filterKey}
+            style={[
+              styles.animatedContentContainer, // Now properly styles and expands the container
+              { display: isCurrentTab ? "flex" : "none" }
+            ]}
+          >
+            <FlashList
+              ref={(instance) => {
+                if (instance) {
+                  listRefs.current[filterKey] = instance;
+                }
+              }}
+              data={currentListData}
+              extraData={currentListData}
+              renderItem={renderItem}
+              getItemType={getItemType}
+              keyExtractor={(item, index) => typeof item === 'number' ? `skeleton-${index}` : item.id.toString()}
+              contentContainerStyle={styles.listContainer}
+              showsVerticalScrollIndicator={false}
+              estimatedItemSize={260}
 
-        ListEmptyComponent={
-          isLoading && posts.length === 0 ? (
-            <View style={styles.emptyFeedStateBox}>
-              <Text style={styles.emptyHeadingText}>
-                No posts in this Verse yet.
-              </Text>
-              <Text style={styles.emptySubheadingText}>
-                Be the first to start the conversation.
-              </Text>
-            </View>
-          ) : null
-        }
-      />
-
+              ListEmptyComponent={
+                isCurrentTab && !isLoading && currentListData.length === 0 ? (
+                  <View style={styles.emptyFeedStateBox}>
+                    <Text style={styles.emptyHeadingText}>
+                      No posts in this Verse yet.
+                    </Text>
+                    <Text style={styles.emptySubheadingText}>
+                      Be the first to start the conversation.
+                    </Text>
+                  </View>
+                ) : null
+              }
+            />
+          </View>
+        );
+      })}
 
       <Pressable
         onPress={() => {
@@ -108,7 +154,6 @@ export function Feed({
 }
 
 const styles = StyleSheet.create({
-
   feedLayoutWrapper: {
     flex: 1,
     width: "100%",
@@ -121,6 +166,10 @@ const styles = StyleSheet.create({
     paddingBottom: 112,
   },
 
+  animatedContentContainer: {
+    flex: 1,
+    width: "100%",
+  },
 
   emptyFeedStateBox: {
     paddingVertical: 64,
@@ -128,7 +177,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-
 
   emptyHeadingText: {
     fontSize: 12,
@@ -138,13 +186,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-
   emptySubheadingText: {
     fontSize: 10,
     color: "rgba(255, 255, 255, 0.2)",
     textAlign: "center",
   },
-
 
   floatingActionButton: {
     position: "absolute",
@@ -163,7 +209,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 6,
   },
-
 
   fabLabelText: {
     color: "#FFFFFF",

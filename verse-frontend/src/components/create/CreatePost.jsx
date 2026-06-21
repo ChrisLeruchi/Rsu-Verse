@@ -25,7 +25,8 @@ import {
   KeyboardAvoidingView,
   Alert,
   Keyboard,
-  StyleSheet
+  StyleSheet,
+  DeviceEventEmitter,
 } from "react-native";
 import * as Crypto from 'expo-crypto';
 import * as ImagePicker from "expo-image-picker";
@@ -50,10 +51,9 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // Focus reference management
   const inputRef = useRef(null);
 
-  // Manage keyboard auto-focus side effects dynamically
+  
   useEffect(() => {
     if (verse !== "market") {
       const timer = setTimeout(() => {
@@ -184,6 +184,8 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
     setIsOpen(false);
     setVerse("gist");
     setIsSubmitting(false);
+
+    DeviceEventEmitter.emit("verse_reset_feed_scroll");
 
     if (verse === "market") {
       navigation.navigate("Market");

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Pressable, Animated } from "react-native";
+import { StyleSheet, View, Text, Pressable, Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { ThemeTokens } from "../../theme";
 
@@ -56,7 +56,6 @@ export function ProfileFilter({ selectedTheme }) {
         const text = filter.label
         const isActive = id === activeFilter
 
-        let activeBorderColor = "#00BA34"
         let activeTextColor = themeColor.textPrimary;
         const inactiveColor = themeColor.textMuted
 
