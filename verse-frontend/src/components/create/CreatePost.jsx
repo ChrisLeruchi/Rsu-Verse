@@ -4,7 +4,6 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import {
   ShoppingBag,
   MessagesSquare,
-  ArrowLeft,
   Image as ImageIcon,
   ShieldAlert,
   X,
@@ -207,11 +206,10 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
     setIsOpen(false);
   }
 
-  // Dynamic context color assignments matching your theme token values
-  const textWhiteColor = themeColor.text; 
-  const textMutedColor = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
-  const textInactiveColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
-  const iconInactiveColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)";
+  const textWhiteColor = themeColor.textPrimary; 
+  const textMutedColor = themeColor.textMuted;
+  const textInactiveColor = textMutedColor;
+  const iconInactiveColor = textMutedColor;
   
   const cyanPrimary = "#00BA34";
   const rosePrimary = "#F59E0B";
@@ -239,7 +237,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
             disabled={isSubmitting}
             style={styles.backBtn}
           >
-            <Text style={[styles.cancelText, { color: themeColor.text }]}>Cancel</Text>
+            <Text style={[styles.cancelText, { color: themeColor.textPrimary }]}>Cancel</Text>
           </Pressable>
 
           <Pressable
@@ -296,7 +294,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
                     {channel.icon}
                     <Text style={[
                       styles.channelButtonText, 
-                      isSelected ? { color: themeColor.text } : { color: textInactiveColor }
+                      isSelected ? { color: themeColor.textPrimary } : { color: textInactiveColor }
                     ]}>
                       {channel.label}
                     </Text>
@@ -321,7 +319,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
                 multiline
                 placeholder={verse === "market" ? "What are you selling? Describe it here..." : "What's happening?..."}
                 placeholderTextColor={textMutedColor}
-                style={[styles.textAreaInput, { color: themeColor.text }]}
+                style={[styles.textAreaInput, { color: themeColor.textPrimary }]}
                 textAlignVertical="top"
               />
 
@@ -382,7 +380,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
                     }}
                     placeholder="Set your price"
                     placeholderTextColor={textMutedColor}
-                    style={[styles.numericInput, { color: themeColor.text, backgroundColor: themeColor.background, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }]}
+                    style={[styles.numericInput, { color: themeColor.textPrimary, backgroundColor: themeColor.background, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }]}
                   />
                 </View>
 
@@ -398,7 +396,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
                           onPress={() => setCondition(cond)}
                           style={[styles.segmentButton, isSelected && [styles.activeSegment, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]]}
                         >
-                          <Text style={[styles.segmentText, isSelected ? { color: themeColor.text } : { color: textInactiveColor }]}>
+                          <Text style={[styles.segmentText, isSelected ? { color: themeColor.textPrimary } : { color: textInactiveColor }]}>
                             {cond === "Fixable" ? "Needs Repair" : cond}
                           </Text>
                         </Pressable>
@@ -414,7 +412,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
                       onPress={() => setIsOpen(!isOpen)}
                       style={[styles.dropdownTrigger, { backgroundColor: themeColor.background, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }, isOpen && styles.dropdownTriggerActive]}
                     >
-                      <Text style={[styles.triggerText, category ? { color: themeColor.text } : { color: textMutedColor }]}>
+                      <Text style={[styles.triggerText, category ? { color: themeColor.textPrimary } : { color: textMutedColor }]}>
                         {[
                           { id: "all", label: "All" },
                           { id: "gadgets", label: "Gadgets" },
@@ -462,7 +460,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
                                   pressed && { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }
                                 ]}
                               >
-                                <Text style={[styles.itemText, isSelected ? styles.textCyan : { color: themeColor.text }]}>
+                                <Text style={[styles.itemText, isSelected ? styles.textCyan : { color: themeColor.textPrimary }]}>
                                   {cat.label}
                                 </Text>
                                 {isSelected && <Check size={14} color="#00BA34" strokeWidth={3} />}
@@ -484,7 +482,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
                 <View style={styles.anonBannerLeft}>
                   <ShieldAlert size={18} color={textMutedColor} />
                   <View style={styles.anonMetadata}>
-                    <Text style={[styles.anonTitleText, { color: themeColor.text }]}>Post Anonymously</Text>
+                    <Text style={[styles.anonTitleText, { color: themeColor.textPrimary }]}>Post Anonymously</Text>
                     <Text style={[styles.anonDescText, { color: textMutedColor }]} numberOfLines={1}>
                       {isAnonymous ? 'Only your faculty will be visible' : 'Both your faculty and department will be visible'}
                     </Text>

@@ -3,11 +3,11 @@ import { StyleSheet, StatusBar, Share, Alert, View, } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderLayout } from './src/components/navigation/HeaderLayout';
 import { Feed } from './src/components/feed/Feed';
-import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, ShoppingBag, Sun, Moon } from 'lucide-react-native';
+import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, ShoppingBag, } from 'lucide-react-native';
 import { NavigationContainer, getFocusedRouteNameFromRoute, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import * as Crypto from 'expo-crypto';
+
 import { NavBar } from './src/components/navigation/NavBar';
 import { Market } from './src/components/market/Market';
 import { PostDetail } from './src/assets/PostDetail';
@@ -41,12 +41,6 @@ const CustomDarkTheme = {
     background: ThemeTokens.colors.dark.background,
   },
 };
-
-const minsAgo = (m) => new Date(Date.now() - m * 60 * 1000).toISOString();
-const hoursAgo = (h) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
-const daysAgo = (d) => new Date(Date.now() - d * 24 * 60 * 60 * 1000).toISOString();
-
-
 
 
 const getVerseIcon = (verse) => {
@@ -114,6 +108,14 @@ function HomeStackNavigator() {
     setMarketAlerts,
     verseAlerts,
     setVerseAlerts,
+    isSellerActive,
+    setIsSellerActive,
+    bio,
+    setBio,
+    displayName,
+    setDisplayName,
+    username,
+    setUsername
   } = useAppContext();
 
   const handlePlusClick = (navigation) => {
@@ -219,12 +221,17 @@ function HomeStackNavigator() {
             {...props}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={selectedTheme}
           />
         )}
       </Stack.Screen>
 
       <Stack.Screen name="AboutVerse">
-        {(props) => <AboutVerse {...props} currentYear={currentYear} />}
+        {(props) => <AboutVerse {...props} currentYear={currentYear}
+          selectedTheme={selectedTheme}
+          setSelectedTheme={selectedTheme}
+        />}
       </Stack.Screen>
 
       <Stack.Screen name="ContactUs">
@@ -241,6 +248,8 @@ function HomeStackNavigator() {
             setAttachment={setAttachment}
             topics={topics}
             handleSubmit={handleSubmit}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={selectedTheme}
           />
         )}
       </Stack.Screen>
@@ -297,6 +306,34 @@ function HomeStackNavigator() {
             confessionAlerts={confessionAlerts}
             setSelectedTheme={setSelectedTheme}
             selectedTheme={selectedTheme}
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen name="Profile">
+        {(props) => <ProfilePage
+          {...props}
+          selectedTheme={selectedTheme}
+          bio={bio}
+          setBio={setBio}
+          displayName={displayName}
+          setDisplayName={setDisplayName}
+        />}
+      </Stack.Screen>
+      <Stack.Screen name="Manage_Profile">
+        {(props) => (
+          <ManageProfile
+            {...props}
+            isSellerActive={isSellerActive}
+            setIsSellerActive={setIsSellerActive}
+            bio={bio}
+            setBio={setBio}
+            displayName={displayName}
+            setDisplayName={setDisplayName}
+            username={username}
+            setUsername={setUsername}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
           />
         )}
       </Stack.Screen>
@@ -431,145 +468,8 @@ function PostCreation() {
 }
 
 
-
-function ProfileManagement() {
-  const {
-    isSellerActive,
-    setIsSellerActive,
-    selectedTheme,
-    setSelectedTheme,
-    searchQuery,
-    setSearchQuery,
-    isOpen,
-    setIsOpen,
-    selectedTopic,
-    setSelectedTopic,
-    message,
-    setMessage,
-    attachment,
-    setAttachment,
-    handleSubmit,
-    bio,
-    setBio,
-    displayName,
-    setDisplayName,
-    username,
-    setUsername
-  } = useAppContext();
-
-  const currentYear = new Date().getFullYear();
-
-  const topics = [
-    { id: "marketplace", label: "Marketplace & Orders" },
-    { id: "account", label: "Account & Verification" },
-    { id: "privacy", label: "Privacy & Reporting" },
-    { id: "technical", label: "App Bugs & Feedback" }
-  ];
-
-  const Themes = [
-    { id: Crypto.randomUUID(), theme: "Light", icon: <Sun size={16} color="white" /> },
-    { id: Crypto.randomUUID(), theme: "Dark", icon: <Moon size={16} color="white" /> }
-  ];
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        gestureEnabled: true,
-        gestureDirection: 'horizontal',
-        gestureResponseDistance: 80,
-        cardStyle: { backgroundColor: ThemeTokens.colors.dark.background },
-        contentStyle: { backgroundColor: ThemeTokens.colors.dark.background },
-      }}
-    >
-
-      <Stack.Screen name="Profile">
-        {(props) => <ProfilePage
-          {...props}
-          selectedTheme={selectedTheme}
-          bio={bio}
-          setBio={setBio}
-          displayName={displayName}
-          setDisplayName={setDisplayName}
-        />}
-      </Stack.Screen>
-
-      <Stack.Screen name="Manage_Profile">
-        {(props) => (
-          <ManageProfile
-            {...props}
-            isSellerActive={isSellerActive}
-            setIsSellerActive={setIsSellerActive}
-            bio={bio}
-            setBio={setBio}
-            displayName={displayName}
-            setDisplayName={setDisplayName}
-            username={username}
-            setUsername={setUsername}
-            selectedTheme={selectedTheme}
-            setSelectedTheme={setSelectedTheme}
-          />
-        )}
-      </Stack.Screen>
-
-
-      <Stack.Screen name="Theme_Management">
-        {(props) => (
-          <Theme
-            {...props}
-            selectedTheme={selectedTheme}
-            setSelectedTheme={setSelectedTheme}
-            Themes={Themes}
-          />
-        )}
-      </Stack.Screen>
-
-
-      <Stack.Screen name="About_Verse">
-        {(props) => <AboutVerse {...props} currentYear={currentYear}
-          selectedTheme={selectedTheme}
-          setSelectedTheme={setSelectedTheme}
-        />}
-      </Stack.Screen>
-
-
-      <Stack.Screen name="Help_Center">
-        {(props) => (
-          <HelpCenter
-            {...props}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            selectedTheme={selectedTheme}
-            setSelectedTheme={setSelectedTheme}
-          />
-        )}
-      </Stack.Screen>
-
-
-      <Stack.Screen name="Contact_Us">
-        {(props) => (
-          <ContactUs
-            {...props}
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            selectedTopic={selectedTopic}
-            setSelectedTopic={setSelectedTopic}
-            message={message}
-            setMessage={setMessage}
-            attachment={attachment}
-            setAttachment={setAttachment}
-            topics={topics}
-            handleSubmit={handleSubmit}
-            selectedTheme={selectedTheme}
-            setSelectedTheme={setSelectedTheme}
-          />
-        )}
-      </Stack.Screen>
-    </Stack.Navigator>
-  );
-}
-
 function Chat() {
-   const { selectedTheme, setSelectedTheme } = useAppContext();
+  const { selectedTheme, setSelectedTheme } = useAppContext();
   return (
     <Stack.Navigator
       screenOptions={{
@@ -584,8 +484,8 @@ function Chat() {
       <Stack.Screen name='ChatList'>
         {(props) => (
           <ChatList
-          selectedTheme={selectedTheme}
-          setSelectedTheme={setSelectedTheme}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
             {...props}
           />
         )}
@@ -594,8 +494,8 @@ function Chat() {
       <Stack.Screen name='ChatRoom'>
         {(props) => (
           <ChatRoom
-          selectedTheme={selectedTheme}
-          setSelectedTheme={setSelectedTheme}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
             {...props}
           />
         )}
@@ -659,7 +559,6 @@ function BottomTabNavigatorComponent() {
       <Tab.Screen name="HomeIndex" component={HomeStackNavigator} />
       <Tab.Screen name='CreatePost' component={PostCreation} />
       <Tab.Screen name='Search' component={SearchStackNavigator} />
-      <Tab.Screen name="Profile" component={ProfileManagement} />
       <Tab.Screen name="Market" component={MarketPlace} />
       <Tab.Screen name="ChatList" component={Chat} />
     </Tab.Navigator>

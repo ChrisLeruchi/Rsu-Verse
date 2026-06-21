@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Pressable, Image, StyleSheet, Modal, Text, Dimensions, Animated } from 'react-native';
-import { Bell, Bookmark, CircleQuestionMark, Settings, ShoppingBag, Moon, Mail, Sun, NotebookText, User2, Plus } from 'lucide-react-native';
+import { Bell, CircleQuestionMark, Settings, ShoppingBag, Moon, Mail, Sun, NotebookText, User2, Plus, Bookmark } from 'lucide-react-native';
 import { useNavigation, } from '@react-navigation/native'
 import { ThemeTokens } from '../../theme';
 
@@ -46,6 +46,35 @@ export function Header({
       setIsSideMenuOpen(false)
     })
   }
+  const sidebarContent = [
+    {
+      id: 'profile', label: 'Profile', icon: <User2 size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: 'Profile'
+    },
+    {
+      id: 'bookmark', label: 'Bookmarks', icon: <Bookmark size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: 'Bookmarks'
+    },
+    {
+      id: 'marketPlace', label: 'Marketplace', icon: <ShoppingBag size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: 'Market'
+    },
+    {
+      id: 'appearance', label: 'Appearance', icon: isDark ? <Moon size={20} strokeWidth={2.5} color={themeColor.textPrimary} /> : <Sun size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: null
+    },
+    {
+      id: 'create', label: 'Create', icon: <Plus size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: 'CreatePost'
+    },
+    {
+      id: 'settings', label: 'Settings', icon: <Settings size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: 'Settings'
+    },
+    {
+      id: 'helpcenter', label: 'Help Center', icon: <CircleQuestionMark size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: 'HelpCenter'
+    },
+    {
+      id: 'aboutverse', label: 'About Verse', icon: <NotebookText size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: 'AboutVerse'
+    },
+    {
+      id: 'contactus', label: 'Contact Us', icon: <Mail size={20} strokeWidth={2.5} color={themeColor.textPrimary} />, destination: 'ContactUs'
+    },
+  ]
 
   return (
     <View
@@ -81,7 +110,7 @@ export function Header({
         <Pressable
           onPress={() => setIsSideMenuOpen(!isSideMenuOpen)}
         >
-          <View style={[styles.avatarPlaceholder, {backgroundColor: themeColor.surface}]} />
+          <View style={[styles.avatarPlaceholder, { backgroundColor: themeColor.surface }]} />
         </Pressable>
       </View>
       <Modal
@@ -136,114 +165,37 @@ export function Header({
             </Pressable>
 
             <View style={[styles.utility, { borderBottomColor: themeColor.border }]}>
-              <Pressable
-                style={styles.sdMenuBtn}
-                onPress={() => {
-                  handleClose();
-                  navigation.navigate('Profile');
-                }}
-              >
-                <User2 size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>Profile</Text>
-              </Pressable>
 
-              <Pressable
-                style={styles.sdMenuBtn}
-                onPress={() => {
-                  handleClose();
-                  navigation.navigate('Bookmarks');
-                }}
-              >
-                <Bookmark size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>Bookmarks</Text>
-              </Pressable>
+              {sidebarContent.map((content) => {
+                const id = content.id;
+                const label = content.label
+                const icon = content.icon
+                const destination = content.destination
 
-              <Pressable
-                style={styles.sdMenuBtn}
-                onPress={() => {
-                  handleClose();
-                  navigation.navigate('Market');
-                }}
-              >
-                <ShoppingBag size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>MarketPlace</Text>
-              </Pressable>
+                return (
+                  <Pressable
+                    key={id}
 
-              {/* APPEARANCE TOGGLE COMPONENT */}
-              <Pressable style={styles.sdMenuBtn} onPress={toggleThemeSwitch}>
-                <View style={styles.theme}>
-                  {isDark ? (
-                    <Moon size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                  ) : (
-                    <Sun size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                  )}
-                  <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>
-                    Appearance
-                  </Text>
-                </View>
-                <View>
-                  <Text style={[styles.themeText, { color: themeColor.textMuted }]}>
-                    ({selectedTheme})
-                  </Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                style={styles.sdMenuBtn}
-                onPress={() => {
-                  handleClose();
-                  navigation.navigate('CreatePost');
-                }}
-              >
-                <Plus size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>Create</Text>
-              </Pressable>
-            </View>
-
-            <View style={styles.settings}>
-              <Pressable
-                style={styles.sdMenuBtn}
-                onPress={() => {
-                  handleClose();
-                  navigation.navigate('Settings');
-                }}
-              >
-                <Settings size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>Settings</Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.sdMenuBtn}
-                onPress={() => {
-                  handleClose();
-                  navigation.navigate('HelpCenter');
-                }}
-              >
-                <CircleQuestionMark size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>Help center</Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.sdMenuBtn}
-                onPress={() => {
-                  handleClose();
-                  navigation.navigate('AboutVerse');
-                }}
-              >
-                <NotebookText size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>About Verse</Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.sdMenuBtn}
-                onPress={() => {
-                  handleClose();
-                  navigation.navigate('ContactUs');
-                }}
-              >
-                <Mail size={20} strokeWidth={2} color={themeColor.textPrimary} />
-                <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>Contact us</Text>
-              </Pressable>
+                    style={styles.sdMenuBtn}
+                    onPress={() => {
+                      if (id === 'appearance') {
+                        toggleThemeSwitch();
+                      } else {
+                        handleClose();
+                        navigation.navigate(destination);
+                      }
+                    }}
+                  >
+                    {icon}
+                    <Text style={[styles.sidebarText, { color: themeColor.textPrimary }]}>{label}</Text>
+                    {label === 'Appearance' && (
+                      <Text style={[styles.themeText, { color: themeColor.textMuted }]}>
+                        {isDark ? '(Dark)' : '(Light)'}
+                      </Text>
+                    )}
+                  </Pressable>
+                )
+              })}
             </View>
           </Animated.View>
         </View>
@@ -429,3 +381,5 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
   },
 });
+
+

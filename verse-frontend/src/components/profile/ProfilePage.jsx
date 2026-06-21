@@ -3,6 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, Modal, Pressable } from "react-native";
 import { ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X, Pencil } from "lucide-react-native";
 import { ThemeTokens } from "../../theme";
+import { ProfileFilter } from "./ProfileFilter";
 
 export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
   const [isStatsOpen, setIsStatsOpen] = useState(false);
@@ -80,6 +81,9 @@ export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
             </View>
           </View>
         </View>
+        <ProfileFilter 
+          selectedTheme={selectedTheme}
+        />
       </ScrollView>
 
       <Modal
@@ -264,7 +268,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingBottom: 40,
     paddingTop: 10,
-    borderTopWidth: 1,
   },
   sheetHandle: {
     width: 40,
