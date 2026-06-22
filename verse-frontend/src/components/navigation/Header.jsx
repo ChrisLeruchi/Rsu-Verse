@@ -216,7 +216,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     zIndex: 50,
-    paddingHorizontal: 4,
     backgroundColor: '#000000',
   },
 
@@ -356,9 +355,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingHorizontal: 16
+    paddingHorizontal: 10
   },
-
 
   notificationButton: {
     position: 'relative',

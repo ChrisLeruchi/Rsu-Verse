@@ -40,8 +40,11 @@ export function PostDetail({
   handleDownvotes,
   handleUpvote,
   handleCommentUpvote,
+  handleCommentDownvote,
   getVerseIcon,
-  selectedTheme
+  selectedTheme,
+  handleReplyUpvote,
+  handleReplyDownvote
 }) {
   const route = useRoute();
   const navigation = useNavigation();
@@ -185,11 +188,11 @@ export function PostDetail({
           showsVerticalScrollIndicator={false}
         >
           <View style={[
-            styles.mainPostCard, 
+            styles.mainPostCard,
             isConfession ? styles.cardConfession : styles.cardDefault,
-            { 
+            {
               backgroundColor: isConfession ? (isDark ? "rgba(245, 158, 11, 0.1)" : "rgba(245, 158, 11, 0.05)") : themeColor.background,
-              borderBottomColor: themeColor.border 
+              borderBottomColor: themeColor.border
             }
           ]}>
             <View style={styles.authorRow}>
@@ -220,10 +223,10 @@ export function PostDetail({
             {post.content?.images && post.content.images.length > 0 && (
               <View style={styles.instagramContainer}>
                 {post.content.images.length === 1 ? (
-                  <Image 
-                    source={{ uri: post.content.images[0] }} 
-                    style={styles.instagramFullHeightImage} 
-                    resizeMode="cover" 
+                  <Image
+                    source={{ uri: post.content.images[0] }}
+                    style={styles.instagramFullHeightImage}
+                    resizeMode="cover"
                   />
                 ) : (
                   <View>
@@ -235,11 +238,11 @@ export function PostDetail({
                       scrollEventThrottle={16}
                     >
                       {post.content.images.map((imgUrl, index) => (
-                        <Image 
-                          key={index} 
-                          source={{ uri: imgUrl }} 
-                          style={[styles.instagramFullHeightImage, { width: windowWidth }]} 
-                          resizeMode="cover" 
+                        <Image
+                          key={index}
+                          source={{ uri: imgUrl }}
+                          style={[styles.instagramFullHeightImage, { width: windowWidth }]}
+                          resizeMode="cover"
                         />
                       ))}
                     </ScrollView>
@@ -249,7 +252,7 @@ export function PostDetail({
                           key={index}
                           style={[
                             styles.paginationDotElement,
-                            activeImageIndex === index 
+                            activeImageIndex === index
                               ? [styles.paginationDotActive, { backgroundColor: "#00BA34" }]
                               : [styles.paginationDotInactive, { backgroundColor: isDark ? "rgba(255, 255, 255, 0.24)" : "rgba(0, 0, 0, 0.16)" }]
                           ]}
@@ -379,12 +382,12 @@ export function PostDetail({
                           </View>
 
                           <View style={styles.commentVoteMetrics}>
-                            <Pressable onPress={() => handleCommentUpvote?.(post.id, comment.id)} style={styles.voteActionBtn}>
-                              <ArrowBigUp size={20} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"} />
+                            <Pressable onPress={() => handleCommentUpvote(post.id, comment.id)} style={styles.voteActionBtn}>
+                              <ArrowBigUp size={22} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"} />
                               <Text style={[styles.voteMetricText, { color: themeColor.textSecondary }]}>{comment.engagement?.upvotes || ""}</Text>
                             </Pressable>
-                            <Pressable style={styles.voteActionBtn}>
-                              <ArrowBigDown size={20} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"} />
+                            <Pressable onPress={() => handleCommentDownvote(post.id, comment.id)} style={styles.voteActionBtn}>
+                              <ArrowBigDown size={22} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"} />
                               <Text style={[styles.voteMetricText, { color: themeColor.textSecondary }]}>{comment.engagement?.downvotes || ""}</Text>
                             </Pressable>
                           </View>
@@ -435,11 +438,11 @@ export function PostDetail({
 
                                   <View style={styles.commentVoteMetrics}>
                                     <Pressable style={styles.voteActionBtn}>
-                                      <ArrowBigUp size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />
+                                      <ArrowBigUp size={22} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />
                                       <Text style={[styles.voteMetricText, { color: themeColor.textSecondary }]}>{reply.engagement?.upvotes || ""}</Text>
                                     </Pressable>
                                     <Pressable style={styles.voteActionBtn}>
-                                      <ArrowBigDown size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />
+                                      <ArrowBigDown size={22} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />
                                       <Text style={[styles.voteMetricText, { color: themeColor.textSecondary }]}>{reply.engagement?.downvotes || ""}</Text>
                                     </Pressable>
                                   </View>

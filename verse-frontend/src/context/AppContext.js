@@ -791,10 +791,10 @@ export function AppProvider({ children }) {
 
   const simulateNetworkSync = () => new Promise((resolve) => setTimeout(resolve, 600));
 
- 
+
   const SIMULATE_NETWORK_FAILURE = false;
 
-const handleUpvote = async (postId) => {
+  const handleUpvote = async (postId) => {
 
     const backupPosts = JSON.parse(JSON.stringify(posts));
 
@@ -822,7 +822,7 @@ const handleUpvote = async (postId) => {
       return post;
     }));
 
-    
+
     try {
       await simulateNetworkSync();
       if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
@@ -864,6 +864,196 @@ const handleUpvote = async (postId) => {
     } catch (error) {
       setPosts(backupPosts);
       Alert.alert("Connection Lost", "We couldn't register your vote choice.", error);
+    }
+  };
+
+  const handleCommentUpvote = async (postId, commentId) => {
+    const backupPosts = JSON.parse(JSON.stringify(posts));
+
+    setPosts((prevPosts) => prevPosts.map((post) => {
+      if (post.id !== postId) return post;
+
+      return {
+        ...post,
+        engagement: {
+          ...post.engagement,
+          comments: post.engagement.comments.map((comment) => {
+            if (comment.id !== commentId) return comment;
+
+            const currentStatus = comment.userInteraction?.voteStatus;
+            const isUpvoted = currentStatus === 'up';
+            const isDownvoted = currentStatus === 'down';
+
+            return {
+              ...comment,
+              engagement: {
+                ...comment.engagement,
+                upvotes: Math.max(0, comment.engagement.upvotes + (isUpvoted ? -1 : 1)),
+                downvotes: Math.max(0, comment.engagement.downvotes + (isDownvoted ? -1 : 0)),
+              },
+              userInteraction: {
+                ...comment.userInteraction,
+                voteStatus: isUpvoted ? null : 'up',
+              },
+            };
+          }),
+        },
+      };
+    }));
+
+    try {
+      await simulateNetworkSync();
+      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
+    } catch (error) {
+      console.warn("Local Engine: Comment upvote rollback triggered.", error);
+      setPosts(backupPosts);
+      Alert.alert("Connection Lost", "We couldn't sync your upvote right now.");
+    }
+  };
+
+  const handleCommentDownvote = async (postId, commentId) => {
+    const backupPosts = JSON.parse(JSON.stringify(posts));
+
+    setPosts((prevPosts) => prevPosts.map((post) => {
+      if (post.id !== postId) return post;
+
+      return {
+        ...post,
+        engagement: {
+          ...post.engagement,
+          comments: post.engagement.comments.map((comment) => {
+            if (comment.id !== commentId) return comment;
+
+            const currentStatus = comment.userInteraction?.voteStatus;
+            const isUpvoted = currentStatus === 'up';
+            const isDownvoted = currentStatus === 'down';
+
+            return {
+              ...comment,
+              engagement: {
+                ...comment.engagement,
+                upvotes: Math.max(0, comment.engagement.upvotes + (isUpvoted ? -1 : 0)),
+                downvotes: Math.max(0, comment.engagement.downvotes + (isDownvoted ? -1 : 1)),
+              },
+              userInteraction: {
+                ...comment.userInteraction,
+                voteStatus: isDownvoted ? null : 'down',
+              },
+            };
+          }),
+        },
+      };
+    }));
+
+    try {
+      await simulateNetworkSync();
+      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
+    } catch (error) {
+      console.warn("Local Engine: Comment downvote rollback triggered.", error);
+      setPosts(backupPosts);
+      Alert.alert("Connection Lost", "We couldn't register your vote choice.");
+    }
+  };
+
+  const handleReplyUpvote = async (postId, commentId, replyId) => {
+    const backupPosts = JSON.parse(JSON.stringify(posts));
+
+    setPosts((prevPosts) => prevPosts.map((post) => {
+      if (post.id !== postId) return post;
+
+      return {
+        ...post,
+        engagement: {
+          ...post.engagement,
+          comments: post.engagement.comments.map((comment) => {
+            if (comment.id !== commentId) return comment;
+
+            return {
+              ...comment,
+              replies: comment.replies.map((reply) => {
+                if (reply.id !== replyId) return reply;
+
+                const currentStatus = reply.userInteraction?.voteStatus;
+                const isUpvoted = currentStatus === 'up';
+                const isDownvoted = currentStatus === 'down';
+
+                return {
+                  ...reply,
+                  engagement: {
+                    ...reply.engagement,
+                    upvotes: Math.max(0, reply.engagement.upvotes + (isUpvoted ? -1 : 1)),
+                    downvotes: Math.max(0, reply.engagement.downvotes + (isDownvoted ? -1 : 0)),
+                  },
+                  userInteraction: {
+                    ...reply.userInteraction,
+                    voteStatus: isUpvoted ? null : 'up',
+                  },
+                };
+              }),
+            };
+          }),
+        },
+      };
+    }));
+
+    try {
+      await simulateNetworkSync();
+      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
+    } catch (error) {
+      console.warn("Local Engine: Reply upvote rollback triggered.", error);
+      setPosts(backupPosts);
+      Alert.alert("Connection Lost", "We couldn't sync your upvote right now.");
+    }
+  };
+
+  const handleReplyDownvote = async (postId, commentId, replyId) => {
+    const backupPosts = JSON.parse(JSON.stringify(posts));
+
+    setPosts((prevPosts) => prevPosts.map((post) => {
+      if (post.id !== postId) return post;
+
+      return {
+        ...post,
+        engagement: {
+          ...post.engagement,
+          comments: post.engagement.comments.map((comment) => {
+            if (comment.id !== commentId) return comment;
+
+            return {
+              ...comment,
+              replies: comment.replies.map((reply) => {
+                if (reply.id !== replyId) return reply;
+
+                const currentStatus = reply.userInteraction?.voteStatus;
+                const isUpvoted = currentStatus === 'up';
+                const isDownvoted = currentStatus === 'down';
+
+                return {
+                  ...reply,
+                  engagement: {
+                    ...reply.engagement,
+                    upvotes: Math.max(0, reply.engagement.upvotes + (isUpvoted ? -1 : 0)),
+                    downvotes: Math.max(0, reply.engagement.downvotes + (isDownvoted ? -1 : 1)),
+                  },
+                  userInteraction: {
+                    ...reply.userInteraction,
+                    voteStatus: isDownvoted ? null : 'down',
+                  },
+                };
+              }),
+            };
+          }),
+        },
+      };
+    }));
+
+    try {
+      await simulateNetworkSync();
+      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
+    } catch (error) {
+      console.warn("Local Engine: Reply downvote rollback triggered.", error);
+      setPosts(backupPosts);
+      Alert.alert("Connection Lost", "We couldn't register your vote choice.");
     }
   };
 
@@ -940,7 +1130,7 @@ const handleUpvote = async (postId) => {
     }
   };
 
-  
+
   const matchingPosts = posts.filter((post) => {
     if (!post || post.verse === 'market') return false;
     const query = search.toLowerCase().trim();
@@ -974,24 +1164,24 @@ const handleUpvote = async (postId) => {
     return post.verse === activeFilter;
   });
 
-if (activeFilter === "new") {
-  const ONE_DAY = 24 * 60 * 60 * 1000;
-  const now = Date.now();
+  if (activeFilter === "new") {
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const now = Date.now();
 
-  filteredPosts = filteredPosts
-    .filter((post) => {
-      const postTime = new Date(post.meta.createdAt).getTime();
-      return (now - postTime) < ONE_DAY;
-    })
-    .sort((a, b) => {
-      const timeA = new Date(a.meta.createdAt).getTime();
-      const timeB = new Date(b.meta.createdAt).getTime();
-      if (timeA !== timeB) return timeB - timeA;
-      const scoreA = a.engagement.upvotes + (a.engagement.comments?.length || 0);
-      const scoreB = b.engagement.upvotes + (b.engagement.comments?.length || 0);
-      return scoreB - scoreA;
-    });
-}
+    filteredPosts = filteredPosts
+      .filter((post) => {
+        const postTime = new Date(post.meta.createdAt).getTime();
+        return (now - postTime) < ONE_DAY;
+      })
+      .sort((a, b) => {
+        const timeA = new Date(a.meta.createdAt).getTime();
+        const timeB = new Date(b.meta.createdAt).getTime();
+        if (timeA !== timeB) return timeB - timeA;
+        const scoreA = a.engagement.upvotes + (a.engagement.comments?.length || 0);
+        const scoreB = b.engagement.upvotes + (b.engagement.comments?.length || 0);
+        return scoreB - scoreA;
+      });
+  }
 
   return (
     <AppContext.Provider
@@ -1027,6 +1217,10 @@ if (activeFilter === "new") {
         attachment, setAttachment,
         handleUpvote,
         handleDownvotes,
+        handleCommentDownvote,
+        handleCommentUpvote,
+        handleReplyUpvote,
+        handleReplyDownvote,
         handleRepost,
         handleSave,
         handleShare,

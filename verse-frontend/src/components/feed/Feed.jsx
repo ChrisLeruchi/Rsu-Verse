@@ -22,8 +22,26 @@ export function Feed({
   handleShare,
   selectedTheme,
   setSelectedTheme,
+  onScrollUp,
+  onScrollDown,
+  TOTAL_HEADER_HEIGHT,
   navigation
 }) {
+
+  const SCROLL_THRESHOLD = 8;
+  const lastScrollY = useRef(0);
+
+  const handleScroll = useCallback(({ nativeEvent }) => {
+    const currentY = nativeEvent.contentOffset.y;
+    const diff = currentY - lastScrollY.current;
+
+    if (Math.abs(diff) < SCROLL_THRESHOLD) return;
+
+    if (diff > 0) onScrollDown?.();
+    else onScrollUp?.();
+
+    lastScrollY.current = currentY;
+  }, [onScrollDown, onScrollUp]);
 
   const [trackedTabs, setTrackedTabs] = useState([activeFilter]);
   const postsCache = useRef({});
@@ -99,7 +117,7 @@ export function Feed({
           <View
             key={filterKey}
             style={[
-              styles.animatedContentContainer, // Now properly styles and expands the container
+              styles.animatedContentContainer, 
               { display: isCurrentTab ? "flex" : "none" }
             ]}
           >
@@ -114,6 +132,8 @@ export function Feed({
               renderItem={renderItem}
               getItemType={getItemType}
               keyExtractor={(item, index) => typeof item === 'number' ? `skeleton-${index}` : item.id.toString()}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
               contentContainerStyle={styles.listContainer}
               showsVerticalScrollIndicator={false}
               estimatedItemSize={260}

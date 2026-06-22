@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { StyleSheet, StatusBar, Share, Alert, View, } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import React, { useRef, useCallback } from 'react';
+import { StyleSheet, StatusBar, View, Animated, Platform, UIManager } from 'react-native';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderLayout } from './src/components/navigation/HeaderLayout';
 import { Feed } from './src/components/feed/Feed';
 import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, ShoppingBag, } from 'lucide-react-native';
@@ -18,7 +18,6 @@ import { ProfilePage } from './src/components/profile/ProfilePage';
 import { ManageProfile } from './src/components/profile/Manage-Profile/ManageProfile';
 import { PasswordSecurity } from './src/components/profile/Password_Security/Security/PasswordSecurity';
 import { Notification } from './src/components/profile/Notification/Notification';
-import { Theme } from './src/components/profile/Theme/Theme';
 import { PrivacySafety } from './src/components/profile/privacy/PrivacySafety';
 import { AboutVerse } from './src/components/profile/AboutVerse/AboutVerse';
 import { HelpCenter } from './src/components/profile/HelpCenter/HelpCenter';
@@ -31,6 +30,10 @@ import { Settings } from './src/components/navigation/sideMenu/Settings';
 import { ChatList } from './src/components/chat_room/ChatList';
 import { ChatRoom } from './src/components/chat_room/ChatRoom';
 
+if (Platform.OS === 'android') {
+  UIManager.setLayoutAnimationEnabledExperimental?.(true);
+}
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -41,7 +44,6 @@ const CustomDarkTheme = {
     background: ThemeTokens.colors.dark.background,
   },
 };
-
 
 const getVerseIcon = (verse) => {
   switch (verse) {
@@ -115,17 +117,72 @@ function HomeStackNavigator() {
     displayName,
     setDisplayName,
     username,
-    setUsername
+    setUsername,
+    handleCommentDownvote,
+    handleCommentUpvote,
+    handleReplyUpvote,
+    handleReplyDownvote,
   } = useAppContext();
 
   const handlePlusClick = (navigation) => {
     setActiveFilter("plus");
     if (navigation) navigation.navigate("CreatePost");
-  }
+  };
 
   const isDark = selectedTheme === 'dark';
 
-  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light
+  const insets = useSafeAreaInsets();
+  const HEADER_HEIGHT = 64;
+  const TOTAL_HEADER_HEIGHT = HEADER_HEIGHT + insets.top;
+
+  const translateY = useRef(new Animated.Value(0)).current;
+  const isAnimating = useRef(false);
+
+  const paddingAnim = useRef(null);
+  if (paddingAnim.current === null) {
+    paddingAnim.current = new Animated.Value(TOTAL_HEADER_HEIGHT);
+  }
+
+  const handleScrollUp = useCallback(() => {
+    if (isAnimating.current) return;
+    isAnimating.current = true;
+    Animated.parallel([
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 80,
+        friction: 12,
+      }),
+      Animated.spring(paddingAnim.current, {
+        toValue: TOTAL_HEADER_HEIGHT,
+        useNativeDriver: false,
+        tension: 80,
+        friction: 12,
+      }),
+    ]).start(() => { isAnimating.current = false; });
+  }, [translateY, TOTAL_HEADER_HEIGHT]);
+
+  const handleScrollDown = useCallback(() => {
+    if (isAnimating.current) return;
+    isAnimating.current = true;
+    Animated.parallel([
+      Animated.spring(translateY, {
+        toValue: -TOTAL_HEADER_HEIGHT,
+        useNativeDriver: true,
+        tension: 80,
+        friction: 12,
+      }),
+      Animated.spring(paddingAnim.current, {
+        toValue: HEADER_HEIGHT,
+        useNativeDriver: false,
+        tension: 80,
+        friction: 12,
+      }),
+    ]).start(() => { isAnimating.current = false; });
+  }, [translateY, TOTAL_HEADER_HEIGHT, HEADER_HEIGHT]);
+
+  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -140,18 +197,24 @@ function HomeStackNavigator() {
       <Stack.Screen name='HomeFeed'>
         {(props) => (
           <View style={styles.appContainer}>
-            <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeAreaHeader, { backgroundColor: themeColor.background }]}>
-              <HeaderLayout
-                selectedTheme={selectedTheme}
-                setSelectedTheme={setSelectedTheme}
-                activeFilter={activeFilter === "all" ? "home" : activeFilter}
-                setActiveFilter={(tab) => {
-                  if (tab === "home") setActiveFilter("all");
-                  else setActiveFilter(tab);
-                }}
-              />
-            </SafeAreaView>
-            <View style={{ flex: 1, paddingTop: 64 }}>
+            <Animated.View style={[
+              styles.floatingHeader,
+              { transform: [{ translateY }], backgroundColor: themeColor.background }
+            ]}>
+              <SafeAreaView edges={['top', 'left', 'right']}>
+                <HeaderLayout
+                  selectedTheme={selectedTheme}
+                  setSelectedTheme={setSelectedTheme}
+                  activeFilter={activeFilter === "all" ? "home" : activeFilter}
+                  setActiveFilter={(tab) => {
+                    if (tab === "home") setActiveFilter("all");
+                    else setActiveFilter(tab);
+                  }}
+                />
+              </SafeAreaView>
+            </Animated.View>
+
+            <Animated.View style={{ flex: 1, paddingTop: paddingAnim.current }}>
               <Feed
                 {...props}
                 posts={filteredPosts}
@@ -166,8 +229,11 @@ function HomeStackNavigator() {
                 getVerseIcon={getVerseIcon}
                 selectedTheme={selectedTheme}
                 setSelectedTheme={setSelectedTheme}
+                onScrollUp={handleScrollUp}
+                onScrollDown={handleScrollDown}
+                TOTAL_HEADER_HEIGHT={TOTAL_HEADER_HEIGHT}
               />
-            </View>
+            </Animated.View>
           </View>
         )}
       </Stack.Screen>
@@ -186,10 +252,13 @@ function HomeStackNavigator() {
             getVerseIcon={getVerseIcon}
             setSelectedTheme={setSelectedTheme}
             selectedTheme={selectedTheme}
+            handleCommentUpvote={handleCommentUpvote}
+            handleCommentDownvote={handleCommentDownvote}
+            handleReplyUpvote={handleReplyUpvote}
+            handleReplyDownvote={handleReplyDownvote}
           />
         )}
       </Stack.Screen>
-
 
       <Stack.Screen name="Settings">
         {(props) => <Settings
@@ -198,7 +267,6 @@ function HomeStackNavigator() {
           setSelectedTheme={setSelectedTheme}
         />}
       </Stack.Screen>
-
 
       <Stack.Screen name="Bookmarks">
         {(props) => <BookMarks
@@ -320,6 +388,7 @@ function HomeStackNavigator() {
           setDisplayName={setDisplayName}
         />}
       </Stack.Screen>
+
       <Stack.Screen name="Manage_Profile">
         {(props) => (
           <ManageProfile
@@ -337,7 +406,6 @@ function HomeStackNavigator() {
           />
         )}
       </Stack.Screen>
-
     </Stack.Navigator>
   );
 }
@@ -357,7 +425,11 @@ function SearchStackNavigator() {
     handleDownvotes,
     handleUpvote,
     selectedTheme,
-    setSelectedTheme
+    setSelectedTheme,
+    handleCommentDownvote,
+    handleCommentUpvote,
+    handleReplyUpvote,
+    handleReplyDownvote
   } = useAppContext();
 
   return (
@@ -371,7 +443,6 @@ function SearchStackNavigator() {
         contentStyle: { backgroundColor: ThemeTokens.colors.dark.background },
       }}
     >
-
       <Stack.Screen name='SearchPage'>
         {(props) => (
           <SearchPage
@@ -389,7 +460,6 @@ function SearchStackNavigator() {
           />
         )}
       </Stack.Screen>
-
 
       <Stack.Screen name='Search_feed'>
         {(props) => (
@@ -420,13 +490,18 @@ function SearchStackNavigator() {
             handleDownvotes={handleDownvotes}
             handleUpvote={handleUpvote}
             getVerseIcon={getVerseIcon}
+            selectedTheme={selectedTheme}
+            setSelectedTheme={setSelectedTheme}
+            handleCommentUpvote={handleCommentUpvote}
+            handleCommentDownvote={handleCommentDownvote}
+            handleReplyUpvote={handleReplyUpvote}
+            handleReplyDownvote={handleReplyDownvote}
           />
         )}
       </Stack.Screen>
     </Stack.Navigator>
   );
 }
-
 
 function MarketPlace() {
   const { posts, selectedTheme, setSelectedTheme } = useAppContext();
@@ -443,10 +518,8 @@ function MarketPlace() {
         )}
       </Stack.Screen>
     </Stack.Navigator>
-  )
+  );
 }
-
-
 
 function PostCreation() {
   const { setPosts, setActiveFilter, selectedTheme, setSelectedTheme } = useAppContext();
@@ -464,9 +537,8 @@ function PostCreation() {
         )}
       </Stack.Screen>
     </Stack.Navigator>
-  )
+  );
 }
-
 
 function Chat() {
   const { selectedTheme, setSelectedTheme } = useAppContext();
@@ -501,11 +573,8 @@ function Chat() {
         )}
       </Stack.Screen>
     </Stack.Navigator>
-  )
+  );
 }
-
-
-
 
 function BottomTabNavigatorComponent() {
   const { activeTab, setActiveTab, setActiveFilter, selectedTheme, setSelectedTheme } = useAppContext();
@@ -565,9 +634,6 @@ function BottomTabNavigatorComponent() {
   );
 }
 
-
-
-
 export default function App() {
   return (
     <SafeAreaProvider style={styles.container}>
@@ -583,7 +649,6 @@ export default function App() {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -598,7 +663,12 @@ const styles = StyleSheet.create({
   safeAreaHeader: {
     zIndex: 100,
     backgroundColor: '#000000',
-  }
+  },
+  floatingHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+  },
 });
-
-
