@@ -1,5 +1,5 @@
 import React, { useRef, useCallback } from 'react';
-import { StyleSheet, StatusBar, View, Animated, Platform, UIManager } from 'react-native';
+import { StyleSheet, View, Animated, Platform, UIManager } from 'react-native';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderLayout } from './src/components/navigation/HeaderLayout';
 import { Feed } from './src/components/feed/Feed';
@@ -190,8 +190,8 @@ function HomeStackNavigator() {
         gestureEnabled: true,
         gestureDirection: 'horizontal',
         gestureResponseDistance: 80,
-        cardStyle: { backgroundColor: ThemeTokens.colors.dark.background },
-        contentStyle: { backgroundColor: ThemeTokens.colors.dark.background },
+        cardStyle: { backgroundColor: themeColor.background },
+        contentStyle: { backgroundColor: themeColor.background },
       }}
     >
       <Stack.Screen name='HomeFeed'>
@@ -201,7 +201,9 @@ function HomeStackNavigator() {
               styles.floatingHeader,
               { transform: [{ translateY }], backgroundColor: themeColor.background }
             ]}>
-              <SafeAreaView edges={['top', 'left', 'right']}>
+              <SafeAreaView edges={['top', 'left', 'right']}
+                style={{backgroundColor: themeColor.background}}
+              >
                 <HeaderLayout
                   selectedTheme={selectedTheme}
                   setSelectedTheme={setSelectedTheme}
@@ -640,7 +642,6 @@ export default function App() {
       <AppProvider>
         <NavigationContainer theme={CustomDarkTheme}>
           <View style={styles.appContainer}>
-            <StatusBar barStyle="light-content" backgroundColor={ThemeTokens.colors.dark.background} />
             <BottomTabNavigatorComponent />
           </View>
         </NavigationContainer>
@@ -662,7 +663,6 @@ const styles = StyleSheet.create({
   },
   safeAreaHeader: {
     zIndex: 100,
-    backgroundColor: '#000000',
   },
   floatingHeader: {
     position: 'absolute',

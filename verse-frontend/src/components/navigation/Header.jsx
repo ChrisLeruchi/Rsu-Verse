@@ -216,7 +216,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     zIndex: 50,
-    backgroundColor: '#000000',
   },
 
   avatarPlaceholder: {
