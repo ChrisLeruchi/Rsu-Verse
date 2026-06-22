@@ -8,7 +8,8 @@ import {
   ScrollView,
   StyleSheet,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Dimensions
 } from "react-native";
 import { useRoute, useNavigation, useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,6 +28,8 @@ import {
 import { formatRelativeTime } from "./formatRelativeTime";
 import * as Crypto from 'expo-crypto';
 import { ThemeTokens } from '../theme';
+
+const { width: windowWidth } = Dimensions.get("window");
 
 export function PostDetail({
   posts,
@@ -54,6 +57,7 @@ export function PostDetail({
   const [replyingTo, setReplyingTo] = useState(null);
   const [secReplyingTo, setSecReplyingTo] = useState(null);
   const [viewReply, setViewReply] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const post = posts.find(p => String(p.id) === String(postId));
 
@@ -65,6 +69,7 @@ export function PostDetail({
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
         setLocalInput("");
+        setActiveImageIndex(0);
       };
     }, [])
   );
@@ -147,6 +152,12 @@ export function PostDetail({
     setSecReplyingTo(null);
   };
 
+  const handleScroll = (event) => {
+    const contentOffset = event.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffset / windowWidth);
+    setActiveImageIndex(index);
+  };
+
   const isConfession = post.verse === "confession";
 
   return (
@@ -207,10 +218,46 @@ export function PostDetail({
             <Text style={[styles.bodyText, { color: themeColor.textPrimary }]}>{post.content?.text}</Text>
 
             {post.content?.images && post.content.images.length > 0 && (
-              <View style={[styles.imageGrid, post.content.images.length === 1 ? styles.gridSingle : styles.gridMulti]}>
-                {post.content.images.map((imgUrl, index) => (
-                  <Image key={index} source={{ uri: imgUrl }} style={styles.attachedImage} resizeMode="cover" />
-                ))}
+              <View style={styles.instagramContainer}>
+                {post.content.images.length === 1 ? (
+                  <Image 
+                    source={{ uri: post.content.images[0] }} 
+                    style={styles.instagramFullHeightImage} 
+                    resizeMode="cover" 
+                  />
+                ) : (
+                  <View>
+                    <ScrollView
+                      horizontal
+                      pagingEnabled
+                      showsHorizontalScrollIndicator={false}
+                      onScroll={handleScroll}
+                      scrollEventThrottle={16}
+                    >
+                      {post.content.images.map((imgUrl, index) => (
+                        <Image 
+                          key={index} 
+                          source={{ uri: imgUrl }} 
+                          style={[styles.instagramFullHeightImage, { width: windowWidth }]} 
+                          resizeMode="cover" 
+                        />
+                      ))}
+                    </ScrollView>
+                    <View style={styles.paginationDotsWrapper}>
+                      {post.content.images.map((_, index) => (
+                        <View
+                          key={index}
+                          style={[
+                            styles.paginationDotElement,
+                            activeImageIndex === index 
+                              ? [styles.paginationDotActive, { backgroundColor: "#00BA34" }]
+                              : [styles.paginationDotInactive, { backgroundColor: isDark ? "rgba(255, 255, 255, 0.24)" : "rgba(0, 0, 0, 0.16)" }]
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                )}
               </View>
             )}
 
@@ -542,6 +589,37 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     paddingHorizontal: 16,
   },
+  instagramContainer: {
+    marginTop: 4,
+    overflow: "hidden",
+    position: "relative",
+  },
+  instagramFullHeightImage: {
+    width: windowWidth,
+    height: 400,
+  },
+  paginationDotsWrapper: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 10,
+    position: "absolute",
+    bottom: 12,
+    left: 0,
+    right: 0,
+  },
+  paginationDotElement: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  paginationDotActive: {
+    transform: [{ scale: 1.15 }],
+  },
+  paginationDotInactive: {
+    opacity: 1,
+  },
   imageGrid: {
     marginTop: 4,
     overflow: "hidden",
@@ -808,7 +886,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
     backgroundColor: "#00BA34"
   },
-  errorContainer: { flex: 1, backgroundColor: "#1A1A1A", alignItems: "center", justifyCenter: "center", padding: 24 },
+  errorContainer: { flex: 1, backgroundColor: "#1A1A1A", alignItems: "center", justifyContent: "center", padding: 24 },
   errorText: { color: "rgba(255, 255, 255, 0.4)", fontSize: 13, textAlign: "center" },
   backButtonInline: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 14 },
   backButtonInlineText: { color: "#00BA34", fontSize: 13, fontWeight: "600" },

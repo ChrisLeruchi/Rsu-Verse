@@ -7,7 +7,8 @@ import {
   ScrollView,
   Image,
   SafeAreaView,
-  StatusBar
+  StatusBar,
+  Dimensions
 } from "react-native";
 import {
   ChevronLeft,
@@ -22,6 +23,71 @@ import {
 } from "lucide-react-native";
 import { formatRelativeTime } from "../../assets/formatRelativeTime";
 import { ThemeTokens } from "../../theme";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+function PostImageCarousel({ images, themeColor }) {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  const handleScroll = (event) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const index = Math.round(scrollPosition / SCREEN_WIDTH);
+    setActiveIndex(index);
+  };
+
+  if (!images || images.length === 0) return null;
+
+  if (images.length === 1) {
+    return (
+      <View style={styles.mediaContainerWrapper}>
+        <Image
+          source={{ uri: images[0] }}
+          style={[styles.singleImage, { backgroundColor: themeColor.surface }]}
+          resizeMode="cover"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.mediaContainerWrapper}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
+        {images.map((imgUrl, index) => (
+          <Image
+            key={`img-${index}`}
+            source={{ uri: imgUrl }}
+            style={[styles.carouselImage, { backgroundColor: themeColor.surface }]}
+            resizeMode="cover"
+          />
+        ))}
+      </ScrollView>
+      
+   
+      <View style={styles.paginationContainer}>
+        {images.map((_, index) => (
+          <View
+            key={`dot-${index}`}
+            style={[
+              styles.paginationDot,
+              {
+                backgroundColor:
+                  index === activeIndex
+                    ? themeColor.accent
+                    : themeColor.border,
+              },
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
 
 export function SearchFeed({
   route,
@@ -143,28 +209,7 @@ export function SearchFeed({
                 </TouchableOpacity>
 
                 {post.content?.images && post.content.images.length > 0 && (
-                  <View style={styles.mediaContainerWrapper}>
-                    <View
-                      style={[
-                        styles.imageGrid,
-                        { borderColor: themeColor.border },
-                        post.content.images.length === 1 ? styles.gridSingle : styles.gridDouble,
-                      ]}
-                    >
-                      {post.content.images.map((imgUrl, index) => (
-                        <Image
-                          key={`img-${index}`}
-                          source={{ uri: imgUrl }}
-                          style={[
-                            styles.attachedImage,
-                            { backgroundColor: themeColor.surface },
-                            post.content.images.length === 1 ? styles.imageFullHeight : styles.imageSquareHeight,
-                          ]}
-                          resizeMode="cover"
-                        />
-                      ))}
-                    </View>
-                  </View>
+                  <PostImageCarousel images={post.content.images} themeColor={themeColor} />
                 )}
 
                 <View style={styles.engagementToolbar}>
@@ -309,20 +354,42 @@ const styles = StyleSheet.create({
   bodyTextContainer: { marginTop: 1 },
   bodyText: { fontSize: 15, lineHeight: 22, fontWeight: "400" },
 
-  imageGrid: {
-    overflow: "hidden",
-    gap: 4,
+
+  mediaContainerWrapper: {
+    marginVertical: 4,
+    position: "relative"
   },
-  gridSingle: { height: 240 },
-  gridDouble: { flexDirection: "row" },
-  attachedImage: { flex: 1 },
-  imageFullHeight: { height: 210, width: "100%" },
-  imageSquareHeight: { height: 160 },
+  singleImage: {
+    width: SCREEN_WIDTH,
+    height: 450,
+  },
+  carouselImage: {
+    width: SCREEN_WIDTH,
+    height: 450,
+  },
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    bottom: -20,
+    left: 0,
+    right: 0,
+    height: 20,
+    gap: 5,
+  },
+  paginationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+
   engagementToolbar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 20, 
+    paddingHorizontal: 16,
   },
   leftToolbarActions: { flexDirection: "row", alignItems: "center", gap: 24 },
   rightToolbarActions: { flexDirection: "row", alignItems: "center", gap: 16 },

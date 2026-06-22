@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Modal, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import {
   MoreHorizontal,
@@ -24,6 +24,8 @@ import Animated, {
 
 import { HapticEngine } from '../../haptics';
 import { ThemeTokens } from '../theme';
+
+const { width: windowWidth } = Dimensions.get('window');
 
 export function PostCard({
   post,
@@ -50,6 +52,7 @@ export function PostCard({
   const isSaved = post.userInteraction?.saved;
   const [isDotOpen, setIsDotOpen] = useState(false);
   const isReposted = post.userInteraction?.reposts;
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const upvoteScale = useSharedValue(1);
   const downvoteScale = useSharedValue(1);
@@ -180,8 +183,16 @@ export function PostCard({
     navigation.navigate("Comments", { postId: post.id });
   };
 
+  const handleScroll = (event) => {
+    const contentOffset = event.nativeEvent.contentOffset.x;
+    const currentIndex = Math.round(contentOffset / windowWidth);
+    setCurrentImageIndex(currentIndex);
+  };
+
   const isDark = selectedTheme === 'dark';
   const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
+
+  const relativeTime = useRelativeTime(post.meta?.createdAt)
 
   return (
     <View
@@ -209,7 +220,7 @@ export function PostCard({
                     @{post.author?.department}
                   </Text>
                   <Text style={[styles.handleText, { color: themeColor.textMuted }]}>
-                    {" "}&bull; {useRelativeTime(post.meta.createdAt)}
+                    {" "}&bull; {relativeTime}
                   </Text>
                 </View>
               </View>
@@ -249,25 +260,45 @@ export function PostCard({
       </Pressable>
 
       {post.content?.images && post.content.images.length > 0 && (
-        <View style={[
-          styles.imagesGrid,
-          { borderColor: themeColor.border },
-          post.content.images.length === 1 ? styles.gridSingle : styles.gridMulti
-        ]}>
-          {post.content.images.map((imgUrl, index) => (
-            <Image
-              key={index}
-              source={imgUrl}
-              style={[
-                styles.gridImage,
-                { backgroundColor: themeColor.surface },
-                post.content.images.length === 1 ? styles.singleImageSize : styles.multiImageSize
-              ]}
-              contentFit="cover"
-              transition={200}
-              cachePolicy="disk"
-            />
-          ))}
+        <View style={styles.carouselContainer}>
+          <FlatList
+            data={post.content.images}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item }) => (
+              <Image
+                source={item}
+                style={[
+                  styles.carouselImage,
+                  { backgroundColor: themeColor.surface, width: windowWidth }
+                ]}
+                contentFit="cover"
+                transition={200}
+                cachePolicy="disk"
+              />
+            )}
+          />
+          {post.content.images.length > 1 && (
+            <View style={styles.paginationContainer}>
+              {post.content.images.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.paginationDot,
+                    {
+                      backgroundColor: currentImageIndex === index 
+                        ? (isConfession ? '#F59E0B' : '#00BA34') 
+                        : themeColor.border
+                    }
+                  ]}
+                />
+              ))}
+            </View>
+          )}
         </View>
       )}
 
@@ -508,30 +539,25 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '400',
   },
-  imagesGrid: {
+  carouselContainer: {
     marginTop: 12,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    overflow: 'hidden',
-    gap: 6,
-  },
-  gridSingle: {
-    flexDirection: 'column',
-  },
-  gridMulti: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  gridImage: {
-    backgroundColor: 'rgba(30, 30, 30, 0.5)',
-  },
-  singleImageSize: {
     width: '100%',
-    maxHeight: 440,
-    aspectRatio: 1.33,
+    position: 'relative',
   },
-  multiImageSize: {
-    width: '49%',
-    aspectRatio: 1,
+  carouselImage: {
+    height: 500,
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    gap: 5,
+  },
+  paginationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   marketContainer: {
     paddingHorizontal: 12,
