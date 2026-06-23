@@ -12,7 +12,7 @@ import {
   Pressable,
 } from "react-native";
 import { ArrowLeft, Camera, Store, GraduationCap, Globe } from "lucide-react-native";
-import { ThemeTokens } from "../../../theme";
+import { ThemeTokens } from "../../../../hooks/theme";
 
 const COLORS = {
   void: "#000000",

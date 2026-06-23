@@ -2,11 +2,11 @@ import React, { useCallback, useState, useRef, useEffect } from "react";
 import { View, Text, Pressable, StyleSheet, DeviceEventEmitter } from "react-native";
 import { FlashList } from "@shopify/flash-list"
 import { Plus } from "lucide-react-native";
-import { PostCard } from "../../assets/Postcard";
+import { PostCard } from "../../assets/post/Postcard";
 import { FeedFilter } from "./FeedFilter";
 import { FeedPostSkeleton } from "./FeedPostSkeleton";
-import { HapticEngine } from "../../../haptics";
-import { ThemeTokens } from "../../theme";
+import { HapticEngine } from "../../haptics/haptics";
+import { ThemeTokens } from "../../../hooks/theme";
 
 export function Feed({
   posts,

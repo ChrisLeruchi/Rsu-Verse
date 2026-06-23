@@ -21,8 +21,8 @@ import {
   MoreHorizontal,
   MessageCircle,
 } from "lucide-react-native";
-import { formatRelativeTime } from "../../assets/formatRelativeTime";
-import { ThemeTokens } from "../../theme";
+import { formatRelativeTime } from "../../assets/formatTime/formatRelativeTime";
+import { ThemeTokens } from "../../../hooks/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 

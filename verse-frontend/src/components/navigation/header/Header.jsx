@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Pressable, Image, StyleSheet, Modal, Text, Dimensions, Animated } from 'react-native';
 import { Bell, CircleQuestionMark, Settings, ShoppingBag, Moon, Mail, Sun, NotebookText, User2, Plus, Bookmark } from 'lucide-react-native';
 import { useNavigation, } from '@react-navigation/native'
-import { ThemeTokens } from '../../theme';
+import { ThemeTokens } from '../../../../hooks/theme';
 
 
 const { width: screen_width } = Dimensions.get('window');
@@ -87,7 +87,7 @@ export function Header({
         style={styles.logoWrapper}
       >
         <Image
-          source={require("../../../public/VerseLogo2.png")}
+          source={require("../../../assets/images/VerseLogo2.png")}
           style={styles.logoImage}
         />
       </Pressable>

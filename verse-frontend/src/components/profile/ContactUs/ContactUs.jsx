@@ -19,7 +19,7 @@ import {
   ChevronDown,
   ChevronUp
 } from "lucide-react-native";
-import { ThemeTokens } from "../../../theme";
+import { ThemeTokens } from "../../../../hooks/theme";
 
 const COLORS = {
   void: "#000000",

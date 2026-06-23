@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { StyleSheet, View, Text, Pressable, Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { ThemeTokens } from "../../theme";
+import { ThemeTokens } from "../../../hooks/theme";
 
 export function ProfileFilter({ selectedTheme }) {
   const [activeFilter, setActiveFilter] = useState('posts')

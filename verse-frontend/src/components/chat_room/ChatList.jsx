@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, SafeAreaView, StatusBar } from "react-native";
 import { ArrowLeft, Search, MessageSquare, CheckCheck } from "lucide-react-native";
 import * as Crypto from 'expo-crypto';
-import { ThemeTokens } from "../../theme";
+import { ThemeTokens } from "../../../hooks/theme";
 
 const COLORS = {
   void: "#000000",

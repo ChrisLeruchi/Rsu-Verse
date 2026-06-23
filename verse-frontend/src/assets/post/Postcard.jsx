@@ -13,7 +13,7 @@ import {
   AlertCircle,
   UserRoundX
 } from "lucide-react-native";
-import { useRelativeTime } from "./useRelativeTime";
+import { useRelativeTime } from "../formatTime/useRelativeTime";
 
 import Animated, {
   useSharedValue,
@@ -22,8 +22,8 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 
-import { HapticEngine } from '../../haptics';
-import { ThemeTokens } from '../theme';
+import { HapticEngine } from '../../haptics/haptics';
+import { ThemeTokens } from '../../../hooks/theme';
 
 const { width: windowWidth } = Dimensions.get('window');
 

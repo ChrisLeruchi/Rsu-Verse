@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { View, ScrollView, StyleSheet, Pressable, Text, Animated, useWindowDimensions } from "react-native";
 import { MessagesSquare, Flame, Music, Landmark, HeartHandshake, Clock } from "lucide-react-native";
-import { HapticEngine } from "../../../haptics";
-import { ThemeTokens } from "../../theme";
+import { HapticEngine } from "../../haptics/haptics";
+import { ThemeTokens } from "../../../hooks/theme";
 
 
 export function FeedFilter({ activeFilter, setActiveFilter, selectedTheme, setSelectedTheme, feedRef }) {

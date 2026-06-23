@@ -11,7 +11,7 @@ import {
   Keyboard,
 } from "react-native";
 import { ChevronLeft, Search, Clock, ArrowUpRight, X } from "lucide-react-native";
-import { ThemeTokens } from "../../theme";
+import { ThemeTokens } from "../../../hooks/theme";
 
 export function SearchPage({
   setActiveFilter,

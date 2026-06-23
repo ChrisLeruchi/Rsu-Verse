@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const ThemeTokens = {
   colors: {
@@ -60,3 +59,5 @@ export const ThemeTokens = {
     }
   }
 };
+
+

@@ -17,9 +17,9 @@ import {
   FileText,
   Heart,
 } from "lucide-react-native";
-import { ThemeTokens } from "../../../theme";
+import { ThemeTokens } from "../../../../hooks/theme";
 
-import VerseLogo from '../../../../public/favicon.png';
+import VerseLogo from '../../../assets/images/favicon.png';
 
 const COLORS = {
   void: "#000000",

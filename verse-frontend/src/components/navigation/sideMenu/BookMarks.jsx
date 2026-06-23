@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import { ArrowLeft } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
-import { PostCard } from "../../../assets/Postcard";
-import { ThemeTokens } from "../../../theme";
+import { PostCard } from "../../../assets/post/Postcard";
+import { ThemeTokens } from "../../../../hooks/theme";
 
 export function BookMarks({ 
   posts = [], 

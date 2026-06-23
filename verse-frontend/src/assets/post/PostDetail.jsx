@@ -25,9 +25,9 @@ import {
   MessageSquare,
   Repeat1
 } from "lucide-react-native";
-import { formatRelativeTime } from "./formatRelativeTime";
+import { formatRelativeTime } from "../formatTime/formatRelativeTime";
 import * as Crypto from 'expo-crypto';
-import { ThemeTokens } from '../theme';
+import { ThemeTokens } from '../../../hooks/theme';
 
 const { width: windowWidth } = Dimensions.get("window");
 

@@ -30,7 +30,7 @@ import {
 } from "react-native";
 import * as Crypto from 'expo-crypto';
 import * as ImagePicker from "expo-image-picker";
-import { ThemeTokens } from "../../theme";
+import { ThemeTokens } from "../../../hooks/theme";
 
 export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
   const navigation = useNavigation();

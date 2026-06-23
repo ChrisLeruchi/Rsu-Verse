@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { ShoppingBag, Search, Tag, ArrowUpRight } from "lucide-react-native";
 import { View, Text, TextInput, Pressable, Image, ScrollView, Linking, Alert, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ThemeTokens } from "../../theme";
+import { ThemeTokens } from "../../../hooks/theme";
 
 export function Market({ posts = [], selectedTheme }) {
   const [searchQuery, setSearchQuery] = useState("");

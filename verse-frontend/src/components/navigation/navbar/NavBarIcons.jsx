@@ -1,8 +1,8 @@
 import React from 'react'
 import { View, Pressable, StyleSheet } from 'react-native'
 import { useNavigation, useNavigationState } from '@react-navigation/native'
-import { Home, Search, ShoppingBag, MessageCircle, MessageCircleageCircle } from 'lucide-react-native'
-import { ThemeTokens } from '../../theme'
+import { Home, Search, ShoppingBag, MessageCircle, } from 'lucide-react-native'
+import { ThemeTokens } from '../../../../hooks/theme'
 
 export function NavBarIcons({ setActiveFilter, selectedTheme, setSelectedTheme }) {
   const isDark = selectedTheme === 'dark';

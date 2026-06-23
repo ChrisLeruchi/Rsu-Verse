@@ -2,7 +2,7 @@ import React, { useRef, useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, Modal, Pressable } from "react-native";
 import { ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X, Pencil } from "lucide-react-native";
-import { ThemeTokens } from "../../theme";
+import { ThemeTokens } from "../../../hooks/theme";
 import { ProfileFilter } from "./ProfileFilter";
 
 export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
