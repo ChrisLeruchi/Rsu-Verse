@@ -1,4 +1,4 @@
-import { StyleSheet, View, Platform, UIManager, Text } from 'react-native';
+import { StyleSheet, View, Platform, UIManager, Text, Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { BottomTabNavigatorComponent } from './src/components/navigation/bottomTabNav/bottomTabNav';
@@ -38,16 +38,22 @@ export default function App() {
   const [authScreen, setAuthScreen] = useState('login');
 
   useEffect(() => {
-    AsyncStorage.getItem('userToken')
-      .then(token => setAuthState(token ? 'auth' : 'auth'))
-      .catch(() => setAuthState('auth'));
+    setAuthState('auth');
   }, []);
 
 
-  const handleLoginSuccess = () => setAuthState('app');
-
+  const handleLoginSuccess = () => {
+    console.log("Intercepted login completion state check successfully.");
+    
+    Alert.alert(
+      "Login Successful! 🎉",
+      "Authentication state intercepted. In production, this shifts layout focus to the main app dashboard routing layer.",
+      [
+        { text: "Understood", onPress: () => console.log("Alert dismissed") }
+      ]
+    );
+  }
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('userToken');
     setAuthState('auth');
     setAuthScreen('login');
   };
