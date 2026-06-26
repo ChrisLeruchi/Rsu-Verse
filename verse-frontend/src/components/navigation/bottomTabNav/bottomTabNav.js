@@ -5,6 +5,7 @@ import { SearchStackNavigator } from "../searchNavigation/searchNavigation";
 import { PostCreation } from "../createNavigation/createNavigation";
 import { Chat } from "../chatNavigation/chatNavigation";
 import { MarketPlace } from "../marketNavigation/marketNavigation";
+import { NotificationPage } from "../notificationNav/NotificationScreen";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
@@ -41,7 +42,8 @@ export function BottomTabNavigatorComponent() {
           nestedRouteName === 'ContactUs' ||
           nestedRouteName === 'Contact_Us' ||
           nestedRouteName === 'Settings' ||
-          nestedRouteName === 'ChatRoom'
+          nestedRouteName === 'ChatRoom' ||
+          nestedRouteName === 'Profile'
         ) {
           return null;
         }
@@ -65,6 +67,7 @@ export function BottomTabNavigatorComponent() {
       <Tab.Screen name='Search' component={SearchStackNavigator} />
       <Tab.Screen name="Market" component={MarketPlace} />
       <Tab.Screen name="ChatList" component={Chat} />
+      <Tab.Screen name="notifications" component={NotificationPage} />
     </Tab.Navigator>
   );
 }

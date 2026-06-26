@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Select your department']
   },
+  level: {
+    type: String,
+    enum: ['100L', '200L', '300L', '400L', '500L', 'Alumni'],
+    required: [true, 'Select your current level']
+  },
   verificationRecieptUrl: {
     type: String,
     required: [true, 'An upload of your e-campus school fee reciept is required to verify that you are a student of RSU']

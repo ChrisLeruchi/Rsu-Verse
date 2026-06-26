@@ -1,30 +1,25 @@
 import { Alert, Share } from "react-native";
 import { useAppContext } from "../src/context/AppContext";
+import Toast from "react-native-toast-message";
+import postService from "../src/services/postService";
 
 export function useEngagement() {
   const { posts, setPosts, setIsSubmitted, selectedTopic, message } = useAppContext();
 
-  const simulateNetworkSync = () => new Promise((resolve) => setTimeout(resolve, 600));
-  const SIMULATE_NETWORK_FAILURE = false;
   const handleUpvote = async (postId) => {
-
-    const backupPosts = JSON.parse(JSON.stringify(posts));
-
-
+    const backupPosts = [...posts];
 
     setPosts((prevPosts) => prevPosts.map((post) => {
       if (post.id === postId) {
         const currentStatus = post.userInteraction.voteStatus;
         const isUpvoted = currentStatus === 'up';
         const isDownvoted = currentStatus === 'down';
-        let upvoteAdjustment = isUpvoted ? -1 : 1;
-        let downvoteAdjustment = isDownvoted ? -1 : 0;
         return {
           ...post,
           engagement: {
             ...post.engagement,
-            upvotes: Math.max(0, post.engagement.upvotes + upvoteAdjustment),
-            downvotes: Math.max(0, post.engagement.downvotes + downvoteAdjustment),
+            upvotes: Math.max(0, post.engagement.upvotes + (isUpvoted ? -1 : 1)),
+            downvotes: Math.max(0, post.engagement.downvotes + (isDownvoted ? -1 : 0)),
           },
           userInteraction: {
             ...post.userInteraction,
@@ -35,13 +30,9 @@ export function useEngagement() {
       return post;
     }));
 
-
     try {
-      await simulateNetworkSync();
-      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
-      // Success! UI stays exactly as modified.
+      await postService.toggleUpvote(postId);
     } catch (error) {
-      console.warn("Local Engine: Rollback triggered successfully.", error);
       setPosts(backupPosts);
       Alert.alert("Connection Lost", "We couldn't sync your upvote right now.");
     }
@@ -55,14 +46,12 @@ export function useEngagement() {
       const currentStatus = post.userInteraction.voteStatus;
       const isUpvoted = currentStatus === 'up';
       const isDownvoted = currentStatus === 'down';
-      let downvoteAdjustment = isDownvoted ? -1 : 1;
-      let upvoteAdjustment = isUpvoted ? -1 : 0;
       return {
         ...post,
         engagement: {
           ...post.engagement,
-          upvotes: Math.max(0, post.engagement.upvotes + upvoteAdjustment),
-          downvotes: Math.max(0, post.engagement.downvotes + downvoteAdjustment)
+          upvotes: Math.max(0, post.engagement.upvotes + (isUpvoted ? -1 : 0)),
+          downvotes: Math.max(0, post.engagement.downvotes + (isDownvoted ? -1 : 1)),
         },
         userInteraction: {
           ...post.userInteraction,
@@ -72,11 +61,10 @@ export function useEngagement() {
     }));
 
     try {
-      await simulateNetworkSync();
-      if (SIMULATE_NETWORK_FAILURE) throw new Error();
+      await postService.toggleDownvote(postId);
     } catch (error) {
       setPosts(backupPosts);
-      Alert.alert("Connection Lost", "We couldn't register your vote choice.", error);
+      Alert.alert("Connection Lost", "We couldn't register your vote choice.");
     }
   };
 
@@ -85,18 +73,15 @@ export function useEngagement() {
 
     setPosts((prevPosts) => prevPosts.map((post) => {
       if (post.id !== postId) return post;
-
       return {
         ...post,
         engagement: {
           ...post.engagement,
           comments: post.engagement.comments.map((comment) => {
             if (comment.id !== commentId) return comment;
-
             const currentStatus = comment.userInteraction?.voteStatus;
             const isUpvoted = currentStatus === 'up';
             const isDownvoted = currentStatus === 'down';
-
             return {
               ...comment,
               engagement: {
@@ -115,10 +100,8 @@ export function useEngagement() {
     }));
 
     try {
-      await simulateNetworkSync();
-      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
+      await postService.toggleCommentUpvote(postId, commentId);
     } catch (error) {
-      console.warn("Local Engine: Comment upvote rollback triggered.", error);
       setPosts(backupPosts);
       Alert.alert("Connection Lost", "We couldn't sync your upvote right now.");
     }
@@ -129,18 +112,15 @@ export function useEngagement() {
 
     setPosts((prevPosts) => prevPosts.map((post) => {
       if (post.id !== postId) return post;
-
       return {
         ...post,
         engagement: {
           ...post.engagement,
           comments: post.engagement.comments.map((comment) => {
             if (comment.id !== commentId) return comment;
-
             const currentStatus = comment.userInteraction?.voteStatus;
             const isUpvoted = currentStatus === 'up';
             const isDownvoted = currentStatus === 'down';
-
             return {
               ...comment,
               engagement: {
@@ -159,10 +139,8 @@ export function useEngagement() {
     }));
 
     try {
-      await simulateNetworkSync();
-      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
+      await postService.toggleCommentDownvote(postId, commentId);
     } catch (error) {
-      console.warn("Local Engine: Comment downvote rollback triggered.", error);
       setPosts(backupPosts);
       Alert.alert("Connection Lost", "We couldn't register your vote choice.");
     }
@@ -173,23 +151,19 @@ export function useEngagement() {
 
     setPosts((prevPosts) => prevPosts.map((post) => {
       if (post.id !== postId) return post;
-
       return {
         ...post,
         engagement: {
           ...post.engagement,
           comments: post.engagement.comments.map((comment) => {
             if (comment.id !== commentId) return comment;
-
             return {
               ...comment,
               replies: comment.replies.map((reply) => {
                 if (reply.id !== replyId) return reply;
-
                 const currentStatus = reply.userInteraction?.voteStatus;
                 const isUpvoted = currentStatus === 'up';
                 const isDownvoted = currentStatus === 'down';
-
                 return {
                   ...reply,
                   engagement: {
@@ -210,10 +184,8 @@ export function useEngagement() {
     }));
 
     try {
-      await simulateNetworkSync();
-      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
+      await postService.addReply(postId, commentId, replyId);
     } catch (error) {
-      console.warn("Local Engine: Reply upvote rollback triggered.", error);
       setPosts(backupPosts);
       Alert.alert("Connection Lost", "We couldn't sync your upvote right now.");
     }
@@ -224,23 +196,19 @@ export function useEngagement() {
 
     setPosts((prevPosts) => prevPosts.map((post) => {
       if (post.id !== postId) return post;
-
       return {
         ...post,
         engagement: {
           ...post.engagement,
           comments: post.engagement.comments.map((comment) => {
             if (comment.id !== commentId) return comment;
-
             return {
               ...comment,
               replies: comment.replies.map((reply) => {
                 if (reply.id !== replyId) return reply;
-
                 const currentStatus = reply.userInteraction?.voteStatus;
                 const isUpvoted = currentStatus === 'up';
                 const isDownvoted = currentStatus === 'down';
-
                 return {
                   ...reply,
                   engagement: {
@@ -261,10 +229,8 @@ export function useEngagement() {
     }));
 
     try {
-      await simulateNetworkSync();
-      if (SIMULATE_NETWORK_FAILURE) throw new Error("Simulated backend crash");
+      await postService.addReply(postId, commentId, replyId);
     } catch (error) {
-      console.warn("Local Engine: Reply downvote rollback triggered.", error);
       setPosts(backupPosts);
       Alert.alert("Connection Lost", "We couldn't register your vote choice.");
     }
@@ -290,15 +256,16 @@ export function useEngagement() {
     }));
 
     try {
-      await simulateNetworkSync();
-      if (SIMULATE_NETWORK_FAILURE) throw new Error();
+      await new Promise((resolve) => setTimeout(resolve, 600));
     } catch (error) {
       setPosts(backupPosts);
-      Alert.alert("Network Error", "Unable to forward broadcast metrics.", error);
+      Alert.alert("Network Error", "Unable to forward broadcast metrics.");
     }
   };
 
   const handleSave = async (postId) => {
+    const targetPost = posts.find((p) => p.id === postId);
+    const isNowSaving = targetPost ? !targetPost.userInteraction.saved : true;
     const backupPosts = JSON.parse(JSON.stringify(posts));
 
     setPosts((prevPosts) => prevPosts.map((post) => {
@@ -317,12 +284,23 @@ export function useEngagement() {
       };
     }));
 
+    Toast.show({
+      type: 'success',
+      text1: isNowSaving ? 'Post saved to bookmarks!' : 'Post removed from bookmarks',
+      position: 'top',
+      visibilityTime: 1500
+    });
+
     try {
-      await simulateNetworkSync();
-      if (SIMULATE_NETWORK_FAILURE) throw new Error();
+      await postService.toggleSave(postId);
     } catch (error) {
       setPosts(backupPosts);
-      Alert.alert("Storage Alert", "Could not synchronize bookmark location tracking.", error);
+      Toast.show({
+        type: 'error',
+        text1: 'Could not update your bookmarks',
+        position: 'top',
+        visibilityTime: 1500
+      });
     }
   };
 
@@ -331,6 +309,7 @@ export function useEngagement() {
       await Share.share({
         message: `Check out this broadcast on Verse: verse://post/${postId}`,
       });
+      await postService.trackShare(postId);
     } catch (error) {
       Alert.alert("Sharing Error", error.message);
     }

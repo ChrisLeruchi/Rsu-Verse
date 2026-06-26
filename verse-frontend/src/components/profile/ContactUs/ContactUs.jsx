@@ -20,6 +20,7 @@ import {
   ChevronUp
 } from "lucide-react-native";
 import { ThemeTokens } from "../../../../hooks/theme";
+import { useAppContext } from "../../../context/AppContext";
 
 const COLORS = {
   void: "#000000",
@@ -27,21 +28,30 @@ const COLORS = {
   white: "#FFFFFF",
 };
 
-export function ContactUs({
-  isOpen,
-  setIsOpen,
-  selectedTopic,
-  setSelectedTopic,
-  message,
-  setMessage,
-  isSubmitted,
-  attachment,
-  setAttachment,
-  topics,
-  handleSubmit,
-  navigation,
-  selectedTheme,
-}) {
+const topics = [
+  { id: "account_verification", label: "Student Status Verification" },
+  { id: "marketplace_issue", label: "Campus Marketplace / Merchant Support" },
+  { id: "content_reporting", label: "Report Abuse or Community Violations" },
+  { id: "confessions_privacy", label: "Anonymity & Privacy Settings" },
+  { id: "technical_bug", label: "App Glitch or Technical Bug" },
+  { id: "general_inquiry", label: "General Inquiry / Feedback" },
+];
+
+export function ContactUs() {
+  const {
+    isOpen,
+    setIsOpen,
+    selectedTopic,
+    setSelectedTopic,
+    message,
+    setMessage,
+    isSubmitted,
+    attachment,
+    setAttachment,
+    handleSubmit,
+    navigation,
+    selectedTheme,
+  } = useAppContext()
   const scrollViewRef = useRef(null);
   const [localInput, setLocalInput] = useState("");
 
@@ -75,9 +85,9 @@ export function ContactUs({
   if (isSubmitted) {
     return (
       <View style={[styles.successContainer, { backgroundColor: themeColor.background }]}>
-        <StatusBar 
-          barStyle={isDark ? "light-content" : "dark-content"} 
-          backgroundColor={themeColor.background} 
+        <StatusBar
+          barStyle={isDark ? "light-content" : "dark-content"}
+          backgroundColor={themeColor.background}
         />
 
         <View style={[styles.successIconWrapper, { backgroundColor: themeColor.surface }]}>
@@ -105,9 +115,9 @@ export function ContactUs({
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
-      <StatusBar 
-        barStyle={isDark ? "light-content" : "dark-content"} 
-        backgroundColor={themeColor.background} 
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={themeColor.background}
       />
 
       {/* Header Layout */}
@@ -143,7 +153,7 @@ export function ContactUs({
 
         {/* Form Container */}
         <View style={styles.formContainer}>
-          
+
           {/* Dropdown Input Group */}
           <View style={[styles.inputGroup, { zIndex: 50 }]}>
             <Text style={[styles.inputLabel, { color: themeColor.textMuted }]}>What do you need help with?</Text>
@@ -172,7 +182,7 @@ export function ContactUs({
                       }}
                       activeOpacity={0.7}
                       style={[
-                        styles.dropdownOptionRow, 
+                        styles.dropdownOptionRow,
                         { backgroundColor: themeColor.surface },
                         !isLastItem && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: themeColor.border }
                       ]}

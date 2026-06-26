@@ -1,21 +1,22 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { StyleSheet, View, Text, Pressable, Animated } from "react-native";
+import { StyleSheet, View, Text, Pressable, Animated, ScrollView } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { ThemeTokens } from "../../../hooks/theme";
 
-export function ProfileFilter({ selectedTheme }) {
-  const [activeFilter, setActiveFilter] = useState('posts')
+export function ProfileFilter({ selectedTheme, activeFilter, setActiveFilter }) {
   const isDark = selectedTheme === 'dark'
   const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light
 
   const filters = [
     { id: 'posts', label: 'Posts' },
+    { id: 'reposts', label: 'Reposts' },
     { id: 'comments', label: 'Comments' },
     { id: 'upvotes', label: 'Upvotes' },
     { id: 'downvotes', label: 'Downvotes' },
   ]
 
   const [layouts, setLayouts] = useState({})
+  const scrollViewRef = useRef(null);
   const indicatorPosition = useRef(new Animated.Value(0)).current
   const indicatorWidth = useRef(new Animated.Value(0)).current;
 
@@ -42,6 +43,12 @@ export function ProfileFilter({ selectedTheme }) {
           useNativeDriver: false,
         })
       ]).start()
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({
+          x: activeLayout.x - 20,
+          animated: true,
+        });
+      }
     }
   }, [activeFilter, layouts]);
 
@@ -50,52 +57,63 @@ export function ProfileFilter({ selectedTheme }) {
     setLayouts((prev) => ({ ...prev, [id]: { x, width } }))
   }
   return (
-    <View style={styles.profileFilter}>
-      {filters.map((filter) => {
-        const id = filter.id
-        const text = filter.label
-        const isActive = id === activeFilter
+    <View style={styles.outerContainer}>
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.profileFilter}
+      >
 
-        let activeTextColor = themeColor.textPrimary;
-        const inactiveColor = themeColor.textMuted
 
-        return (
-          <Pressable
-            key={id}
-            onLayout={(event) => handleTabLayout(id, event)}
-            onPress={() => setActiveFilter(id)}
-            style={styles.filterBtn}
+        {filters.map((filter) => {
+          const id = filter.id
+          const text = filter.label
+          const isActive = id === activeFilter
 
-          >
-            <Text style={[styles.filterText, isActive ? { color: activeTextColor, } : { color: inactiveColor }]}>
-              {text}
-            </Text>
-          </Pressable>
-        )
-      })}
-      <Animated.View
-        style={[
-          styles.slidingIndicator,
-          {
-            left: indicatorPosition,
-            width: indicatorWidth,
-            backgroundColor: "#00BA34",
-            opacity: layouts[activeFilter] ? 1 : 0
-          }
-        ]}
-      />
+          let activeTextColor = themeColor.textPrimary;
+          const inactiveColor = themeColor.textMuted
+
+          return (
+            <Pressable
+              key={id}
+              onLayout={(event) => handleTabLayout(id, event)}
+              onPress={() => setActiveFilter(id)}
+              style={styles.filterBtn}
+            >
+              <Text style={[styles.filterText, isActive ? { color: activeTextColor, } : { color: inactiveColor }]}>
+                {text}
+              </Text>
+            </Pressable>
+          )
+        })}
+        <Animated.View
+          style={[
+            styles.slidingIndicator,
+            {
+              left: indicatorPosition,
+              width: indicatorWidth,
+              backgroundColor: "#00BA34",
+              opacity: layouts[activeFilter] ? 1 : 0
+            }
+          ]}
+        />
+      </ScrollView>
     </View>
   )
 }
 const styles = StyleSheet.create({
+  outerContainer: {
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+    borderBottomWidth: 1,
+  },
   profileFilter: {
     flexDirection: "row",
     justifyContent: "center",
     gap: 16,
     position: 'relative',
     paddingBottom: 8,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
-    borderBottomWidth: 1
+    paddingHorizontal: 16
   },
   filterBtn: {
     minWidth: 70,
@@ -110,7 +128,7 @@ const styles = StyleSheet.create({
   slidingIndicator: {
     position: "absolute",
     bottom: 0,
-    height: 2,         
+    height: 2,
     borderRadius: 1,
   }
 })

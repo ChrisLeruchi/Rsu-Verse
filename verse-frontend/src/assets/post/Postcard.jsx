@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { useAppContext } from '../../context/AppContext';
+import { verses } from '../../../constants/verse';
 import { Image } from 'expo-image';
 import {
   MoreHorizontal,
@@ -27,24 +29,28 @@ import { ThemeTokens } from '../../../hooks/theme';
 
 const { width: windowWidth } = Dimensions.get('window');
 
-export function PostCard({
-  post,
-  handleUpvote,
-  handleDownvotes,
-  handleRepost,
-  handleSave,
-  getVerseIcon,
-  handleShare,
-  selectedTheme,
-  setSelectedTheme,
-  navigation
-}) {
+const imageKeyExtractor = (_, index) => index.toString();
 
-  const totalCommentsAndReplies = post.engagement?.comments?.reduce((total, comment) => {
-    const replyCount = comment.engagement?.replies?.length || 0;
-    return total + 1 + replyCount;
-  }, 0) || 0;
+export function PostCardComponent({ navigation, post, }) {
 
+  const {
+    handleUpvote,
+    handleDownvotes,
+    handleRepost,
+    handleSave,
+    handleShare,
+    selectedTheme,
+    setActiveFilter
+  } = useAppContext()
+
+  const {getVerseIcon} = verses() 
+
+  const totalCommentsAndReplies = useMemo(() => {
+    return post.engagement?.comments?.reduce((total, comment) => {
+      const replyCount = comment.engagement?.replies?.length || 0;
+      return total + 1 + replyCount;
+    }, 0) || 0;
+  }, [post.engagement?.comments]);
   const isConfession = post.verse === 'confession';
   const isMarket = post.verse === 'market';
   const isUpvoted = post.userInteraction?.voteStatus === 'up';
@@ -183,23 +189,35 @@ export function PostCard({
     navigation.navigate("Comments", { postId: post.id });
   };
 
-  const handleScroll = (event) => {
+  const handleScroll = useCallback((event) => {
     const contentOffset = event.nativeEvent.contentOffset.x;
     const currentIndex = Math.round(contentOffset / windowWidth);
     setCurrentImageIndex(currentIndex);
-  };
-
+  }, []);
   const isDark = selectedTheme === 'dark';
   const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
   const relativeTime = useRelativeTime(post.meta?.createdAt)
+
+  const renderCarouselItem = useCallback(({ item }) => (
+    <Image
+      source={item}
+      style={[
+        styles.carouselImage,
+        { backgroundColor: themeColor.surface, width: windowWidth }
+      ]}
+      contentFit="cover"
+      transition={150}
+      cachePolicy="disk"
+    />
+  ), [themeColor.surface]);
 
   return (
     <View
       style={[
         styles.cardContainer,
         { borderBottomColor: themeColor.border },
-        isConfession ? isDark ? styles.confessionCardBg : {backgroundColor: themeColor.background} : { backgroundColor: themeColor.background }
+        isConfession ? isDark ? styles.confessionCardBg : { backgroundColor: themeColor.background } : { backgroundColor: themeColor.background }
       ]}
     >
 
@@ -232,9 +250,11 @@ export function PostCard({
                 >
                   <MoreHorizontal size={18} color={themeColor.textMuted} />
                 </Pressable>
-                <View style={styles.badgeIconWrapper}>
+                <Pressable 
+                onPress={() => setActiveFilter(post.verse)}
+                style={styles.badgeIconWrapper}>
                   {getVerseIcon?.(post.verse)}
-                </View>
+                </Pressable>
               </View>
             </View>
           </View>
@@ -246,11 +266,11 @@ export function PostCard({
         style={styles.contentBodyWrapper}
       >
 
-        <View style={[styles.badgeWrapper, { backgroundColor: themeColor.surface }]}>
+        <Pressable onPress={()=> setActiveFilter(post.verse)} style={[styles.badgeWrapper, { backgroundColor: themeColor.surface }]}>
           <Text style={[styles.badgeText, isConfession ? styles.textRose : styles.textCyan]}>
             {isConfession ? 'CONFESSION' : post.verse?.toUpperCase()}
           </Text>
-        </View>
+        </Pressable>
 
         {post.content?.text && (
           <Text style={[styles.bodyText, { color: themeColor.textPrimary }]}>
@@ -268,19 +288,12 @@ export function PostCard({
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={16}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item }) => (
-              <Image
-                source={item}
-                style={[
-                  styles.carouselImage,
-                  { backgroundColor: themeColor.surface, width: windowWidth }
-                ]}
-                contentFit="cover"
-                transition={200}
-                cachePolicy="disk"
-              />
-            )}
+            keyExtractor={imageKeyExtractor}
+            renderItem={renderCarouselItem}
+            initialNumToRender={1}
+            maxToRenderPerBatch={1}
+            windowSize={2}
+            removeClippedSubviews={true}
           />
           {post.content.images.length > 1 && (
             <View style={styles.paginationContainer}>
@@ -290,8 +303,8 @@ export function PostCard({
                   style={[
                     styles.paginationDot,
                     {
-                      backgroundColor: currentImageIndex === index 
-                        ? (isConfession ? '#F59E0B' : '#00BA34') 
+                      backgroundColor: currentImageIndex === index
+                        ? (isConfession ? '#F59E0B' : '#00BA34')
                         : themeColor.border
                     }
                   ]}
@@ -443,6 +456,19 @@ export function PostCard({
     </View>
   );
 }
+
+export const PostCard = React.memo(PostCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.post.id === nextProps.post.id &&
+    prevProps.selectedTheme === nextProps.selectedTheme &&
+    prevProps.post.engagement?.upvotes === nextProps.post.engagement?.upvotes &&
+    prevProps.post.engagement?.downvotes === nextProps.post.engagement?.downvotes &&
+    prevProps.post.engagement?.reposts === nextProps.post.engagement?.reposts &&
+    prevProps.post.engagement?.comments?.length === nextProps.post.engagement?.comments?.length &&
+    prevProps.post.userInteraction?.voteStatus === nextProps.post.userInteraction?.voteStatus &&
+    prevProps.post.userInteraction?.saved === nextProps.post.userInteraction?.saved
+  );
+});
 
 const styles = StyleSheet.create({
   cardContainer: {

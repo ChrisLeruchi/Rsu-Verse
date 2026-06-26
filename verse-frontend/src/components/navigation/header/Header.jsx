@@ -3,17 +3,18 @@ import { View, Pressable, Image, StyleSheet, Modal, Text, Dimensions, Animated }
 import { Bell, CircleQuestionMark, Settings, ShoppingBag, Moon, Mail, Sun, NotebookText, User2, Plus, Bookmark } from 'lucide-react-native';
 import { useNavigation, } from '@react-navigation/native'
 import { ThemeTokens } from '../../../../hooks/theme';
+import { useAppContext } from '../../../context/AppContext';
 
 
 const { width: screen_width } = Dimensions.get('window');
 const sideBar_width = screen_width * 0.8
 
-export function Header({
-  activeFilter,
+export function Header() {
+  const {activeFilter,
   setActiveFilter,
   selectedTheme,
-  setSelectedTheme
-}) {
+  setSelectedTheme,
+  bio} = useAppContext()
   const navigation = useNavigation();
 
   const isDark = selectedTheme === 'dark';
@@ -94,7 +95,7 @@ export function Header({
 
       <View style={styles.actionsContainer}>
         <Pressable
-          onPress={() => setActiveFilter("notifications")}
+          onPress={() => navigation.navigate('notifications')}
           style={[
             styles.notificationButton,
             activeFilter === "notifications" && styles.activeTextCyan
@@ -139,7 +140,7 @@ export function Header({
               style={styles.sdMenuProfile}
               onPress={() => {
                 handleClose();
-                navigation.navigate('ProfileScreen');
+                navigation.navigate('Profile');
               }}
             >
               <View style={[styles.smAvatarPlaceholder, { backgroundColor: themeColor.surface }]} />
@@ -149,7 +150,7 @@ export function Header({
                     Computer Engr
                   </Text>
                   <Text style={[styles.secText, { color: themeColor.textMuted }]}>
-                    13th disciple 📿
+                    {bio}
                   </Text>
                 </View>
 
