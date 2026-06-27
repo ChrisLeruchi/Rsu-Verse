@@ -26,6 +26,7 @@ import Animated, {
 
 import { HapticEngine } from '../../haptics/haptics';
 import { ThemeTokens } from '../../../hooks/theme';
+import { useEngagement } from '../../../hooks/useEngagement';
 
 const { width: windowWidth } = Dimensions.get('window');
 
@@ -34,14 +35,16 @@ const imageKeyExtractor = (_, index) => index.toString();
 export function PostCardComponent({ navigation, post, }) {
 
   const {
+    selectedTheme,
+    setActiveFilter
+  } = useAppContext();
+  const {
     handleUpvote,
     handleDownvotes,
     handleRepost,
     handleSave,
     handleShare,
-    selectedTheme,
-    setActiveFilter
-  } = useAppContext()
+  } = useEngagement();
 
   const {getVerseIcon} = verses() 
 

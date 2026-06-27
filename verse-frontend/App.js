@@ -38,7 +38,7 @@ export default function App() {
   const [authScreen, setAuthScreen] = useState('login');
 
   useEffect(() => {
-    setAuthState('auth');
+    setAuthState('app');
   }, []);
 
 
