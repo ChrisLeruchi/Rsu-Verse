@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  TextInput, 
-  Text, 
-  StyleSheet, 
-  Alert, 
-  ActivityIndicator, 
-  TouchableOpacity, 
+import {
+  View,
+  TextInput,
+  Text,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  TouchableOpacity,
   Image,
   Keyboard,
   TouchableWithoutFeedback
@@ -14,12 +14,12 @@ import {
 import authService from '../services/authService';
 import VerseLogo from '../../assets/verse_logo2.png';
 
-export default function LoginScreen({ onNavigateToRegister }) {
+export default function LoginScreen({ onNavigateToRegister, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  
+
   const passwordRef = useRef(null);
 
   const handleLogin = async () => {
@@ -27,11 +27,10 @@ export default function LoginScreen({ onNavigateToRegister }) {
       Alert.alert('Error', 'Please enter your email and password.');
       return;
     }
-
     setLoading(true);
     try {
       await authService.login({ email, password });
-      Alert.alert('Success', 'Welcome back to Verse!');
+      onLoginSuccess(); 
     } catch (err) {
       Alert.alert('Login Error', err.message);
     } finally {
@@ -54,10 +53,10 @@ export default function LoginScreen({ onNavigateToRegister }) {
           keyboardType="email-address"
           editable={!loading}
           returnKeyType="next"
-          onSubmitEditing={() => passwordRef.current?.focus()} 
+          onSubmitEditing={() => passwordRef.current?.focus()}
           blurOnSubmit={false}
         />
-        
+
         <TextInput
           ref={passwordRef}
           placeholder="Password"
@@ -68,7 +67,7 @@ export default function LoginScreen({ onNavigateToRegister }) {
           style={styles.input}
           editable={!loading}
           returnKeyType="done"
-          onSubmitEditing={handleLogin} 
+          onSubmitEditing={handleLogin}
         />
 
         {loading ? (

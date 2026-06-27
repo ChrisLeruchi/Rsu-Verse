@@ -115,7 +115,7 @@ export function ManageProfile({
         <View style={styles.avatarSection}>
           <TouchableOpacity activeOpacity={0.9} style={styles.avatarWrapper}>
             <View style={[styles.avatarCircle, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
-              <Text style={[styles.avatarInitials, { color: themeColor.textMuted }]}>CI</Text>
+              <Text style={[styles.avatarInitials, { color: isDark ?'#FFF' : '#000' }]}>CI</Text>
             </View>
 
             <View style={[styles.cameraBadge, { backgroundColor: isDark ? themeColor.surface : COLORS.white, borderColor: themeColor.border }]}>
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   },
   avatarInitials: {
     fontSize: 26,
-    fontWeight: "500",
+    fontWeight: "700",
     letterSpacing: -0.5,
   },
   cameraBadge: {

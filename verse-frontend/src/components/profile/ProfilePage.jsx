@@ -1,12 +1,23 @@
-import React, { useRef, useCallback, useState } from "react";
+import React, { useRef, useCallback, useState, useMemo } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, Modal, Pressable } from "react-native";
-import { ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X, Pencil } from "lucide-react-native";
+import { ShieldCheck, GraduationCap, Flame, MessageSquare, UserCheck, ChevronDown, X, Pencil, MessageCircle } from "lucide-react-native";
 import { ThemeTokens } from "../../../hooks/theme";
+import { useAppContext } from "../../context/AppContext";
 import { ProfileFilter } from "./ProfileFilter";
 
-export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
+export function ProfilePage({ navigation }) {
+
+  const {
+    selectedTheme,
+    bio,
+    displayName,
+    username,
+    posts
+  } = useAppContext();
+
   const [isStatsOpen, setIsStatsOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('posts');
   const scrollViewRef = useRef(null);
 
   const isDark = selectedTheme === 'dark';
@@ -16,15 +27,62 @@ export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
     useCallback(() => {
       return () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        setActiveFilter('posts');
       };
     }, [])
   );
 
+
+  const userMetrics = useMemo(() => {
+    const cleanUser = username?.toLowerCase() || '';
+    const computationalMatches = posts.filter(post => post?.author?.username?.toLowerCase() === cleanUser);
+
+    return {
+      postsCount: computationalMatches.length,
+      confessionsCount: computationalMatches.filter(p => p?.verse === 'confessions').length,
+      reputationScore: 1000 + (computationalMatches.length * 15)
+    };
+  }, [posts, username]);
+
+  const emptyState = [
+    { id: 'posts', message: 'No posts yet', title: null },
+    { id: 'comments', message: 'Comments you make on Verse will appear here.', title: 'No comments' },
+    { id: 'reposts', message: 'No reposts yet', title: null },
+    { id: 'upvotes', message: 'Posts you upvote will appear here.', title: null },
+    { id: 'downvotes', message: 'Posts you downvote will appear here.', title: null },
+  ]
+
+
+  const horizontalTabRenderData = useMemo(() => {
+    const cleanUser = username?.toLowerCase() || '';
+
+    switch (activeFilter) {
+      case 'posts':
+        return posts.filter(post => post?.author?.username?.toLowerCase() === cleanUser && !post?.isRepost);
+      case 'reposts':
+        return posts.filter(post => post?.author?.username?.toLowerCase() === cleanUser && post?.isRepost);
+      case 'comments':
+        return posts.filter(post => Array.isArray(post?.engagement?.comments) &&
+          post.engagement.comments.some(c => c?.author?.username?.toLowerCase() === cleanUser)
+        );
+      case 'upvotes':
+        return posts.filter(post => Array.isArray(post?.engagement?.upvotedBy) &&
+          post.engagement.upvotedBy.some(u => u?.toLowerCase() === cleanUser)
+        );
+      case 'downvotes':
+        return posts.filter(post => Array.isArray(post?.engagement?.downvotedBy) &&
+          post.engagement.downvotedBy.some(d => d?.toLowerCase() === cleanUser)
+        );
+      default:
+        return [];
+    }
+  }, [posts, activeFilter, username]);
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
-      <StatusBar 
-        barStyle={isDark ? "light-content" : "dark-content"} 
-        backgroundColor={themeColor.background} 
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={themeColor.background}
       />
 
       <View style={[styles.header, { backgroundColor: themeColor.background }]}>
@@ -42,13 +100,18 @@ export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+
         <View style={styles.heroRow}>
-          <View style={[styles.avatarPlaceholder, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]} />
-          
+          <View style={[styles.avatarPlaceholder, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
+            <Text style={[styles.avatarLetter, { color: themeColor.textPrimary }]}>
+              {displayName ? displayName.charAt(0).toUpperCase() : '?'}
+            </Text>
+          </View>
+
           <View style={styles.identityMeta}>
             <View style={styles.profileNameRow}>
               <Text style={[styles.profileName, { color: themeColor.textPrimary }]}>{displayName}</Text>
-              
+
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => setIsStatsOpen(true)}
@@ -67,8 +130,8 @@ export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
                 <Pencil size={16} color={themeColor.textSecondary} />
               </Pressable>
             </View>
-            
-            <Text style={[styles.bio, { color: themeColor.textSecondary }]}>{bio}</Text>
+
+            <Text style={[styles.bio, { color: themeColor.textSecondary }]}>{bio || "Enter your bio."}</Text>
 
             <View style={styles.tagRow}>
               <View style={[styles.deptTag, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}>
@@ -81,9 +144,46 @@ export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
             </View>
           </View>
         </View>
-        <ProfileFilter 
+
+
+        <ProfileFilter
           selectedTheme={selectedTheme}
+          activeFilter={activeFilter}
+          setActiveFilter={setActiveFilter}
         />
+
+        <View style={styles.feedWrapper}>
+          {horizontalTabRenderData.length === 0 ? (
+            <View style={[styles.emptyContainer, { backgroundColor: themeColor.surface }]}>
+              <MessageCircle size={32} color={themeColor.textMuted} style={{ marginBottom: 8 }} />
+              {emptyState.map((filter) => {
+                const noInteraction = filter.id === activeFilter
+
+                return (
+                  noInteraction && (
+                    <Text key={filter.id} style={[styles.emptyText, { color: themeColor.textSecondary }]}>
+                      {filter.message}
+                    </Text>
+                  )
+                )
+              })}
+            </View>
+          ) : (
+            horizontalTabRenderData.map((post) => (
+              <View
+                key={post.id || Math.random().toString()}
+                style={[styles.postCard, { backgroundColor: themeColor.surface, borderColor: themeColor.border }]}
+              >
+                <Text style={[styles.postText, { color: themeColor.textPrimary }]}>
+                  {post?.content?.text || "Empty content."}
+                </Text>
+                <Text style={[styles.postVerseMeta, { color: themeColor.textMuted }]}>
+                  Posted within: /{post?.verse || "general"}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
       </ScrollView>
 
       <Modal
@@ -115,15 +215,19 @@ export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
                   <UserCheck size={16} color="#17CB49" />
                   <Text style={[styles.metricLabel, { color: "#17CB49" }]}>Reputation</Text>
                 </View>
-                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>1,420</Text>
+                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>
+                  {userMetrics.reputationScore.toLocaleString()}
+                </Text>
               </View>
 
               <View style={[styles.metricBox, { backgroundColor: themeColor.surface }]}>
                 <View style={styles.metricHeaderRow}>
                   <MessageSquare size={16} color={themeColor.textMuted} />
-                  <Text style={[styles.metricLabel, { color: themeColor.textSecondary }]}>My Verses</Text>
+                  <Text style={[styles.metricLabel, { color: themeColor.textSecondary }]}>Posts made</Text>
                 </View>
-                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>48 posts</Text>
+                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>
+                  {userMetrics.postsCount} {userMetrics.postsCount === 1 ? 'post' : 'posts'}
+                </Text>
               </View>
 
               <View style={[styles.metricBox, { backgroundColor: themeColor.surface }]}>
@@ -131,7 +235,9 @@ export function ProfilePage({ navigation, selectedTheme, bio, displayName }) {
                   <Flame size={16} color="#F59E0B" />
                   <Text style={[styles.metricLabel, { color: "#F59E0B" }]}>Confessions made</Text>
                 </View>
-                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>12</Text>
+                <Text style={[styles.metricValue, { color: themeColor.textPrimary }]}>
+                  {userMetrics.confessionsCount}
+                </Text>
               </View>
             </View>
           </View>
@@ -190,6 +296,12 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarLetter: {
+    fontSize: 22,
+    fontWeight: "700",
   },
   identityMeta: {
     flexDirection: "column",
@@ -250,6 +362,38 @@ const styles = StyleSheet.create({
     color: "#F59E0B",
     fontSize: 11,
     fontWeight: "600",
+  },
+  feedWrapper: {
+    paddingHorizontal: 16,
+    marginTop: 16,
+    gap: 12,
+  },
+  postCard: {
+    width: "100%",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  postText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "400",
+  },
+  postVerseMeta: {
+    fontSize: 11,
+    marginTop: 8,
+    fontWeight: "500",
+  },
+  emptyContainer: {
+    width: "100%",
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  emptyText: {
+    fontSize: 13,
+    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,

@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  TextInput, 
-  Text, 
-  StyleSheet, 
-  Alert, 
-  ActivityIndicator, 
-  ScrollView, 
-  TouchableOpacity, 
+import {
+  View,
+  TextInput,
+  Text,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
   Image,
   Dimensions,
   Keyboard,
@@ -35,7 +35,7 @@ const RSU_DEPARTMENTS = [
   "Architecture"
 ];
 
-export default function RegisterScreen({ onNavigateToLogin }) {
+export default function RegisterScreen({ onNavigateToLogin, onLoginSuccess }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -48,11 +48,11 @@ export default function RegisterScreen({ onNavigateToLogin }) {
   const [filteredDepts, setFilteredDepts] = useState([]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name] = useState(''); 
-  const [matricNumber] = useState(''); 
+  const [name] = useState('');
+  const [matricNumber] = useState('');
   const [receiptImage] = useState(null);
 
-  
+
   const passwordInputRef = useRef(null);
 
   const handleDateChange = (event, selectedDate) => {
@@ -101,9 +101,8 @@ export default function RegisterScreen({ onNavigateToLogin }) {
         });
       }
 
-      const result = await authService.register(formData);
-      Alert.alert('Success 🎉', result.message || 'Account created successfully!');
-      onNavigateToLogin();
+      await authService.register(formData);
+      onLoginSuccess();
     } catch (err) {
       Alert.alert('Registration Error', err.message);
     } finally {
@@ -116,7 +115,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
-            
+
             {renderHeaderNavigation()}
             <Image style={styles.logo} source={VerseLogo} />
 
@@ -125,7 +124,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
               <View style={styles.stepBox}>
                 <Text style={styles.stepTitle}>When is your birthday?</Text>
                 <Text style={styles.stepDescription}>Neither your birthday or age will be displayed publicly</Text>
-                
+
                 <View style={styles.pickerContainer}>
                   <DateTimePicker
                     value={dob}
@@ -145,8 +144,8 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                   </View>
                 )}
 
-                <TouchableOpacity 
-                  style={[styles.nextButton, !isAgeValid && styles.disabledButton]} 
+                <TouchableOpacity
+                  style={[styles.nextButton, !isAgeValid && styles.disabledButton]}
                   onPress={() => isAgeValid && setStep(2)}
                   disabled={!isAgeValid}
                 >
@@ -159,7 +158,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
             {step === 2 && (
               <View style={styles.stepBox}>
                 <Text style={styles.stepTitle}>{"What's your current level?"}</Text>
-              
+
                 <View style={styles.chipGrid}>
                   {['100L', '200L', '300L', '400L', '500L', 'Alumni'].map((item) => (
                     <TouchableOpacity
@@ -172,8 +171,8 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                   ))}
                 </View>
 
-                <TouchableOpacity 
-                  style={[styles.nextButton, !level && styles.disabledButton]} 
+                <TouchableOpacity
+                  style={[styles.nextButton, !level && styles.disabledButton]}
                   onPress={() => level && setStep(3)}
                   disabled={!level}
                 >
@@ -182,7 +181,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
               </View>
             )}
 
-     
+
             {step === 3 && (
               <View style={styles.stepBox}>
                 <Text style={styles.stepTitle}>Search your Department</Text>
@@ -197,8 +196,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                     if (text.trim() === '') {
                       setFilteredDepts([]);
                     } else {
-                      // Strict block filter checking consecutive letter strings directly
-                      const filtered = RSU_DEPARTMENTS.filter(d => 
+                      const filtered = RSU_DEPARTMENTS.filter(d =>
                         d.toLowerCase().indexOf(text.toLowerCase()) !== -1
                       );
                       setFilteredDepts(filtered);
@@ -212,8 +210,8 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                   <View style={styles.dropdownScrollContainer}>
                     <ScrollView nestedScrollEnabled={true} style={{ maxHeight: 180 }} keyboardShouldPersistTaps="handled">
                       {filteredDepts.map((item) => (
-                        <TouchableOpacity 
-                          key={item} 
+                        <TouchableOpacity
+                          key={item}
                           style={[styles.suggestionRow, department === item && styles.suggestionActive]}
                           onPress={() => {
                             setDepartment(item);
@@ -229,8 +227,8 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                   </View>
                 )}
 
-                <TouchableOpacity 
-                  style={[styles.nextButton, !department && styles.disabledButton]} 
+                <TouchableOpacity
+                  style={[styles.nextButton, !department && styles.disabledButton]}
                   onPress={() => department && setStep(4)}
                   disabled={!department}
                 >
@@ -270,8 +268,8 @@ export default function RegisterScreen({ onNavigateToLogin }) {
                   onSubmitEditing={() => { if (email && password.length >= 8) setStep(5); }}
                 />
 
-                <TouchableOpacity 
-                  style={[styles.nextButton, (!email || password.length < 8) && styles.disabledButton]} 
+                <TouchableOpacity
+                  style={[styles.nextButton, (!email || password.length < 8) && styles.disabledButton]}
                   onPress={() => email && password.length >= 8 && setStep(5)}
                   disabled={!email || password.length < 8}
                 >
@@ -315,7 +313,7 @@ export default function RegisterScreen({ onNavigateToLogin }) {
 const styles = StyleSheet.create({
   scrollContainer: { flexGrow: 1, backgroundColor: '#008060', },
   container: { padding: 24, paddingBottom: 40 },
-  navHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',  },
+  navHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', },
   backButton: { padding: 8, paddingLeft: 0 },
   backArrow: { color: '#ffffff', fontSize: 24, fontWeight: 'bold' },
   backButtonPlaceholder: { width: 40 },
@@ -329,8 +327,8 @@ const styles = StyleSheet.create({
   policyAlertBox: { backgroundColor: '#7f1d1d', padding: 16, borderRadius: 12, marginTop: 15, borderWidth: 1, borderColor: '#f87171' },
   policyAlertText: { color: '#fca5a5', fontSize: 13, fontWeight: '500', lineHeight: 18, textAlign: 'center' },
   input: { borderWidth: 1, borderColor: '#004d3a', padding: 16, marginBottom: 12, borderRadius: 12, backgroundColor: '#ffffff', color: '#111111', fontSize: 16 },
-  
-  
+
+
   dropdownScrollContainer: { backgroundColor: '#004d3a', borderRadius: 12, padding: 6, marginBottom: 14, borderWidth: 1, borderColor: '#005c45', overflow: 'hidden' },
   suggestionRow: { padding: 14, borderRadius: 8, marginBottom: 4 },
   suggestionActive: { backgroundColor: '#ffffff' },

@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Dimensions
@@ -153,6 +154,7 @@ export function PostDetail({
     setCommentText("");
     setReplyingTo(null);
     setSecReplyingTo(null);
+    Keyboard.dismiss()
   };
 
   const handleScroll = (event) => {

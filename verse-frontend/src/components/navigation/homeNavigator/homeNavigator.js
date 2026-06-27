@@ -16,7 +16,7 @@ import { AboutVerse } from "../../profile/AboutVerse/AboutVerse";
 import { ContactUs } from "../../profile/ContactUs/ContactUs";
 import { PasswordSecurity } from "../../profile/Password_Security/Security/PasswordSecurity";
 import { ManageProfile } from "../../profile/Manage-Profile/ManageProfile";
-import { Notification } from "../../profile/Notification/Notification";
+import { Notification } from "../../profile/Notification/NotificationMgt";
 import { ProfilePage } from "../../profile/ProfilePage";
 
 
