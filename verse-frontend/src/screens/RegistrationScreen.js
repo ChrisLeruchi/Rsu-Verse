@@ -84,24 +84,17 @@ export default function RegisterScreen({ onNavigateToLogin, onLoginSuccess }) {
     Keyboard.dismiss();
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('email', email.trim().toLowerCase());
-      formData.append('password', password);
-      formData.append('level', level);
-      formData.append('department', department);
-      formData.append('name', name ? name.trim() : 'Pending OCR Extraction');
-      formData.append('matricNumber', matricNumber ? matricNumber.trim().toUpperCase() : `TEMP-${Date.now()}`);
-      formData.append('faculty', 'Engineering');
-
-      if (receiptImage) {
-        formData.append('receiptImage', {
-          uri: receiptImage.uri,
-          name: 'receipt.jpg',
-          type: 'image/jpeg',
-        });
+      const userData = {
+        email: email.trim().toLocaleLowerCase(),
+        password: password,
+        level: level,
+        department: department,
+        name: name ? name.trim() : 'Pending reciept verification',
+        matricNumber: matricNumber ? matricNumber.trim().toUpperCase() : `TEMP-${Date.now()}`,
+        faculty: 'Engineering'
       }
 
-      await authService.register(formData);
+      await authService.register(userData);
       onLoginSuccess();
     } catch (err) {
       Alert.alert('Registration Error', err.message);

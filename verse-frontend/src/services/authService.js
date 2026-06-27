@@ -2,13 +2,9 @@ import API from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const authService = {
-  register: async (formData) => {
+  register: async (userData) => {
     try {
-      const response = await API.post('/auth/register', formData, {
-        headers: {
-          'Content-type': 'multipart/form-data'
-        }
-      });
+      const response = await API.post('/auth/register', userData);
       if (response.data && response.data.token) {
         await AsyncStorage.setItem('userToken', response.data.token);
       }
