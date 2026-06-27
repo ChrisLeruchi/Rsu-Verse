@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "student",
   },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -56,16 +60,20 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+}, {timestamps: true});
 
 // hash password before saving user to database
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   
-
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);  
 })
+
+//compare password method
+userSchema.methods.comparePassword = async function (userPassword: string) {
+  return await bcrypt.compare(userPassword, this.password);
+};
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 

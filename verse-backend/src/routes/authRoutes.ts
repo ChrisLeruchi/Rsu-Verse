@@ -1,13 +1,13 @@
 import express from "express";
 import User from "../lib/models/User.ts";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import "dotenv/config"
 
 const router = express.Router();
 
 const generateToken = (userId: string) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET as string, {
-    expiresIn: "1h",
+    expiresIn: "1d",
   });
 };
 
@@ -57,6 +57,7 @@ router.post("/register", async (req, res) => {
       faculty,
       name,
       matricNumber,
+      isAdmin: false, 
     });
 
     await newUser.save();
@@ -83,28 +84,23 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try{
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Please provide both email and password" });
-  }
+    if (!email || !password) return res.status(400).json({ message: "Please provide both email and password" });
 
-  try {
+    // Check if user exists
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (!user) return res.status(400).json({ message: "Invalid Credentials" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    // Check if password is correct
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect) return res.status(400).json({ message: "Invalid Credentials" });
 
+    // Generate token
     const token = generateToken(user._id);
 
-    res.json({
+    res.status(200).json({
       token,
       user: {
         id: user._id,
@@ -115,9 +111,11 @@ router.post("/login", async (req, res) => {
         name: user.name,
         matricNumber: user.matricNumber,
       },
+      message: `User: ${user.name} logged in successfully`,
     });
+    
   } catch (error) {
-    console.error(error);
+    console.error(`Error in login route ${error}`);
     res.status(500).json({ message: "Server error" });
   }
 });
