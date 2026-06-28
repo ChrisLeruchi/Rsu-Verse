@@ -34,8 +34,23 @@ API.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error(`🔴 [RESPONSE ERROR] ${error.response?.status} ${error.config?.url}`);
-    console.error('💬 [ERROR MESSAGE]', error.response?.data?.message || error.message);
+    const status = error.response?.status ?? 'NO_STATUS';
+    const url = error.config?.url ?? 'NO_URL';
+    const message = error.response?.data?.message ?? error.message ?? 'Unknown error';
+    const rawResponse = error.response?.data ?? 'No response body';
+
+    console.error(`🔴 [RESPONSE ERROR] Status: ${status} | URL: ${url}`);
+    console.error(`💬 [ERROR MESSAGE] ${message}`);
+    console.error(`📄 [RAW RESPONSE]`, rawResponse);
+
+    if (error.message?.includes('JSON Parse error')) {
+      console.error('⚠️ [CLIENT] Server returned non-JSON. Backend may be sending plain text or HTML instead of JSON.');
+    }
+
+    if (!error.response) {
+      console.error('⚠️ [CLIENT] No response received — server unreachable, wrong IP, or CORS issue.');
+    }
+
     return Promise.reject(error);
   }
 );
