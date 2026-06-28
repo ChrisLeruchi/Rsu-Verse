@@ -11,15 +11,33 @@ const API = axios.create({
 
 API.interceptors.request.use(
   async (config) => {
+    console.log('🔧 [CLIENT] Interceptor fired, building request...');
     const token = await AsyncStorage.getItem('userToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log(`🌐 [REQUEST] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    console.log('📦 [REQUEST BODY]', config.data ? JSON.parse(config.data) : 'none');
+    console.log('🔑 [AUTH HEADER]', token ? 'Bearer token attached' : 'No token');
     return config;
   },
   (error) => {
+    console.error('❌ [REQUEST ERROR]', error.message);
     return Promise.reject(error);
   }
 );
 
-export default API
+API.interceptors.response.use(
+  (response) => {
+    console.log(`✅ [RESPONSE] ${response.status} ${response.config.url}`);
+    console.log('📬 [RESPONSE DATA]', response.data);
+    return response;
+  },
+  (error) => {
+    console.error(`🔴 [RESPONSE ERROR] ${error.response?.status} ${error.config?.url}`);
+    console.error('💬 [ERROR MESSAGE]', error.response?.data?.message || error.message);
+    return Promise.reject(error);
+  }
+);
+
+export default API;
