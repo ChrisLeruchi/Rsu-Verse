@@ -1,249 +1,316 @@
-import React, { useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, StatusBar, FlatList } from "react-native";
-import { ChevronLeft, MessageSquare, Flame, Store, Megaphone, Bell } from "lucide-react-native";
+import React, { useMemo, } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  FlatList,
+} from "react-native";
+import { ChevronLeft, Bell } from "lucide-react-native";
 import { useAppContext } from "../../../context/AppContext";
 import { ThemeTokens } from "../../../../hooks/theme";
 
-const mockNotifications = [
-  {
-    id: "ntf_1",
-    type: "reply",
-    title: "Post from",
-    body: "Computer Engineering",
-    department: "CE",
-    timestamp: '2m',
-    isRead: false
-  },
-  {
-    id: "ntf_3",
-    type: "marketplace",
-    title: "Offer on MacBook Pro",
-    body: "Emeka Didi",
-    department: "MS",
-    timestamp: "5h",
-    isRead: true,
-  },
-  {
-    id: "ntf_4",
-    type: "verse",
-    title: "Post from",
-    body: "Law",
-    department: "LW",
-    timestamp: "1d",
-    isRead: true,
-  },
-]
-
 export function NotificationInbox({ navigation }) {
-  const { selectedTheme } = useAppContext();
+  const { selectedTheme, posts, notifications=[], setNotifications } = useAppContext();
+  const isDark = selectedTheme === "dark";
+  const c = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const isDark = selectedTheme === 'dark';
-  const themeColor = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light
+  const postMap = useMemo(() => {
+    return posts.reduce((acc, post) => {
+      acc[post.id] = post;
+      return acc;
+    }, {});
+  }, [posts]);
 
-  const handleNotificationPress = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+
+
+
+  const enrichedNotifications = useMemo(() => {
+    return notifications.map((n) => {
+      const linkedPost = postMap[n.postId];
+      const snippet = linkedPost?.content?.text
+        ? linkedPost.content.text.slice(0, 80)
+        : null;
+      return { ...n, snippet };
+    });
+  }, [notifications, postMap]);
+
+  const unreadCount = enrichedNotifications.filter((n) => !n.isRead).length;
+  const newNotifications = enrichedNotifications.filter((n) => !n.isRead);
+  const earlierNotifications = enrichedNotifications.filter((n) => n.isRead);
+
+  const handleNotificationPress = (item) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
+    );
+
+    if (item.type === "reply" || item.type === "verse") {
+      navigation?.navigation("Comments", { postId: item.postId })
+    } else if (item.type === "marketplace") {
+
+      navigation?.navigate("ChatRoom", { chatId: "2" });
+    };
   };
 
-  const getNotificationIcon = (department) => {
+  const handleMarkAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  };
+
+  const renderAvatar = (department) => (
+    <View style={[styles.avatar, { backgroundColor: c.surfaceElevated }]}>
+      <Text style={[styles.avatarText, { color: c.textSecondary }]}>
+        {department || "CE"}
+      </Text>
+    </View>
+  );
+
+  const renderCard = ({ item }) => {
+    const isUnread = !item.isRead;
     return (
-      <View style={[styles.avatarPlaceholder, { backgroundColor: themeColor.surfaceElevated }]}>
-        <Text style={[styles.avatarText, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }]}>
-          {department || "CE"}
-        </Text>
-      </View>
+      <TouchableOpacity
+        onPress={() => handleNotificationPress(item.id)}
+        activeOpacity={0.75}
+        style={[
+          styles.card,
+          { borderBottomColor: c.border, backgroundColor: c.background },
+          isUnread && {
+            backgroundColor: "rgba(0, 186, 52, 0.15)",
+          },
+        ]}
+      >
+        <View style={styles.bellCol}>
+          <View
+            style={[
+              styles.bellIconWrapper,
+              {
+                backgroundColor: isUnread
+                  ? "rgba(0, 186, 52, 0.08)"
+                  : c.background,
+              },
+            ]}
+          >
+            <Bell
+              size={16}
+              color={c.accent}
+              fill={c.accent}
+              strokeWidth={2}
+            />
+          </View>
+        </View>
+
+        <View style={styles.centerCol}>
+          <View style={styles.topRow}>
+            {renderAvatar(item.department)}
+            <Text style={[styles.cardTitle, { color: c.textMuted }]}>
+              {item.title}
+            </Text>
+            <Text style={[styles.dot, { color: c.border }]}>·</Text>
+            <Text style={[styles.timestamp, { color: c.textMuted }]}>
+              {item.timestamp}
+            </Text>
+          </View>
+          <Text
+            style={[
+              styles.cardBody,
+              {
+                color: c.textPrimary,
+                fontWeight: isUnread ? "600" : "500",
+              },
+            ]}
+            numberOfLines={2}
+          >
+            {item.body}
+          </Text>
+        </View>
+
+        {item.snippet ? (
+          <View
+            style={[
+              styles.snippetCol,
+              { backgroundColor: c.background, borderColor: c.border },
+            ]}
+          >
+            <Text
+              style={[styles.snippetText, { color: c.textMuted }]}
+              numberOfLines={5}
+            >
+              {item.snippet}
+            </Text>
+          </View>
+        ) : null}
+      </TouchableOpacity>
     );
   };
 
+  const renderSectionLabel = (label) => (
+    <View style={[styles.sectionLabel, { borderBottomColor: c.border }]}>
+      <Text style={[styles.sectionLabelText, { color: c.textMuted }]}>
+        {label}
+      </Text>
+    </View>
+  );
+
+  const sections = [
+    ...(newNotifications.length > 0
+      ? [{ type: "label", label: "New", id: "label_new" }, ...newNotifications]
+      : []),
+    ...(earlierNotifications.length > 0
+      ? [
+        { type: "label", label: "Earlier", id: "label_earlier" },
+        ...earlierNotifications,
+      ]
+      : []),
+  ];
+
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColor.background }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: c.background }]}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor={themeColor.background}
+        backgroundColor={c.background}
       />
 
-      <View style={[styles.header, { backgroundColor: themeColor.background, borderBottomColor: themeColor.border }]}>
-        <View style={styles.headerLeft}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: c.background, borderBottomColor: c.border },
+        ]}
+      >
+        <View style={styles.headerTop}>
           <TouchableOpacity
             onPress={() => navigation?.goBack()}
-            style={styles.headerAction}
+            style={[styles.backBtn, { backgroundColor: c.surface }]}
             activeOpacity={0.7}
           >
-            <ChevronLeft size={20} color={isDark ? "#FFFFFF" : themeColor.textPrimary} strokeWidth={2.5} />
+            <ChevronLeft size={18} color={c.textPrimary} strokeWidth={2.5} />
           </TouchableOpacity>
-          <View>
-            <Text style={[styles.headerTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary, paddingHorizontal: 0 }]}>
-              Notifications
+          <Text style={[styles.headerTitle, { color: c.textPrimary }]}>
+            Notifications
+          </Text>
+        </View>
+
+        <View style={styles.headerMeta}>
+          {unreadCount > 0 ? (
+            <View
+              style={[
+                styles.unreadPill,
+                { backgroundColor: "rgba(0, 186, 52, 0.1)" },
+              ]}
+            >
+              <Text style={[styles.unreadPillText, { color: c.accent }]}>
+                {unreadCount} unread
+              </Text>
+            </View>
+          ) : (
+            <View />
+          )}
+          <TouchableOpacity onPress={handleMarkAllRead} activeOpacity={0.7}>
+            <Text style={[styles.markReadText, { color: c.textMuted }]}>
+              Mark all as read
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
       <FlatList
-        data={notifications}
+        data={sections}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={
+          sections.length === 0 ? styles.emptyContainer : null
+        }
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: themeColor.textMuted }]}>Your notification stream is clear.</Text>
+          <View style={styles.emptyInner}>
+            <Text style={[styles.emptyText, { color: c.textMuted }]}>
+              Your notification stream is clear.
+            </Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => handleNotificationPress(item.id)}
-            activeOpacity={0.85}
-            style={[
-              styles.notificationCard,
-              !item.isRead ? ({ borderLeftWidth: 3.5, backgroundColor: "rgba(0, 186, 52, 0.2)", borderBottomColor: themeColor.border }) : ({ borderLeftWidth: 3.5, backgroundColor: themeColor.background, borderBottomColor: themeColor.border })
-            ]}
-          >
-            <View style={styles.card}>
-              <View style={styles.notificationIcon}>
-                <Bell size={22} color="rgba(0, 186, 52, 1)" fill="rgba(0, 186, 52, 1)" strokeWidth={3} />
-              </View>
-              
-              <View style={styles.cardRightContent}>
-                <View style={styles.cardHeaderRow}>
-                  <View style={styles.cardHeaderLeft}>
-                    <View style={[styles.iconWrapper]}>
-                      {getNotificationIcon(item.department)}
-                    </View>
-                    <View style={styles.title}>
-                      <Text style={[styles.cardTitle, { color: isDark ? "#FFFFFF" : themeColor.textPrimary }, !item.isRead && styles.unreadTitleText]}>
-                        {item.title}
-                      </Text>
-                      <Text style={[styles.timestamp, { color: themeColor.textMuted }]}>&bull;{item.timestamp}</Text>
-                    </View>
-                  </View>
-                </View>
-
-                <Text style={[styles.cardBody, { color: themeColor.textPrimary }]} numberOfLines={2}>
-                  {item.body}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => {
+          if (item.type === "label") return renderSectionLabel(item.label);
+          return renderCard({ item });
+        }}
       />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
+  safeArea: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: 'center',
-    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingTop: 8,
+    paddingBottom: 14,
     borderBottomWidth: 1,
+    gap: 14,
   },
-  headerLeft: {
-    flexDirection: "column",
-    gap: 12,
+  headerTop: { flexDirection: "row", alignItems: "center", gap: 10 },
+  backBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  headerAction: {
-    padding: 4
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    letterSpacing: -0.3
-  },
-  unreadBadgeText: {
-    fontSize: 11,
-    color: "#17CB49",
-    fontWeight: "600",
-    marginTop: 1,
-  },
-  markReadButton: {
+  headerTitle: { fontSize: 22, fontWeight: "700", letterSpacing: -0.5 },
+  headerMeta: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: "rgba(23, 203, 73, 0.08)",
-    borderRadius: 20,
+    justifyContent: "space-between",
   },
-  markReadText: {
-    fontSize: 12,
-    color: "#17CB49",
+  unreadPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  unreadPillText: { fontSize: 12, fontWeight: "600" },
+  markReadText: { fontSize: 12, fontWeight: "500" },
+  sectionLabel: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
+  sectionLabelText: {
+    fontSize: 11,
     fontWeight: "600",
-  },
-  scrollContent: {
-    gap: 1,
-  },
-  avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#1F2633",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: 'row'
-  },
-  avatarText: {
-    fontSize: 12,
-    fontWeight: "700",
+    textTransform: "uppercase",
   },
   card: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    gap: 10
-  },
-  notificationIcon: {
-    paddingTop: 6,
-  },
-  cardRightContent: {
-    flex: 1,
-    flexDirection: 'column',
-    gap: 4,
-    justifyContent: 'flex-start'
-  },
-  notificationCard: {
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  cardHeaderRow: {
     flexDirection: "row",
-    justifyContent: 'center',
-    gap: 5
+    alignItems: "flex-start",
+    gap: 12,
+    padding: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderLeftWidth: 3,
   },
-  cardHeaderLeft: {
-    flexDirection: "column",
-    flex: 1,
-    gap: 10,
-  },
-  iconWrapper: {
-  },
-  title: {
-    flexDirection: 'row',
+  bellCol: { paddingTop: 2, flexShrink: 0 },
+  bellIconWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: "center",
-    gap: 5
+    justifyContent: "center",
   },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  unreadTitleText: {
-    fontWeight: "700",
-  },
-  timestamp: {
-    fontSize: 12,
-  },
-  cardBody: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  emptyContainer: {
-    paddingTop: 60,
+  centerCol: { flex: 1, flexDirection: "column", gap: 5, minWidth: 0 },
+  topRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  avatar: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
     alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
   },
-  emptyText: {
-    fontSize: 14,
-  }
+  avatarText: { fontSize: 10, fontWeight: "700", letterSpacing: 0.3 },
+  cardTitle: { fontSize: 14, fontWeight: "500" },
+  dot: { fontSize: 11 },
+  timestamp: { fontSize: 12 },
+  cardBody: { fontSize: 14, lineHeight: 19 },
+  snippetCol: {
+    flexShrink: 0,
+    width: 58,
+    height: 54,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 3,
+  },
+  snippetText: { fontSize: 8, lineHeight: 10 },
+
+  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  emptyInner: { paddingTop: 80, alignItems: "center" },
+  emptyText: { fontSize: 14 },
 });

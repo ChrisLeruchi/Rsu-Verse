@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { useFeedState } from "../assets/states/context";
 import { useNotificationState } from "../assets/states/notificationMgt";
 import { useSupportState } from "../assets/states/supportMgt";
@@ -9,9 +9,90 @@ import { useUtilityState } from "../assets/states/utitilities";
 const FeedContext = createContext(null);
 const UIContext = createContext(null);
 
+export const mock_chat = {
+  chats: [
+    {
+      id: "1",
+      department: "Computer Engineering",
+      faculty: "Engineering",
+      initials: "CE",
+      lastMessage: "Did you hear what that lecturer did?",
+      timeStamp: "2m",
+      unreadCount: 2,
+      isOnline: true,
+      messages: [
+        { id: "m3", senderId: "other", text: "Did you hear what that lecturer did?", time: "4:16 PM" },
+        { id: "m2", senderId: "me", text: "Which one? The GNS guy?", time: "4:15 PM" },
+        { id: "m1", senderId: "other", text: "Hey! You in the engineering group?", time: "4:12 PM" },
+      ],
+    },
+    {
+      id: "2",
+      department: "Management Sciences",
+      faculty: "Management",
+      initials: "MS",
+      lastMessage: "Sent an attachment: Marketplace Item",
+      timeStamp: "1h",
+      unreadCount: 0,
+      isOnline: false,
+      messages: [
+        { id: "m2", senderId: "me", text: "Sent an attachment: Marketplace Item", time: "3:10 PM" },
+        { id: "m1", senderId: "other", text: "Do you have any textbooks for sale?", time: "3:08 PM" },
+      ],
+    },
+    {
+      id: "3",
+      department: "Law",
+      faculty: "Law",
+      initials: "LW",
+      lastMessage: "The moot court schedule just dropped",
+      timeStamp: "1d",
+      unreadCount: 0,
+      isOnline: false,
+      messages: [
+        { id: "m1", senderId: "other", text: "The moot court schedule just dropped", time: "Yesterday" },
+      ],
+    },
+  ],
+};
+
 export function AppProvider({ children }) {
 
- const { posts, setPosts, activeFilter, setActiveFilter, activeTab, setActiveTab, recents, setRecents, search, setSearch } = useFeedState();
+  const { posts, setPosts, activeFilter, setActiveFilter, activeTab, setActiveTab, recents, setRecents, search, setSearch } = useFeedState();
+
+  const [ mockChat, setMockChat ] = useState(mock_chat);
+  const [notifications, setNotifications] = useState([
+      {
+        id: "ntf_1",
+        postId: posts[0]?.id ?? null,
+        type: "reply",
+        title: "Post from",
+        body: "Computer Engineering",
+        department: "CE",
+        timestamp: "2m",
+        isRead: false,
+      },
+      {
+        id: "ntf_3",
+        postId: posts[1]?.id ?? null,
+        type: "marketplace",
+        title: "Offer on MacBook Pro",
+        body: "Emeka Didi",
+        department: "MS",
+        timestamp: "5h",
+        isRead: true,
+      },
+      {
+        id: "ntf_4",
+        postId: posts[2]?.id ?? null,
+        type: "verse",
+        title: "Post from",
+        body: "Law",
+        department: "LW",
+        timestamp: "1d",
+        isRead: true,
+      },
+    ])
 
 
   const { selectedTheme, setSelectedTheme, isSellerActive, setIsSellerActive, showCurrentPassword, setShowCurrentPassword, showNewPassword, setShowNewPassword, twoFactorActive, setTwoFactorActive, biometricsActive, setBiometricsActive } = useProfileState();
@@ -24,7 +105,7 @@ export function AppProvider({ children }) {
 
   const { isOpen, setIsOpen, selectedTopic, setSelectedTopic, isSubmitted, setIsSubmitted, message, setMessage, attachment, setAttachment } = useSupportState();
 
-const matchingPosts = useMemo(() => {
+  const matchingPosts = useMemo(() => {
     const query = search.toLowerCase().trim();
     if (!query) return [];
 
@@ -121,11 +202,13 @@ const matchingPosts = useMemo(() => {
     selectedTopic, setSelectedTopic,
     isSubmitted, setIsSubmitted,
     message, setMessage,
-    attachment, setAttachment
+    attachment, setAttachment,
+    mockChat, setMockChat,
+    notifications, setNotifications
   }), [
     selectedTheme, isSellerActive, showCurrentPassword, showNewPassword,
     twoFactorActive, biometricsActive, anonymousDefault, hideDetails,
-    allowDirectMessages, pushMaster, emailDigest, socialAlerts,
+    allowDirectMessages, pushMaster, emailDigest, socialAlerts, mockChat, setMockChat,
     confessionAlerts, marketAlerts, verseAlerts, searchQuery,
     bio, username, displayName, isOpen, selectedTopic,
     isSubmitted, message, attachment,
@@ -134,7 +217,8 @@ const matchingPosts = useMemo(() => {
     setAllowDirectMessages, setPushMaster, setEmailDigest, setSocialAlerts,
     setConfessionAlerts, setMarketAlerts, setVerseAlerts, setSearchQuery,
     setBio, setUsername, setDisplayName, setIsOpen, setSelectedTopic,
-    setIsSubmitted, setMessage, setAttachment
+    setIsSubmitted, setMessage, setAttachment,
+    notifications, setNotifications
   ]);
 
 
@@ -148,7 +232,7 @@ const matchingPosts = useMemo(() => {
 }
 
 export function useAppContext() {
-const feedData = useContext(FeedContext);
+  const feedData = useContext(FeedContext);
   const uiData = useContext(UIContext);
 
   if (!feedData || !uiData) {

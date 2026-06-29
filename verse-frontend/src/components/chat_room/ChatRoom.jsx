@@ -1,148 +1,202 @@
-import React, { useState, useRef } from "react";
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform } from "react-native";
-import { ChevronLeft, Send, Image, Smile, MoreVertical } from "lucide-react-native";
+import React, { useState, useRef, useCallback } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
+} from "react-native";
+import { ChevronLeft, Send, Paperclip, Smile, MoreVertical } from "lucide-react-native";
+import { useAppContext } from "../../context/AppContext";
+import { ThemeTokens } from "../../../hooks/theme";
 
-const MOCK_MESSAGES = [
-  { id: "m3", senderId: "other", text: "Yeah! Let's meet at the campus library tech desk.", time: "4:16 PM" },
-  { id: "m2", senderId: "me", text: "Awesome! Are you free to drop it off around noon tomorrow?", time: "4:15 PM" },
-  { id: "m1", senderId: "other", text: "Hey Alex! I found the engineering manual you were looking for.", time: "4:12 PM" },
-];
-
-
-const MOCK_CHATS = [
-  {
-    id: '1',
-    department: 'Computer',
-    faculty: 'Engineering',
-    lastMessage: 'Did you hear what that lecturer did?',
-    timeStamp: "2m",
-    unreadCount: 1,
-    isOnline: true,
-    messages: [
-      { id: "m3", senderId: "other", text: "Yeah! Let's meet at the campus library tech desk.", time: "4:16 PM" },
-      { id: "m2", senderId: "me", text: "Awesome! Are you free to drop it off around noon tomorrow?", time: "4:15 PM" },
-      { id: "m1", senderId: "other", text: "Hey Alex! I found the engineering manual you were looking for.", time: "4:12 PM" },
-    ]
-  },
-  {
-    id: '2',
-    department: 'Management',
-    faculty: 'Sciences',
-    lastMessage: 'Sent an attachment: Marketplace Item',
-    timeStamp: "1h",
-    unreadCount: 0,
-    isOnline: false,
-    messages: []
-  },
-]
-
-const COLORS = {
-  void: "#000000",
-  ink: "#1A1A1A",
-  cyan: "#17CB49",
-  white: "#FFFFFF",
-  white5: "rgba(255, 255, 255, 0.05)",
-  white10: "rgba(255, 255, 255, 0.1)",
-  white30: "rgba(255, 255, 255, 0.3)",
-  white40: "rgba(255, 255, 255, 0.4)",
-  white60: "rgba(255, 255, 255, 0.6)",
-  white90: "rgba(255, 255, 255, 0.9)",
-};
 
 export function ChatRoom({ route, navigation }) {
-  const chatId = route?.params?.chatId || route?.params?.roomId || "1";
+  const { selectedTheme, mockChat, setMockChat } = useAppContext();
+  const isDark = selectedTheme === "dark";
+  const c = isDark ? ThemeTokens.colors.dark : ThemeTokens.colors.light;
 
-  const activeChat = MOCK_CHATS.find((item) => item.id === chatId) || MOCK_CHATS[0];
+  const chatId = route?.params?.chatId ?? "1";
+  const activeChat = mockChat.chats.find((ch) => ch.id === chatId) ?? mockChat.chats[0];
+  const chatMessages = activeChat.messages ?? [];
+  
 
-  const [messages, setMessages] = useState(activeChat.messages || []);
   const [text, setText] = useState("");
   const flatListRef = useRef(null);
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     if (!text.trim()) return;
-
-    const newMessage = {
+    const newMsg = {
       id: `msg_${Date.now()}`,
       senderId: "me",
       text: text.trim(),
-      time: "Just now"
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setMessages([newMessage, ...messages]);
     setText("");
-  };
+    setMockChat((prev) => ({
+      ...prev,
+      chats: prev.chats.map((chat) =>
+        chat.id === chatId
+          ? {
+            ...chat,
+            lastMessage: text.trim(),
+            timeStamp: "Now",
+            messages: [newMsg, ...chat.messages]
+          }
+          : chat
+      )
+    }));
 
-  const renderMessageBubble = ({ item }) => {
+  }, [text, chatId, setMockChat]);
+
+  const renderBubble = ({ item, index }) => {
     const isMe = item.senderId === "me";
+    const prevItem = chatMessages[index + 1];
+    const isFirstInGroup = !prevItem || prevItem.senderId !== item.senderId;
+
     return (
-      <View style={[styles.messageRow, isMe ? styles.rowMe : styles.rowOther]}>
-        <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleOther]}>
-          <Text style={[styles.bubbleText, isMe ? styles.textMe : styles.textOther]}>
+      <View style={[styles.bubbleRow, isMe ? styles.rowMe : styles.rowOther]}>
+        {!isMe && isFirstInGroup && (
+          <View style={[styles.bubbleAvatar, { backgroundColor: c.surfaceElevated }]}>
+            <Text style={[styles.bubbleAvatarText, { color: c.textSecondary }]}>
+              {activeChat.initials}
+            </Text>
+          </View>
+        )}
+        {!isMe && !isFirstInGroup && <View style={styles.bubbleAvatarSpacer} />}
+
+        <View
+          style={[
+            styles.bubble,
+            isMe
+              ? [styles.bubbleMe, { backgroundColor: c.accent }]
+              : [styles.bubbleOther, { backgroundColor: c.surfaceElevated, borderColor: c.border }],
+            isMe && !isFirstInGroup && styles.bubbleMeGrouped,
+            !isMe && !isFirstInGroup && styles.bubbleOtherGrouped,
+          ]}
+        >
+          <Text
+            style={[
+              styles.bubbleText,
+              { color: isMe ? "#ffffff" : c.textPrimary },
+            ]}
+          >
             {item.text}
           </Text>
-          <Text style={styles.bubbleTime}>{item.time}</Text>
+          <Text
+            style={[
+              styles.bubbleTime,
+              { color: isMe ? "rgba(255,255,255,0.55)" : c.textMuted },
+            ]}
+          >
+            {item.time}
+          </Text>
         </View>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={c.background}
+      />
 
-      <View style={styles.header}>
-        <View style={styles.headerCenter}>
-          <TouchableOpacity onPress={() => navigation?.goBack()}>
-            <ChevronLeft size={20} color={COLORS.white60} strokeWidth={2.5} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{activeChat.faculty}</Text>
-          <Text style={styles.headerSubtitle}>{activeChat.isOnline ? "Active now" : ""}</Text>
+      <View style={[styles.header, { borderBottomColor: c.border, backgroundColor: c.background }]}>
+        <TouchableOpacity
+          onPress={() => navigation?.goBack()}
+          style={styles.backBtn}
+          activeOpacity={0.7}
+        >
+          <ChevronLeft size={20} color={c.textPrimary} strokeWidth={2.5} />
+        </TouchableOpacity>
+
+        <View style={[styles.headerAvatar, { backgroundColor: c.surfaceElevated }]}>
+          <Text style={[styles.headerAvatarText, { color: c.textSecondary }]}>
+            {activeChat.initials}
+          </Text>
+          {activeChat.isOnline && (
+            <View style={[styles.headerOnlineDot, { borderColor: c.surfaceElevated }]} />
+          )}
         </View>
-        <TouchableOpacity>
-          <MoreVertical size={20} color={COLORS.white60} />
+
+        <View style={styles.headerMeta}>
+          <Text style={[styles.headerName, { color: c.textPrimary }]}>
+            {activeChat.department}
+          </Text>
+          {activeChat.isOnline && (
+            <Text style={[styles.headerStatus, { color: c.accent }]}>Active now</Text>
+          )}
+        </View>
+
+        <TouchableOpacity style={styles.moreBtn} activeOpacity={0.7}>
+          <MoreVertical size={20} color={c.textSecondary} />
         </TouchableOpacity>
       </View>
 
-
       <FlatList
         ref={flatListRef}
-        data={messages}
-        inverted={true}
+        data={chatMessages}
+        inverted
         keyExtractor={(item) => item.id}
-        renderItem={renderMessageBubble}
-        contentContainerStyle={styles.messageListContainer}
+        renderItem={renderBubble}
+        contentContainerStyle={styles.messageList}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No messages here yet. Start the conversation!</Text>
+          <View style={styles.emptyWrap}>
+            <Text style={[styles.emptyText, { color: c.textMuted }]}>
+              No messages yet. Start the conversation.
+            </Text>
           </View>
         }
       />
 
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <View style={styles.inputContainer}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image size={22} color={COLORS.white40} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      >
+        <View style={[styles.inputBar, { backgroundColor: c.background, borderTopColor: c.border }]}>
+          <TouchableOpacity style={styles.inputAction} activeOpacity={0.7}>
+            <Paperclip size={20} color={c.textMuted} />
           </TouchableOpacity>
 
-          <View style={styles.inputWrapper}>
+          <View style={[styles.inputWrap, { backgroundColor: c.surface, borderColor: c.border }]}>
             <TextInput
-              style={styles.textInput}
+              style={[styles.input, { color: c.textPrimary }]}
               placeholder="Message..."
-              placeholderTextColor={COLORS.white30}
+              placeholderTextColor={c.textMuted}
               value={text}
               onChangeText={setText}
-              multiline={true}
+              multiline
+              returnKeyType="default"
             />
-            <TouchableOpacity style={styles.innerInputIcon}>
-              <Smile size={20} color={COLORS.white40} />
+            <TouchableOpacity style={styles.inputAction} activeOpacity={0.7}>
+              <Smile size={20} color={c.textMuted} />
             </TouchableOpacity>
           </View>
 
-          {text.trim().length > 0 && (
-            <TouchableOpacity style={styles.sendButton} onPress={handleSend} activeOpacity={0.8}>
-              <Send size={16} color={COLORS.white} />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={[
+              styles.sendBtn,
+              {
+                backgroundColor: text.trim().length > 0 ? c.accent : c.surface,
+              },
+            ]}
+            onPress={handleSend}
+            activeOpacity={0.8}
+          >
+            <Send
+              size={16}
+              color={text.trim().length > 0 ? "#ffffff" : c.textMuted}
+            />
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -150,68 +204,116 @@ export function ChatRoom({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.void },
+  safe: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.white5,
-  },
-  headerCenter: { alignItems: "center", flexDirection: "row", gap: 10 },
-  headerTitle: { fontSize: 14, fontWeight: "600", color: COLORS.white90 },
-  headerSubtitle: { fontSize: 11, color: COLORS.cyan, marginTop: 1 },
-  messageListContainer: { paddingHorizontal: 14, paddingVertical: 16, gap: 14 },
-  messageRow: { flexDirection: "row", width: "100%" },
-  rowMe: { justifyContent: "flex-end" },
-  rowOther: { justifyContent: "flex-start" },
-  bubble: { maxWidth: "75%", borderRadius: 18, paddingHorizontal: 14, paddingVertical: 10, gap: 4 },
-  bubbleMe: { backgroundColor: COLORS.cyan, borderBottomRightRadius: 2 },
-  bubbleOther: { backgroundColor: COLORS.ink, borderBottomLeftRadius: 2, borderWidth: 1, borderColor: COLORS.white5 },
-  bubbleText: { fontSize: 14, lineHeight: 19 },
-  textMe: { color: COLORS.white, fontWeight: "400" },
-  textOther: { color: COLORS.white90 },
-  bubbleTime: { fontSize: 10, color: "rgba(255,255,255,0.4)", alignSelf: "flex-end", marginTop: 2 },
-  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: COLORS.void,
+    borderBottomWidth: 1,
+    gap: 10,
+  },
+  backBtn: { padding: 4 },
+  headerAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  headerAvatarText: { fontSize: 12, fontWeight: "700" },
+  headerOnlineDot: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "rgba(0, 186, 52, 1)",
+    borderWidth: 1.5,
+  },
+  headerMeta: { flex: 1, gap: 1 },
+  headerName: { fontSize: 14, fontWeight: "600" },
+  headerStatus: { fontSize: 11 },
+  moreBtn: { padding: 4 },
+  messageList: {
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+    gap: 6,
+  },
+  bubbleRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 8,
+    marginBottom: 2,
+  },
+  rowMe: { justifyContent: "flex-end" },
+  rowOther: { justifyContent: "flex-start" },
+  bubbleAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  bubbleAvatarText: { fontSize: 9, fontWeight: "700" },
+  bubbleAvatarSpacer: { width: 28 },
+  bubble: {
+    maxWidth: "72%",
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    gap: 3,
+  },
+  bubbleMe: {
+    borderBottomRightRadius: 4,
+    borderWidth: 0,
+  },
+  bubbleOther: {
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+  },
+  bubbleMeGrouped: { borderBottomRightRadius: 18, marginTop: 2 },
+  bubbleOtherGrouped: { borderBottomLeftRadius: 18, marginTop: 2 },
+  bubbleText: { fontSize: 14, lineHeight: 20 },
+  bubbleTime: { fontSize: 10, alignSelf: "flex-end" },
+  inputBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: COLORS.white5,
     gap: 8,
   },
-  iconButton: { padding: 4 },
-  inputWrapper: {
+  inputAction: { padding: 4 },
+  inputWrap: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.ink,
     borderRadius: 22,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: COLORS.white5,
+    minHeight: 40,
   },
-  textInput: {
+  input: {
     flex: 1,
-    color: COLORS.white,
     fontSize: 14,
     paddingVertical: Platform.OS === "ios" ? 8 : 4,
-    maxHeight: 80,
+    maxHeight: 100,
   },
-  innerInputIcon: { padding: 4 },
-  sendButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: COLORS.cyan,
+  sendBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
-  
-  emptyContainer: { transform: [{ scaleY: -1 }], alignItems: "center", padding: 32 },
-  emptyText: { color: COLORS.white30, fontSize: 13, textAlign: "center" },
+  emptyWrap: {
+    transform: [{ scaleY: -1 }],
+    alignItems: "center",
+    paddingTop: 60,
+  },
+  emptyText: { fontSize: 13, textAlign: "center" },
 });
