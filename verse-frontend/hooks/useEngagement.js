@@ -184,10 +184,10 @@ export function useEngagement() {
     }));
 
     try {
-      await postService.addReply(postId, commentId, replyId);
+      await postService.toggleReplyUpvote(postId, commentId, replyId);
     } catch (error) {
       setPosts(backupPosts);
-      Alert.alert("Connection Lost", "We couldn't sync your upvote right now.");
+      Alert.alert('Connection Lost', 'We could not sync your reply upvote.');
     }
   };
 
@@ -229,10 +229,10 @@ export function useEngagement() {
     }));
 
     try {
-      await postService.addReply(postId, commentId, replyId);
+      await postService.toggleReplyDownvote(postId, commentId, replyId);
     } catch (error) {
       setPosts(backupPosts);
-      Alert.alert("Connection Lost", "We couldn't register your vote choice.");
+      Alert.alert('Connection Lost', 'We could not sync your reply downvote.');
     }
   };
 

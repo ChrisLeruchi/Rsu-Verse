@@ -10,6 +10,7 @@ import { CheckCircle2 } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import authService from './src/services/authService';
+import { setPostServiceEnabled } from './src/services/postService';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegistrationScreen';
 
@@ -39,6 +40,7 @@ export default function App() {
   const [authState, setAuthState] = useState('loading');
   const [authScreen, setAuthScreen] = useState('login');
   const [user, setUser] = useState(null);
+  const [postServiceConnected, setPostServiceConnected] = useState(true);
 
   useEffect(() => {
     const restoreAuthState = async () => {
@@ -65,6 +67,13 @@ export default function App() {
     restoreAuthState();
   }, []);
 
+  useEffect(() => {
+    setPostServiceEnabled(postServiceConnected);
+  }, [postServiceConnected]);
+
+  const handleTogglePostServiceConnection = () => {
+    setPostServiceConnected((current) => !current);
+  };
 
   const handleLoginSuccess = (authResult) => {
     if (authResult?.user) {
@@ -143,6 +152,16 @@ export default function App() {
           <NavigationContainer theme={CustomDarkTheme}>
             <View style={styles.appContainer}>
               <BottomTabNavigatorComponent onLogout={handleLogout} />
+              <View style={styles.devToggleContainer}>
+                <Pressable
+                  style={[styles.serviceToggle, { backgroundColor: postServiceConnected ? 'rgba(0, 186, 52, 0.95)' : 'rgba(255, 69, 58, 0.95)' }]}
+                  onPress={handleTogglePostServiceConnection}
+                >
+                  <Text style={styles.serviceToggleText}>
+                    {postServiceConnected ? 'Disconnect PostServ' : 'Connect PostService'}
+                  </Text>
+                </Pressable>
+              </View>
               {__DEV__ && (
                 <Pressable
                   style={styles.authToggle}
@@ -182,10 +201,31 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     elevation: 6,
   },
+  devToggleContainer: {
+    position: 'absolute',
+    top: 40,
+    right: 16,
+    zIndex: 10,
+  },
+  serviceToggle: {
+    position: 'absolute',
+    top: 35,
+    right: 99,
+    zIndex: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    elevation: 6,
+  },
+  serviceToggleText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 10,
+  },
   authToggleText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 13,
+    fontSize: 10,
   },
   authModeContainer: {
     flex: 1,

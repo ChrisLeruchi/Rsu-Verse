@@ -31,6 +31,7 @@ import {
 import * as Crypto from 'expo-crypto';
 import * as ImagePicker from "expo-image-picker";
 import { ThemeTokens } from "../../../hooks/theme";
+import postService from "../../services/postService";
 
 export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
   const navigation = useNavigation();
@@ -43,6 +44,7 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
   const [text, setText] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createError, setCreateError] = useState(null);
 
   const [price, setPrice] = useState("");
   const [condition, setCondition] = useState("Used");
@@ -95,11 +97,12 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
     setImages((prevImages) => prevImages.filter((_, index) => index !== indexToRemove));
   };
 
-  const handleBroadcast = () => {
+  const handleBroadcast = async () => {
     if (verse === "gist" && !text.trim() && images.length === 0) return;
     if (verse === "market" && (!text.trim() || !price)) return;
 
     setIsSubmitting(true);
+    setCreateError(null);
 
     let themeConfig = {
       bg: "bg-Cyan/10",
@@ -174,24 +177,33 @@ export function CreatePost({ setPosts, setActiveFilter, selectedTheme }) {
       })
     };
 
-    setPosts((prevPosts) => [newTransmission, ...prevPosts]);
+    try {
+      const response = await postService.createPost(newTransmission);
+      const createdPost = response?.data?.data?.post ?? newTransmission;
+      setPosts((prevPosts) => [createdPost, ...prevPosts]);
 
-    setText("");
-    setPrice("");
-    setCondition("Used");
-    setImages([]);
-    setCategory("general");
-    setIsOpen(false);
-    setVerse("gist");
-    setIsSubmitting(false);
+      setText("");
+      setPrice("");
+      setCondition("Used");
+      setImages([]);
+      setCategory("general");
+      setIsOpen(false);
+      setVerse("gist");
 
-    DeviceEventEmitter.emit("verse_reset_feed_scroll");
+      DeviceEventEmitter.emit("verse_reset_feed_scroll");
 
-    if (verse === "market") {
-      navigation.navigate("Market");
-    } else {
-      setActiveFilter("all");
-      navigation.navigate("HomeIndex");
+      if (verse === "market") {
+        navigation.navigate("Market");
+      } else {
+        setActiveFilter("all");
+        navigation.navigate("HomeIndex");
+      }
+    } catch (error) {
+      const errorMessage = error?.message || 'Unable to publish your post right now.';
+      setCreateError(errorMessage);
+      Alert.alert('Post failed', errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

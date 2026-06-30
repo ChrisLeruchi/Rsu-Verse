@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
 import { useFeedState } from "../assets/states/context";
 import { useNotificationState } from "../assets/states/notificationMgt";
 import { useSupportState } from "../assets/states/supportMgt";
 import { useProfileState } from "../assets/states/profileMgt";
 import { usePrivacystate } from "../assets/states/privacyMgt";
 import { useUtilityState } from "../assets/states/utitilities";
+import postService from "../services/postService";
 
 const FeedContext = createContext(null);
 const UIContext = createContext(null);
@@ -59,8 +60,39 @@ export const mock_chat = {
 export function AppProvider({ children, user, setUser }) {
 
   const { posts, setPosts, activeFilter, setActiveFilter, activeTab, setActiveTab, recents, setRecents, search, setSearch } = useFeedState();
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState(null);
 
   const [ mockChat, setMockChat ] = useState(mock_chat);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadInitialPosts = async () => {
+      setPostsLoading(true);
+      setPostsError(null);
+      try {
+        const response = await postService.getAllPosts();
+        const fetchedFeed = response?.data?.data?.feed;
+        if (isMounted && Array.isArray(fetchedFeed)) {
+          setPosts(fetchedFeed);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setPostsError(error.message || 'Unable to load feed');
+        }
+      } finally {
+        if (isMounted) {
+          setPostsLoading(false);
+        }
+      }
+    };
+
+    loadInitialPosts();
+    return () => {
+      isMounted = false;
+    };
+  }, [setPosts]);
   const [notifications, setNotifications] = useState([
       {
         id: "ntf_1",
@@ -172,9 +204,12 @@ export function AppProvider({ children, user, setUser }) {
     recents, setRecents,
     search, setSearch,
     matchingPosts,
-    filteredPosts
+    filteredPosts,
+    postsLoading,
+    postsError
   }), [
     posts, activeFilter, activeTab, recents, search, matchingPosts, filteredPosts,
+    postsLoading, postsError,
     setPosts, setActiveFilter, setActiveTab, setRecents, setSearch
   ]);
 
