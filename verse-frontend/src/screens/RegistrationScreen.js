@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import * as ImagePicker from 'expo-image-picker';
 import {
   View,
   TextInput,
@@ -50,7 +51,7 @@ export default function RegisterScreen({ onNavigateToLogin, onLoginSuccess }) {
   const [password, setPassword] = useState('');
   const [name] = useState('');
   const [matricNumber] = useState('');
-  const [receiptImage] = useState(null);
+  const [receiptImage, setReceiptImage] = useState(null);
 
 
   const passwordInputRef = useRef(null);
@@ -94,8 +95,8 @@ export default function RegisterScreen({ onNavigateToLogin, onLoginSuccess }) {
         faculty: 'Engineering'
       }
 
-      await authService.register(userData);
-      onLoginSuccess();
+      const authResult = await authService.register(userData);
+      onLoginSuccess(authResult);
     } catch (err) {
       Alert.alert('Registration Error', err.message);
     } finally {
@@ -277,9 +278,38 @@ export default function RegisterScreen({ onNavigateToLogin, onLoginSuccess }) {
                 <Text style={styles.stepTitle}>Verify Student </Text>
                 <Text style={styles.stepDescription}>Upload your e-campus school fee. This is to ensure that every user is a student of RSU. Your name, dept and mat-no will be extracted from here.</Text>
 
-                <TouchableOpacity style={styles.uploadPlaceholderCard} onPress={() => Alert.alert('Camera Input', 'Next checkpoint step!')}>
-                  <Text style={styles.uploadPlaceholderText}>📸 Tap to Upload Fee Receipt</Text>
-                </TouchableOpacity>
+                {receiptImage ? (
+                  <View style={styles.receiptPreviewContainer}>
+                    <Image source={{ uri: receiptImage }} style={styles.receiptPreview} />
+                    <TouchableOpacity
+                      style={styles.removeReceiptBtn}
+                      onPress={() => setReceiptImage(null)}
+                    >
+                      <Text style={styles.removeReceiptBtnText}>✕ Remove</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.uploadPlaceholderCard}
+                    onPress={async () => {
+                      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                      if (!permission.granted) {
+                        Alert.alert('Permission needed to access your photos.');
+                        return;
+                      }
+                      const result = await ImagePicker.launchImageLibraryAsync({
+                        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                        quality: 0.8,
+                      });
+                      if (!result.canceled && result.assets.length > 0) {
+                        setReceiptImage(result.assets[0].uri);
+                      }
+                    }}
+                  >
+                    <Text style={styles.uploadPlaceholderText}>📸 Tap to Upload Fee Receipt</Text>
+                  </TouchableOpacity>
+                )}
+
 
                 {loading ? (
                   <ActivityIndicator size="large" color="#ffffff" style={styles.loader} />
@@ -342,5 +372,29 @@ const styles = StyleSheet.create({
   buttonTextFinal: { color: '#008060', fontSize: 16, fontWeight: '700' },
   loader: { marginVertical: 16 },
   switchText: { color: '#e2e8f0', textAlign: 'center', marginTop: 28, fontSize: 14, fontWeight: '500' },
-  linkText: { color: '#ffffff', fontWeight: '700', textDecorationLine: 'underline' }
+  linkText: { color: '#ffffff', fontWeight: '700', textDecorationLine: 'underline' },
+  receiptPreviewContainer: {
+  alignItems: 'center',
+  marginVertical: 15,
+  gap: 10,
+},
+receiptPreview: {
+  width: '100%',
+  height: 200,
+  borderRadius: 12,
+  resizeMode: 'contain',
+  backgroundColor: '#004d3a',
+},
+removeReceiptBtn: {
+  backgroundColor: '#7f1d1d',
+  paddingVertical: 8,
+  paddingHorizontal: 20,
+  borderRadius: 8,
+},
+removeReceiptBtnText: {
+  color: '#fca5a5',
+  fontSize: 14,
+  fontWeight: '600',
+},
+
 });

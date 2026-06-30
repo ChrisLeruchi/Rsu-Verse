@@ -56,7 +56,7 @@ export const mock_chat = {
   ],
 };
 
-export function AppProvider({ children }) {
+export function AppProvider({ children, user, setUser }) {
 
   const { posts, setPosts, activeFilter, setActiveFilter, activeTab, setActiveTab, recents, setRecents, search, setSearch } = useFeedState();
 
@@ -204,7 +204,9 @@ export function AppProvider({ children }) {
     message, setMessage,
     attachment, setAttachment,
     mockChat, setMockChat,
-    notifications, setNotifications
+    notifications, setNotifications,
+    user,
+    setUser,
   }), [
     selectedTheme, isSellerActive, showCurrentPassword, showNewPassword,
     twoFactorActive, biometricsActive, anonymousDefault, hideDetails,
@@ -218,7 +220,9 @@ export function AppProvider({ children }) {
     setConfessionAlerts, setMarketAlerts, setVerseAlerts, setSearchQuery,
     setBio, setUsername, setDisplayName, setIsOpen, setSelectedTopic,
     setIsSubmitted, setMessage, setAttachment,
-    notifications, setNotifications
+    notifications, setNotifications,
+    user,
+    setUser,
   ]);
 
 

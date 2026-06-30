@@ -13,6 +13,10 @@ const authService = {
         await AsyncStorage.setItem('userToken', response.data.token);
         console.log('🔐 [AUTH] Token saved to AsyncStorage after registration');
       }
+      if (response.data && response.data.user) {
+        await AsyncStorage.setItem('userProfile', JSON.stringify(response.data.user));
+        console.log('👤 [AUTH] User profile saved to AsyncStorage after registration');
+      }
       console.log('✅ [AUTH] Registration successful:', response.data.message);
       return response.data;
     } catch (error) {
@@ -33,6 +37,10 @@ const authService = {
         await AsyncStorage.setItem('userToken', response.data.token);
         console.log('🔐 [AUTH] Token saved to AsyncStorage after login');
       }
+      if (response.data && response.data.user) {
+        await AsyncStorage.setItem('userProfile', JSON.stringify(response.data.user));
+        console.log('👤 [AUTH] User profile saved to AsyncStorage after login');
+      }
       console.log('✅ [AUTH] Login successful for:', credentials.email);
       return response.data;
     } catch (error) {
@@ -46,7 +54,8 @@ const authService = {
     console.log('👋 [AUTH] Logout called, clearing token...');
     try {
       await AsyncStorage.removeItem('userToken');
-      console.log('👋 [AUTH] Token cleared, user logged out');
+      await AsyncStorage.removeItem('userProfile');
+      console.log('👋 [AUTH] Token and profile cleared, user logged out');
     } catch (error) {
       console.error('❌ [AUTH] Error clearing auth session:', error);
     }

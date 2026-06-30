@@ -1,5 +1,6 @@
-import { StyleSheet, View, Platform, UIManager, Text, Alert } from 'react-native';
+import { StyleSheet, View, Platform, UIManager, Text, Alert, Pressable } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { NavigationContainer } from '@react-navigation/native';
 import { BottomTabNavigatorComponent } from './src/components/navigation/bottomTabNav/bottomTabNav';
 import Toast from 'react-native-toast-message';
@@ -8,6 +9,7 @@ import { CustomDarkTheme } from './hooks/theme/customDarkTheme';
 import { CheckCircle2 } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import authService from './src/services/authService';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegistrationScreen';
 
@@ -36,24 +38,57 @@ const toastConfig = {
 export default function App() {
   const [authState, setAuthState] = useState('loading');
   const [authScreen, setAuthScreen] = useState('login');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    setAuthState('app');
+    const restoreAuthState = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        const userJson = await AsyncStorage.getItem('userProfile');
+
+        if (token) {
+          setAuthState('app');
+          if (userJson) {
+            setUser(JSON.parse(userJson));
+          }
+        } else {
+          setAuthState('auth');
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('[APP] Failed to restore auth session:', error);
+        setAuthState('auth');
+        setUser(null);
+      }
+    };
+
+    restoreAuthState();
   }, []);
 
 
-  const handleLoginSuccess = () => {
-    console.log("Intercepted login completion state check successfully.");
-    
+  const handleLoginSuccess = (authResult) => {
+    if (authResult?.user) {
+      setUser(authResult.user);
+    }
+
+    setAuthState('app');
     Alert.alert(
-      "Login Successful! 🎉",
-      "Authentication state intercepted. In production, this shifts layout focus to the main app dashboard routing layer.",
+      'Login Successful! 🎉',
+      'Authentication state has been restored. You are now inside the app.',
       [
-        { text: "Understood", onPress: () => console.log("Alert dismissed") }
+        { text: 'Understood', onPress: () => console.log('Alert dismissed') }
       ]
     );
-  }
+  };
+
   const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (logoutError) {
+      console.error('[APP] Logout failed:', logoutError);
+    }
+
+    setUser(null);
     setAuthState('auth');
     setAuthScreen('login');
   };
@@ -65,36 +100,65 @@ export default function App() {
   if (authState === 'auth') {
     if (authScreen === 'register') {
       return (
-        <>
+        <View style={styles.authModeContainer}>
           <RegisterScreen
             onNavigateToLogin={() => setAuthScreen('login')}
             onLoginSuccess={handleLoginSuccess}
           />
+          {__DEV__ && (
+            <Pressable
+              style={styles.authModeToggle}
+              onPress={() => setAuthState('app')}
+            >
+              <Text style={styles.authModeToggleText}>Switch to App</Text>
+            </Pressable>
+          )}
           <Toast config={toastConfig} />
-        </>
+        </View>
       );
     }
     return (
-      <>
+      <View style={styles.authModeContainer}>
         <LoginScreen
           onNavigateToRegister={() => setAuthScreen('register')}
           onLoginSuccess={handleLoginSuccess}
         />
+        {__DEV__ && (
+          <Pressable
+            style={styles.authModeToggle}
+            onPress={() => setAuthState('app')}
+          >
+            <Text style={styles.authModeToggleText}>Switch to App</Text>
+          </Pressable>
+        )}
         <Toast config={toastConfig} />
-      </>
+      </View>
     );
   }
 
   return (
     <SafeAreaProvider style={styles.container}>
-      <AppProvider>
-        <NavigationContainer theme={CustomDarkTheme}>
-          <View style={styles.appContainer}>
-            <BottomTabNavigatorComponent onLogout={handleLogout} />
-          </View>
-        </NavigationContainer>
-      </AppProvider>
-      <Toast config={toastConfig} />
+      <ErrorBoundary>
+        <AppProvider user={user} setUser={setUser}>
+          <NavigationContainer theme={CustomDarkTheme}>
+            <View style={styles.appContainer}>
+              <BottomTabNavigatorComponent onLogout={handleLogout} />
+              {__DEV__ && (
+                <Pressable
+                  style={styles.authToggle}
+                  onPress={() => {
+                    setAuthState('auth');
+                    setAuthScreen('login');
+                  }}
+                >
+                  <Text style={styles.authToggleText}>Switch to Auth</Text>
+                </Pressable>
+              )}
+            </View>
+          </NavigationContainer>
+        </AppProvider>
+        <Toast config={toastConfig} />
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
@@ -108,4 +172,38 @@ const styles = StyleSheet.create({
   toastContent: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   toastTitle: { color: '#FFFFFF', fontSize: 15, fontWeight: '700', letterSpacing: 0.2 },
   toastSubtitle: { color: '#A0A0A0', fontSize: 12, fontWeight: '400', marginTop: 2 },
+  authToggle: {
+    position: 'absolute',
+    top: 40,
+    right: 130,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(0, 186, 52, 0.95)',
+    borderRadius: 999,
+    elevation: 6,
+  },
+  authToggleText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  authModeContainer: {
+    flex: 1,
+  },
+  authModeToggle: {
+    position: 'absolute',
+    bottom: 20,
+    right: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  authModeToggleText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
+  },
 });

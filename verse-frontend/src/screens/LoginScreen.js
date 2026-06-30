@@ -29,8 +29,8 @@ export default function LoginScreen({ onNavigateToRegister, onLoginSuccess }) {
     }
     setLoading(true);
     try {
-      await authService.login({ email, password });
-      onLoginSuccess(); 
+      const authResult = await authService.login({ email, password });
+      onLoginSuccess(authResult);
     } catch (err) {
       Alert.alert('Login Error', err.message);
     } finally {

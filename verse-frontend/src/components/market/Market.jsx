@@ -117,62 +117,83 @@ export function Market({ posts = [], selectedTheme }) {
           </ScrollView>
         </View>
 
-        <View style={styles.gridMatrix}>
-          {marketItems.map((item) => (
-            <View key={item.id} style={styles.cardWrapper}>
-              <View style={[styles.cardContainer, { backgroundColor: themeColor.surface }]}>
-                <View style={styles.cardTopSection}>
-                  <View style={[styles.imageBox, { backgroundColor: themeColor.surface }]}>
-                    {item.content?.images && item.content.images.length > 0 ? (
-                      <Image
-                        source={{ uri: item.content.images[0] }}
-                        style={styles.productImage}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <View style={styles.imagePlaceholder}>
-                        <Tag size={16} color={themeColor.border} />
-                      </View>
-                    )}
+        {marketItems.length > 0 ? (
+          <View style={styles.gridMatrix}>
+            {marketItems.map((item) => (
+              <View key={item.id} style={styles.cardWrapper}>
+                <View style={[styles.cardContainer, { backgroundColor: themeColor.surface }]}>
+                  <View style={styles.cardTopSection}>
+                    <View style={[styles.imageBox, { backgroundColor: themeColor.surface }]}>
+                      {item.content?.images && item.content.images.length > 0 ? (
+                        <Image
+                          source={{ uri: item.content.images[0] }}
+                          style={styles.productImage}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View style={styles.imagePlaceholder}>
+                          <Tag size={16} color={themeColor.border} />
+                        </View>
+                      )}
 
-                    <View style={styles.conditionBadge}>
-                      <Text style={styles.conditionText}>
-                        {item.marketPlace?.condition}
+                      <View style={styles.conditionBadge}>
+                        <Text style={styles.conditionText}>
+                          {item.marketPlace?.condition}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.titleContainer}>
+                      <Text numberOfLines={2} style={[styles.productTitle, { color: themeColor.textPrimary }]}>
+                        {item.content?.text}
                       </Text>
                     </View>
                   </View>
 
-                  <View style={styles.titleContainer}>
-                    <Text numberOfLines={2} style={[styles.productTitle, { color: themeColor.textPrimary }]}>
-                      {item.content?.text}
+                  <View style={styles.cardFooterPanel}>
+                    <Text style={[styles.priceText, { color: themeColor.textPrimary }]}>
+                      ₦{item.marketPlace?.price?.toLocaleString()}
                     </Text>
+
+                    <Pressable
+                      onPress={() => handleMakeOffer(item)}
+                      style={({ pressed }) => [
+                        styles.ctaButton,
+                        {
+                          transform: [{ scale: pressed ? 0.96 : 1 }],
+                          opacity: pressed ? 0.9 : 1
+                        }
+                      ]}
+                    >
+                      <ShoppingBag size={16} color="#FFFFFF" />
+                      <Text style={styles.ctaButtonText}>Buy Now</Text>
+                      <ArrowUpRight size={16} color="#FFFFFF" strokeWidth={2.5} />
+                    </Pressable>
                   </View>
                 </View>
-
-                <View style={styles.cardFooterPanel}>
-                  <Text style={[styles.priceText, { color: themeColor.textPrimary }]}>
-                    ₦{item.marketPlace?.price?.toLocaleString()}
-                  </Text>
-
-                  <Pressable
-                    onPress={() => handleMakeOffer(item)}
-                    style={({ pressed }) => [
-                      styles.ctaButton,
-                      {
-                        transform: [{ scale: pressed ? 0.96 : 1 }],
-                        opacity: pressed ? 0.9 : 1
-                      }
-                    ]}
-                  >
-                    <ShoppingBag size={16} color="#FFFFFF" />
-                    <Text style={styles.ctaButtonText}>Buy Now</Text>
-                    <ArrowUpRight size={16} color="#FFFFFF" strokeWidth={2.5} />
-                  </Pressable>
-                </View>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.emptyMarketContainer}>
+            <ShoppingBag size={40} color={themeColor.textMuted} />
+            <Text style={[styles.emptyMarketTitle, { color: themeColor.textPrimary }]}>
+              {searchQuery.trim()
+                ? `No items found for "${searchQuery}"`
+                : selectedCategory !== "all"
+                  ? `No items in this category yet`
+                  : "No items in the marketplace yet"}
+            </Text>
+            <Text style={[styles.emptyMarketSubtitle, { color: themeColor.textMuted }]}>
+              {searchQuery.trim()
+                ? "Try adjusting your search or browse a different category"
+                : selectedCategory !== "all"
+                  ? "Check back later or browse all categories"
+                  : "Be the first to list an item"}
+            </Text>
+          </View>
+        )}
+
       </ScrollView>
     </View>
   );
@@ -324,4 +345,23 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 14,
   },
+  emptyMarketContainer: {
+  width: "100%",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 64,
+  gap: 12,
+},
+emptyMarketTitle: {
+  fontSize: 16,
+  fontWeight: "600",
+  textAlign: "center",
+},
+emptyMarketSubtitle: {
+  fontSize: 13,
+  textAlign: "center",
+  paddingHorizontal: 32,
+  lineHeight: 18,
+},
+
 });

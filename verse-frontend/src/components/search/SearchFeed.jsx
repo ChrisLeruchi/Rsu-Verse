@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useCallback} from "react";
 import {
   StyleSheet,
   View,
@@ -20,6 +20,7 @@ import {
   Share,
   MoreHorizontal,
   MessageCircle,
+  ImageOff
 } from "lucide-react-native";
 import { formatRelativeTime } from "../../assets/formatTime/formatRelativeTime";
 import { ThemeTokens } from "../../../hooks/theme";
@@ -28,6 +29,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 function PostImageCarousel({ images, themeColor }) {
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const [failedImages, setFailedImages] = React.useState(new Set());
 
   const handleScroll = (event) => {
     const scrollPosition = event.nativeEvent.contentOffset.x;
@@ -35,16 +37,32 @@ function PostImageCarousel({ images, themeColor }) {
     setActiveIndex(index);
   };
 
+  const handleImageError = useCallback((index) => {
+    setFailedImages(prev => new Set([...prev, index]));
+  }, []);
+
   if (!images || images.length === 0) return null;
+
+  const renderFallback = (style) => (
+    <View style={[style, styles.fallbackContainer, { backgroundColor: themeColor.surface }]}>
+      <ImageOff size={24} color={themeColor.textMuted} />
+      <Text style={[styles.fallbackText, { color: themeColor.textMuted }]}>Unavailable</Text>
+    </View>
+  );
 
   if (images.length === 1) {
     return (
       <View style={styles.mediaContainerWrapper}>
-        <Image
-          source={{ uri: images[0] }}
-          style={[styles.singleImage, { backgroundColor: themeColor.surface }]}
-          resizeMode="cover"
-        />
+        {failedImages.has(0) ? (
+          renderFallback([styles.singleImage])
+        ) : (
+          <Image
+            source={{ uri: images[0] }}
+            style={[styles.singleImage, { backgroundColor: themeColor.surface }]}
+            resizeMode="cover"
+            onError={() => handleImageError(0)}
+          />
+        )}
       </View>
     );
   }
@@ -59,16 +77,22 @@ function PostImageCarousel({ images, themeColor }) {
         scrollEventThrottle={16}
       >
         {images.map((imgUrl, index) => (
-          <Image
-            key={`img-${index}`}
-            source={{ uri: imgUrl }}
-            style={[styles.carouselImage, { backgroundColor: themeColor.surface }]}
-            resizeMode="cover"
-          />
+          failedImages.has(index) ? (
+            <View key={`fallback-${index}`} style={[styles.carouselFallback, { backgroundColor: themeColor.surface }]}>
+              <ImageOff size={24} color={themeColor.textMuted} />
+              <Text style={[styles.fallbackText, { color: themeColor.textMuted }]}>Unavailable</Text>
+            </View>
+          ) : (
+            <Image
+              key={`img-${index}`}
+              source={{ uri: imgUrl }}
+              style={[styles.carouselImage, { backgroundColor: themeColor.surface }]}
+              resizeMode="cover"
+              onError={() => handleImageError(index)}
+            />
+          )
         ))}
       </ScrollView>
-      
-   
       <View style={styles.paginationContainer}>
         {images.map((_, index) => (
           <View
@@ -88,6 +112,7 @@ function PostImageCarousel({ images, themeColor }) {
     </View>
   );
 }
+
 
 export function SearchFeed({
   route,
@@ -407,4 +432,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   noResultsText: { fontSize: 15, textAlign: "center", lineHeight: 22 },
+  fallbackContainer: {
+  alignItems: "center",
+  justifyContent: "center",
+},
+fallbackText: {
+  fontSize: 12,
+  marginTop: 4,
+  fontWeight: "500",
+},
+carouselFallback: {
+  width: SCREEN_WIDTH,
+  height: 450,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
 });

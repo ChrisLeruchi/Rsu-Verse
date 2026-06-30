@@ -223,7 +223,7 @@ export function NotificationInbox({ navigation }) {
         ListEmptyComponent={
           <View style={styles.emptyInner}>
             <Text style={[styles.emptyText, { color: c.textMuted }]}>
-              Your notification stream is clear.
+              No notifications
             </Text>
           </View>
         }
