@@ -35,6 +35,8 @@ export function HomeStackNavigator() {
     filteredPosts,
     activeFilter,
     setActiveFilter,
+    postsLoading,
+    postsError,
     selectedTheme,
     setSelectedTheme,
     searchQuery,
@@ -187,6 +189,7 @@ export function HomeStackNavigator() {
                 {...props}
                 posts={filteredPosts}
                 activeFilter={activeFilter}
+                isLoading={postsLoading}
                 setActiveFilter={setActiveFilter}
                 handleUpvote={handleUpvote}
                 handleDownvotes={handleDownvotes}

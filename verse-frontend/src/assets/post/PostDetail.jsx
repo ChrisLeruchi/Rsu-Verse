@@ -10,6 +10,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Alert,
   Dimensions
 } from "react-native";
 import { useRoute, useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -29,7 +30,7 @@ import {
 import { formatRelativeTime } from "../formatTime/formatRelativeTime";
 import * as Crypto from 'expo-crypto';
 import { ThemeTokens } from '../../../hooks/theme';
-
+import postService from "../../services/postService";
 const { width: windowWidth } = Dimensions.get("window");
 
 export function PostDetail({
@@ -61,6 +62,8 @@ export function PostDetail({
   const [replyingTo, setReplyingTo] = useState(null);
   const [secReplyingTo, setSecReplyingTo] = useState(null);
   const [viewReply, setViewReply] = useState(null);
+  const [commentError, setCommentError] = useState(null);
+  const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const post = posts.find(p => String(p.id) === String(postId));
@@ -90,7 +93,7 @@ export function PostDetail({
     );
   }
 
-  const handleSendComment = () => {
+  const handleSendComment = async () => {
     if (!commentText.trim()) return;
 
     const rawSnippet = secReplyingTo ? secReplyingTo.text : null;
@@ -99,62 +102,77 @@ export function PostDetail({
       : rawSnippet;
 
     const newCommentId = Crypto.randomUUID();
+    const backupPosts = JSON.parse(JSON.stringify(posts));
+    setCommentError(null);
+    setIsCommentSubmitting(true);
 
-    if (replyingTo) {
-      setViewReply(replyingTo);
+    const optimisticPosts = posts.map((p) => {
+      if (p.id !== postId) return p;
+      const rawComments = Array.isArray(p.engagement?.comments) ? p.engagement.comments : [];
+
+      if (replyingTo) {
+        return {
+          ...p,
+          engagement: {
+            ...p.engagement,
+            comments: rawComments.map((c) => {
+              if (c.id !== replyingTo) return c;
+              const rawReplies = Array.isArray(c.engagement?.replies) ? c.engagement.replies : [];
+
+              const newReply = {
+                id: Crypto.randomUUID(),
+                author: { name: "Comp Eng", department: "Comp Eng" },
+                text: commentText.trim(),
+                createdAt: new Date().toISOString(),
+                replyingToText: cleanSnippet,
+                engagement: { upvotes: 0, downvotes: 0 }
+              };
+
+              return {
+                ...c,
+                engagement: { ...c.engagement, replies: [...rawReplies, newReply] }
+              };
+            })
+          }
+        };
+      }
+
+      const newComment = {
+        id: newCommentId,
+        author: { name: "Law", department: "Law" },
+        text: commentText.trim(),
+        createdAt: new Date().toISOString(),
+        engagement: { upvotes: 0, downvotes: 0, replies: [] }
+      };
+
+      return {
+        ...p,
+        engagement: { ...p.engagement, comments: [newComment, ...rawComments] }
+      };
+    });
+
+    setPosts(optimisticPosts);
+
+    try {
+      if (replyingTo) {
+        await postService.addReply(postId, replyingTo, commentText.trim());
+      } else {
+        await postService.addComment(postId, commentText.trim());
+      }
+
+      setCommentText("");
+      setReplyingTo(null);
+      setSecReplyingTo(null);
+      setViewReply(null);
+      Keyboard.dismiss();
+    } catch (error) {
+      setPosts(backupPosts);
+      const message = error?.message || 'Unable to submit your comment right now.';
+      setCommentError(message);
+      Alert.alert('Comment Failed', message);
+    } finally {
+      setIsCommentSubmitting(false);
     }
-
-    setPosts((prevPosts) =>
-      prevPosts.map((p) => {
-        if (p.id !== postId) return p;
-        const rawComments = Array.isArray(p.engagement?.comments) ? p.engagement.comments : [];
-
-        if (replyingTo) {
-          return {
-            ...p,
-            engagement: {
-              ...p.engagement,
-              comments: rawComments.map((c) => {
-                if (c.id !== replyingTo) return c;
-                const rawReplies = Array.isArray(c.engagement?.replies) ? c.engagement.replies : [];
-
-                const newReply = {
-                  id: Crypto.randomUUID(),
-                  author: { name: "Comp Eng", department: "Comp Eng" },
-                  text: commentText.trim(),
-                  createdAt: new Date().toISOString(),
-                  replyingToText: cleanSnippet,
-                  engagement: { upvotes: 0, downvotes: 0 }
-                };
-
-                return {
-                  ...c,
-                  engagement: { ...c.engagement, replies: [...rawReplies, newReply] }
-                };
-              })
-            }
-          };
-        } else {
-          const newComment = {
-            id: newCommentId,
-            author: { name: "Law", department: "Law" },
-            text: commentText.trim(),
-            createdAt: new Date().toISOString(),
-            engagement: { upvotes: 0, downvotes: 0, replies: [] }
-          };
-
-          return {
-            ...p,
-            engagement: { ...p.engagement, comments: [newComment, ...rawComments] }
-          };
-        }
-      })
-    );
-
-    setCommentText("");
-    setReplyingTo(null);
-    setSecReplyingTo(null);
-    Keyboard.dismiss()
   };
 
   const handleScroll = (event) => {
